@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Add the Gateway protobuf stream consumer, latest-state freshness check, and diagnostics binary.
+- Add the Gateway protobuf stream consumer, latest-state freshness check, and vehicle-state diagnostics binary.
 
 ## [0.1.0] - 2026-09-21
 

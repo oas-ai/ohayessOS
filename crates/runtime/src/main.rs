@@ -38,9 +38,12 @@ fn run() -> Result<(), String> {
         let now_ns = u64::try_from(now_ns).map_err(|_| "system timestamp is too large")?;
         let state = runtime.latest().expect("read_next returned a snapshot");
         eprintln!(
-            "vehicle_state timestamp_ns={:?} speed_mps={:?} fresh={}",
+            "vehicle_state timestamp_ns={:?} speed_mps={:?} acceleration_mps2={:?} steering_angle_rad={:?} brake_pressed={:?} fresh={}",
             state.timestamp_ns,
             state.vehicle_speed_mps,
+            state.acceleration_mps2,
+            state.steering.as_ref().and_then(|value| value.angle_rad),
+            state.brake.as_ref().and_then(|value| value.pressed),
             runtime.latest_is_fresh(now_ns, maximum_age_ns)
         );
     }
