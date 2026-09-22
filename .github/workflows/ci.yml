@@ -13,3 +13,15 @@ jobs:
     uses: oas-ai/.github/.github/workflows/license-check.yml@main
   rust:
     uses: oas-ai/.github/.github/workflows/rust-ci.yml@main
+  hmi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: oas-ai/sdk
+          ref: 5f536c640a15c1d4b31749a467fa9d86919c9d1b
+          path: sdk
+      - run: sudo apt-get update && sudo apt-get install -y cmake g++ libprotobuf-dev protobuf-compiler qt6-base-dev qt6-declarative-dev
+      - run: cmake -S apps/hmi -B build/hmi -DOAS_SDK_PROTO_DIR="$GITHUB_WORKSPACE/sdk/proto"
+      - run: cmake --build build/hmi --parallel

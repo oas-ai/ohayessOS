@@ -9,17 +9,19 @@ ApplicationWindow {
     title: "ohayessOS"
     color: "#0b0f14"
 
-    // VehicleStateBridge owns decoding the length-prefixed protobuf stream.
-    // Until the platform adapter is installed, the production HMI stays empty.
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 48
         spacing: 24
 
         Label { text: "DRIVE BRIEF"; color: "#61d7ff"; font.pixelSize: 18 }
-        Label { text: "Vehicle state unavailable"; color: "#f1f5f9"; font.pixelSize: 48 }
         Label {
-            text: "A trusted VehicleState stream is required before driving data is displayed."
+            text: vehicleState.available ? Math.round(vehicleState.speedKph) + " km/h" : "Vehicle state unavailable"
+            color: "#f1f5f9"
+            font.pixelSize: 48
+        }
+        Label {
+            text: vehicleState.available ? "Gear " + vehicleState.gear : "Waiting for " + vehicleState.streamPath
             color: "#a6b2c2"
             font.pixelSize: 22
         }

@@ -1,14 +1,28 @@
 cmake_minimum_required(VERSION 3.21)
 project(ohayess_hmi VERSION 0.1 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Quick)
+set(OAS_SDK_PROTO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../sdk/proto" CACHE PATH "Directory containing the OAS protobuf schema")
+if(NOT EXISTS "${OAS_SDK_PROTO_DIR}/oas/vehicle/v1/vehicle.proto")
+  message(FATAL_ERROR "Set OAS_SDK_PROTO_DIR to the SDK proto directory")
+endif()
+
+find_package(Protobuf 3.20 REQUIRED)
+find_package(Qt6 6.2 REQUIRED COMPONENTS Quick)
 qt_standard_project_setup()
 
-qt_add_executable(ohayess-hmi src/main.cpp)
+add_library(oas-vehicle-proto STATIC)
+target_sources(oas-vehicle-proto PRIVATE "${OAS_SDK_PROTO_DIR}/oas/vehicle/v1/vehicle.proto")
+protobuf_generate(TARGET oas-vehicle-proto LANGUAGE cpp PROTOC_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated" IMPORT_DIRS "${OAS_SDK_PROTO_DIR}")
+target_include_directories(oas-vehicle-proto PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/generated")
+target_link_libraries(oas-vehicle-proto PUBLIC protobuf::libprotobuf)
+
+qt_add_executable(ohayess-hmi src/main.cpp src/vehicle_state_bridge.cpp)
 qt_add_qml_module(ohayess-hmi
   URI OAS.HMI
   VERSION 1.0
   QML_FILES qml/Main.qml
 )
-target_link_libraries(ohayess-hmi PRIVATE Qt6::Quick)
+target_link_libraries(ohayess-hmi PRIVATE Qt6::Quick oas-vehicle-proto)
 install(TARGETS ohayess-hmi)
