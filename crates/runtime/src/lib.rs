@@ -5,10 +5,21 @@
 use std::fmt;
 use std::io::{self, Read};
 
-pub use oas_sdk::vehicle::v1::VehicleState;
+pub use oas_sdk::vehicle::v1::{GearPosition, VehicleState};
 use prost::Message;
 
 pub const MAX_SNAPSHOT_BYTES: u32 = 1024 * 1024;
+pub const STOPPED_SPEED_MPS: f32 = 0.1;
+
+/// 운전자 화면에서 영상을 재생할 수 있는지 나타낸다.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum VideoPlayback {
+    Allowed,
+    NoVehicleState,
+    StaleVehicleState,
+    VehicleInMotion,
+    NotParked,
+}
 
 /// Gateway stream에서 최신 차량 상태를 유지하는 runtime이다.
 #[derive(Debug)]
@@ -65,6 +76,31 @@ impl<R: Read> Runtime<R> {
             .and_then(|timestamp_ns| now_ns.checked_sub(timestamp_ns))
             .is_some_and(|age_ns| age_ns <= maximum_age_ns)
     }
+
+    /// 최신 상태가 정차·P 기어임을 명시할 때만 운전자 영상 재생을 허용한다.
+    pub fn video_playback(&self, now_ns: u64, maximum_age_ns: u64) -> VideoPlayback {
+        let Some(state) = self.latest() else {
+            return VideoPlayback::NoVehicleState;
+        };
+        if !self.latest_is_fresh(now_ns, maximum_age_ns) {
+            return VideoPlayback::StaleVehicleState;
+        }
+        if !state
+            .vehicle_speed_mps
+            .is_some_and(|speed| speed.is_finite() && speed.abs() <= STOPPED_SPEED_MPS)
+        {
+            return VideoPlayback::VehicleInMotion;
+        }
+        if state
+            .gear
+            .as_ref()
+            .and_then(|gear| GearPosition::try_from(gear.position).ok())
+            != Some(GearPosition::Park)
+        {
+            return VideoPlayback::NotParked;
+        }
+        VideoPlayback::Allowed
+    }
 }
 
 #[derive(Debug)]
@@ -102,10 +138,10 @@ impl From<prost::DecodeError> for RuntimeError {
 mod tests {
     use std::io::Cursor;
 
-    use oas_sdk::vehicle::v1::VehicleState;
+    use oas_sdk::vehicle::v1::{GearPosition, GearState, VehicleState};
     use prost::Message;
 
-    use super::{MAX_SNAPSHOT_BYTES, Runtime, RuntimeError};
+    use super::{MAX_SNAPSHOT_BYTES, Runtime, RuntimeError, VideoPlayback};
 
     #[test]
     fn reads_a_length_prefixed_snapshot_and_checks_freshness() {
@@ -179,5 +215,42 @@ mod tests {
 
         assert_eq!(speeds, [10.0, 20.0]);
         assert_eq!(runtime.latest(), Some(&states[1]));
+    }
+
+    #[test]
+    fn video_playback_fails_closed_unless_fresh_stationary_and_parked() {
+        let state = VehicleState {
+            timestamp_ns: Some(1_000),
+            vehicle_speed_mps: Some(0.0),
+            gear: Some(GearState {
+                position: GearPosition::Park as i32,
+            }),
+            ..VehicleState::default()
+        };
+        let payload = state.encode_to_vec();
+        let mut stream = (payload.len() as u32).to_be_bytes().to_vec();
+        stream.extend_from_slice(&payload);
+        let mut runtime = Runtime::new(Cursor::new(stream));
+
+        assert_eq!(
+            runtime.video_playback(1_000, 500),
+            VideoPlayback::NoVehicleState
+        );
+        runtime.read_next().unwrap();
+        assert_eq!(runtime.video_playback(1_500, 500), VideoPlayback::Allowed);
+        assert_eq!(
+            runtime.video_playback(1_501, 500),
+            VideoPlayback::StaleVehicleState
+        );
+
+        runtime.latest.as_mut().unwrap().gear = Some(GearState {
+            position: GearPosition::Drive as i32,
+        });
+        assert_eq!(runtime.video_playback(1_000, 500), VideoPlayback::NotParked);
+        runtime.latest.as_mut().unwrap().vehicle_speed_mps = Some(0.2);
+        assert_eq!(
+            runtime.video_playback(1_000, 500),
+            VideoPlayback::VehicleInMotion
+        );
     }
 }
