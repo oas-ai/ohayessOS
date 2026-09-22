@@ -3,6 +3,7 @@
 #include <QCommandLineOption>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QUrl>
 
 #include "vehicle_state_bridge.h"
 
@@ -20,6 +21,6 @@ int main(int argc, char *argv[]) {
   if (parser.isSet(demoOption)) vehicleState.showDemo();
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("vehicleState", &vehicleState);
-  engine.loadFromModule("OAS.HMI", "Main");
+  engine.load(QUrl("qrc:/OAS/HMI/qml/Main.qml"));
   return engine.rootObjects().isEmpty() ? 1 : app.exec();
 }
