@@ -26,7 +26,10 @@ fn run() -> Result<(), String> {
         .checked_mul(1_000_000)
         .ok_or("maximum age is too large")?;
     let config = MediaPlaybackConfig {
-        allow_drive_when_stopped: matches!(std::env::var("OAS_ALLOW_MEDIA_IN_DRIVE_WHEN_STOPPED").as_deref(), Ok("true")),
+        allow_drive_when_stopped: matches!(
+            std::env::var("OAS_ALLOW_MEDIA_IN_DRIVE_WHEN_STOPPED").as_deref(),
+            Ok("true")
+        ),
     };
     let emit_hmi_state = matches!(std::env::var("OAS_HMI_STATE_OUTPUT").as_deref(), Ok("true"));
     let mut runtime = Runtime::new(io::stdin().lock());
@@ -47,8 +50,12 @@ fn run() -> Result<(), String> {
             let hmi_state = hmi_state_for_state(Some(state), now_ns, maximum_age_ns, config);
             let payload = hmi_state.encode_to_vec();
             let length = u32::try_from(payload.len()).map_err(|_| "HMI snapshot is too large")?;
-            output.write_all(&length.to_be_bytes()).map_err(|error| error.to_string())?;
-            output.write_all(&payload).map_err(|error| error.to_string())?;
+            output
+                .write_all(&length.to_be_bytes())
+                .map_err(|error| error.to_string())?;
+            output
+                .write_all(&payload)
+                .map_err(|error| error.to_string())?;
             output.flush().map_err(|error| error.to_string())?;
         }
         eprintln!(

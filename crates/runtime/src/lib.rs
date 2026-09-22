@@ -373,10 +373,22 @@ mod tests {
             ..VehicleState::default()
         };
         let hmi = hmi_state_for_state(Some(&state), 1_100, 500, MediaPlaybackConfig::default());
-        assert_eq!(HmiFreshness::try_from(hmi.freshness), Ok(HmiFreshness::Fresh));
-        assert_eq!(HmiCapability::try_from(hmi.media_playback), Ok(HmiCapability::Allowed));
-        assert_eq!(HmiCapability::try_from(hmi.diagnostics), Ok(HmiCapability::Allowed));
-        assert_eq!(HmiCapability::try_from(hmi.vehicle_controls), Ok(HmiCapability::Unavailable));
+        assert_eq!(
+            HmiFreshness::try_from(hmi.freshness),
+            Ok(HmiFreshness::Fresh)
+        );
+        assert_eq!(
+            HmiCapability::try_from(hmi.media_playback),
+            Ok(HmiCapability::Allowed)
+        );
+        assert_eq!(
+            HmiCapability::try_from(hmi.diagnostics),
+            Ok(HmiCapability::Allowed)
+        );
+        assert_eq!(
+            HmiCapability::try_from(hmi.vehicle_controls),
+            Ok(HmiCapability::Unavailable)
+        );
         assert_eq!(hmi.media_playback_reason, "allowed");
     }
 }
