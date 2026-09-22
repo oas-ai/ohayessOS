@@ -73,7 +73,7 @@
     <header class="page-heading"><p class="eyebrow">Read only</p><h1>Diagnostics</h1></header>
     <nav class="sub-nav" aria-label="진단 메뉴"><button class="sub-nav-button is-active" type="button" data-tab-group="diagnostics" data-tab="overview">Overview</button><button class="sub-nav-button" type="button" data-tab-group="diagnostics" data-tab="can">CAN</button><button class="sub-nav-button" type="button" data-tab-group="diagnostics" data-tab="logs">Logs</button></nav>
     <div data-tab-panel-group="diagnostics" data-tab-panel="overview" class="overview-grid"><article class="card"><p class="eyebrow">State stream</p><h2 id="diagnostics-stream">확인 중</h2><p id="diagnostics-copy" class="muted">Gateway stream의 최신 상태를 기다립니다.</p></article><article class="card"><p class="eyebrow">Safety policy</p><h2 id="diagnostics-policy">확인 중</h2><p class="muted">모든 정책 판정은 runtime이 제공합니다.</p></article><article class="card"><p class="eyebrow">Gateway</p><h2>연결 준비 중</h2><p class="muted">대상 Linux에서 service 상태를 표시합니다.</p></article></div>
-    <div data-tab-panel-group="diagnostics" data-tab-panel="can" class="content-grid" hidden><article class="card"><p class="eyebrow">CAN interface</p><h2>대상 장비 대기 중</h2><p class="muted">SocketCAN interface, bitrate, listen-only 상태를 표시합니다.</p></article><article class="card"><p class="eyebrow">Gateway decoder</p><h2>상태 stream 기준</h2><p class="muted">수신된 canonical VehicleState만 표시하며 CAN 송신은 제공하지 않습니다.</p></article></div>
+    <div data-tab-panel-group="diagnostics" data-tab-panel="can" class="content-grid" hidden><article class="card"><p class="eyebrow">CAN interface</p><h2>대상 장비 대기 중</h2><p class="muted">SocketCAN interface, bitrate, listen-only 상태를 표시합니다.</p></article><article class="card"><p class="eyebrow">Gateway decoder</p><h2>상태 stream 기준</h2><p class="muted">수신된 canonical VehicleState만 표시하며 CAN 송신은 제공하지 않습니다.</p></article><article class="card"><p class="eyebrow">DBC raw catalog</p><h2>Body · comfort</h2><p id="diagnostics-raw-signals" class="muted">DBC raw 신호를 기다립니다.</p></article></div>
     <div data-tab-panel-group="diagnostics" data-tab-panel="logs" class="settings-list" hidden><article class="card"><p class="eyebrow">Event log</p><h2>로그 없음</h2><p class="muted">Gateway와 systemd가 연결되면 최근 오류·복구 이벤트를 표시합니다.</p></article></div>
   </section>
 </main>
@@ -144,6 +144,9 @@
     byId('diagnostics-stream').textContent = state.videoPlayback === 'no_vehicle_state' ? '상태 대기 중' : '상태 수신 중';
     byId('diagnostics-copy').textContent = `speed ${speed} · gear ${state.gear}`;
     byId('diagnostics-policy').textContent = state.videoPlayback;
+    const raw = state.rawDiagnostics || {};
+    const value = key => raw[key] === null || raw[key] === undefined ? '—' : raw[key];
+    byId('diagnostics-raw-signals').textContent = `door sw ${value('driverDoorSwitch')} · belt D/P ${value('driverSeatbeltSwitch')}/${value('passengerSeatbeltSwitch')} · door D/P/RL/RR ${value('driverDoor')}/${value('passengerDoor')}/${value('rearLeftDoor')}/${value('rearRightDoor')} · temp D/P ${value('driverTemperatureC')}/${value('passengerTemperatureC')}°C`;
   }
   async function refresh() {
     try { showState(await fetch('/state', {cache: 'no-store'}).then(response => response.json())); }

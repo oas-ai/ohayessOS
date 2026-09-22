@@ -97,11 +97,18 @@ fn hmi_locks_media_after_drive_or_stale_state() {
                 position: GearPosition::Park as i32,
             }),
             night_mode: Some(true),
+            raw_signals: [
+                ("CGW1.CF_Gway_DrvDrSw".to_owned(), 1.0),
+                ("DATC12.CR_Datc_DrTempDispC".to_owned(), 20.0),
+            ]
+            .into(),
             ..VehicleState::default()
         }))
         .unwrap();
     assert!(state_is(&address, "\"videoPlayback\":\"allowed\""));
     assert!(state_is(&address, "\"nightMode\":true"));
+    assert!(state_is(&address, "\"driverDoorSwitch\":1"));
+    assert!(state_is(&address, "\"driverTemperatureC\":20"));
 
     stdin
         .write_all(&frame(&VehicleState {

@@ -137,9 +137,26 @@ fn state_json(
         .and_then(|state| state.night_mode)
         .map(|value| value.to_string())
         .unwrap_or_else(|| "null".to_owned());
+    let raw_signal = |key: &str| {
+        state
+            .as_ref()
+            .and_then(|state| state.raw_signals.get(key))
+            .filter(|value| value.is_finite())
+            .map(|value| value.to_string())
+            .unwrap_or_else(|| "null".to_owned())
+    };
     format!(
-        "{{\"videoPlayback\":\"{}\",\"speedMps\":{speed},\"gear\":\"{gear}\",\"nightMode\":{night_mode},\"allowDriveWhenStopped\":{}}}",
+        "{{\"videoPlayback\":\"{}\",\"speedMps\":{speed},\"gear\":\"{gear}\",\"nightMode\":{night_mode},\"allowDriveWhenStopped\":{},\"rawDiagnostics\":{{\"driverDoorSwitch\":{},\"driverSeatbeltSwitch\":{},\"passengerSeatbeltSwitch\":{},\"driverDoor\":{},\"passengerDoor\":{},\"rearLeftDoor\":{},\"rearRightDoor\":{},\"driverTemperatureC\":{},\"passengerTemperatureC\":{}}}}}",
         playback.as_str(),
-        config.allow_drive_when_stopped
+        config.allow_drive_when_stopped,
+        raw_signal("CGW1.CF_Gway_DrvDrSw"),
+        raw_signal("CGW1.CF_Gway_DrvSeatBeltSw"),
+        raw_signal("CGW1.CF_Gway_AstSeatBeltSw"),
+        raw_signal("GW_DDM_PE.C_DRVDoorStatus"),
+        raw_signal("GW_DDM_PE.C_ASTDoorStatus"),
+        raw_signal("GW_DDM_PE.C_RLDoorStatus"),
+        raw_signal("GW_DDM_PE.C_RRDoorStatus"),
+        raw_signal("DATC12.CR_Datc_DrTempDispC"),
+        raw_signal("DATC12.CR_Datc_PsTempDispC"),
     )
 }

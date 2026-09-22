@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Show DBC-trusted Palisade body, seatbelt, door, and climate raw diagnostics in the read-only HMI.
 - Add the Gateway protobuf stream consumer, latest-state freshness check, and vehicle-state diagnostics binary.
 - Add runtime binary fail-safe end-to-end tests for disconnects, stale state, and invalid snapshots.
 - Add a dependency-free blocking VehicleState subscription API for applications.
