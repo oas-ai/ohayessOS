@@ -14,6 +14,7 @@ qt_standard_project_setup()
 
 add_library(oas-vehicle-proto STATIC)
 target_sources(oas-vehicle-proto PRIVATE "${OAS_SDK_PROTO_DIR}/oas/vehicle/v1/vehicle.proto")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated")
 protobuf_generate(TARGET oas-vehicle-proto LANGUAGE cpp PROTOC_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated" IMPORT_DIRS "${OAS_SDK_PROTO_DIR}")
 target_include_directories(oas-vehicle-proto PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_link_libraries(oas-vehicle-proto PUBLIC protobuf::libprotobuf)
