@@ -26,3 +26,5 @@
 ## Screen baseline
 
 기준 해상도는 가로형 1280×720 이상이다. 720px 이하에서는 한 열로 전환한다. 다음 화면도 이 토큰과 컴포넌트를 먼저 사용하고, 새 컴포넌트가 두 화면 이상에 필요할 때만 공통화한다.
+
+화면 구조와 안전 상태의 우선순위는 [information architecture](INFORMATION_ARCHITECTURE.md)를 따른다.
