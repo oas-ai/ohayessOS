@@ -20,6 +20,8 @@ cargo run -p ohayess-hmi -- 127.0.0.1:8080 500 < vehicle-state-stream.bin
 
 브라우저에서 `http://127.0.0.1:8080`을 열면 `/state`의 정책 결과를 250ms마다 반영합니다. HMI는 아직 플레이어를 포함하지 않는 안전한 shell이며, 하드웨어 단계에서 kiosk/WebView를 이 영역에 연결해야 합니다.
 
+`#media/library`, `#vehicle/vision`, `#settings/safety`, `#diagnostics/can`처럼 URL fragment로 각 HMI menu와 in-menu view를 직접 열 수 있습니다. 이는 가상 CAN browser E2E와 kiosk 화면 복구에 사용합니다.
+
 운영 배포에서는 Gateway 패키지의 감독 서비스가 한 `VehicleState` stream을 runtime과 HMI에 동시에 fan-out합니다. 설치·재연결·systemd 절차는 [gateway deployment guide](https://github.com/oas-ai/gateway/tree/main/packaging/systemd)를 따릅니다.
 
 HMI의 색상·간격·컴포넌트·안전 상태 규칙은 [design system](crates/hmi/DESIGN_SYSTEM.md)에 정의되어 있습니다.

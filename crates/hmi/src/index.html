@@ -76,12 +76,19 @@
     screens.forEach(screen => { screen.hidden = screen.dataset.screen !== route; });
     routes.forEach(button => button.classList.toggle('is-active', button.dataset.route === route));
   }
-  routes.forEach(button => button.addEventListener('click', () => navigate(button.dataset.route)));
+  function activeRoute() { return [...screens].find(screen => !screen.hidden).dataset.screen; }
+  function applyLocation() {
+    const [requestedRoute = 'home', tab] = location.hash.slice(1).split('/');
+    const route = [...screens].some(screen => screen.dataset.screen === requestedRoute) ? requestedRoute : 'home';
+    navigate(route);
+    if (tab) { navigateTab(route, tab); }
+  }
+  routes.forEach(button => button.addEventListener('click', () => { location.hash = button.dataset.route; }));
   function navigateTab(group, tab) {
     document.querySelectorAll(`[data-tab-panel-group="${group}"]`).forEach(panel => { panel.hidden = panel.dataset.tabPanel !== tab; });
     document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(button => button.classList.toggle('is-active', button.dataset.tab === tab));
   }
-  document.querySelectorAll('[data-tab-group]').forEach(button => button.addEventListener('click', () => navigateTab(button.dataset.tabGroup, button.dataset.tab)));
+  document.querySelectorAll('[data-tab-group]').forEach(button => button.addEventListener('click', () => { location.hash = `${activeRoute()}/${button.dataset.tab}`; }));
   let targetTemperature = 22;
   let fanLevel = 2;
   let acEnabled = true;
@@ -126,7 +133,8 @@
       byId('global-safety-banner').textContent = '안전 상태 확인 중';
     }
   }
-  renderComfortControls(); refresh(); setInterval(refresh, 250);
+  window.addEventListener('hashchange', applyLocation);
+  applyLocation(); renderComfortControls(); refresh(); setInterval(refresh, 250);
 </script>
 </body>
 </html>
