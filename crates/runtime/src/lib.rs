@@ -122,4 +122,22 @@ mod tests {
 
         assert!(matches!(error, RuntimeError::SnapshotTooLarge(_)));
     }
+
+    #[test]
+    fn preserves_the_last_valid_snapshot_after_a_decode_error() {
+        let state = VehicleState {
+            timestamp_ns: Some(1_000),
+            vehicle_speed_mps: Some(12.5),
+            ..VehicleState::default()
+        };
+        let payload = state.encode_to_vec();
+        let mut stream = (payload.len() as u32).to_be_bytes().to_vec();
+        stream.extend_from_slice(&payload);
+        stream.extend_from_slice(&[0, 0, 0, 1, 0x80]);
+        let mut runtime = Runtime::new(Cursor::new(stream));
+
+        assert_eq!(runtime.read_next().unwrap(), Some(&state));
+        assert!(matches!(runtime.read_next(), Err(RuntimeError::Decode(_))));
+        assert_eq!(runtime.latest(), Some(&state));
+    }
 }

@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add the Gateway protobuf stream consumer, latest-state freshness check, and vehicle-state diagnostics binary.
+- Add runtime binary fail-safe end-to-end tests for disconnects, stale state, and invalid snapshots.
 
 ## [0.1.0] - 2026-09-21
 
