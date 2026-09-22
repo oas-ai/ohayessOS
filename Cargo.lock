@@ -142,7 +142,7 @@ checksum = "1d87ecb2933e8aeadb3e3a02b828fed80a7528047e68b4f424523a0981a3a084"
 [[package]]
 name = "oas-sdk"
 version = "0.1.0"
-source = "git+https://github.com/oas-ai/sdk.git?rev=6ef7194183120ce1be50e22e6e1dfd8f794be610#6ef7194183120ce1be50e22e6e1dfd8f794be610"
+source = "git+https://github.com/oas-ai/sdk.git?rev=931acba1bcbb3cd46c5c1cae16cf628ff7ccf47f#931acba1bcbb3cd46c5c1cae16cf628ff7ccf47f"
 dependencies = [
  "prost",
  "prost-build",
