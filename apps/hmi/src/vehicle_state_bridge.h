@@ -17,6 +17,7 @@ class VehicleStateBridge final : public QObject {
   Q_PROPERTY(bool mediaPlaybackAllowed READ mediaPlaybackAllowed NOTIFY changed)
   Q_PROPERTY(QString mediaPlaybackReason READ mediaPlaybackReason NOTIFY changed)
   Q_PROPERTY(bool diagnosticsAvailable READ diagnosticsAvailable NOTIFY changed)
+  Q_PROPERTY(QString diagnosticsSummary READ diagnosticsSummary NOTIFY changed)
   Q_PROPERTY(QString streamPath READ streamPath CONSTANT)
 
  public:
@@ -28,6 +29,7 @@ class VehicleStateBridge final : public QObject {
   bool mediaPlaybackAllowed() const;
   QString mediaPlaybackReason() const;
   bool diagnosticsAvailable() const;
+  QString diagnosticsSummary() const;
   QString streamPath() const;
 
  signals:
@@ -54,4 +56,5 @@ class VehicleStateBridge final : public QObject {
   bool media_playback_allowed_ = false;
   QString media_playback_reason_;
   bool diagnostics_available_ = false;
+  QString diagnostics_summary_;
 };

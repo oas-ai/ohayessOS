@@ -47,6 +47,7 @@ void writeState(int fd, float speedMps) {
   state.set_timestamp_ns(static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()) * 1'000'000);
   state.set_vehicle_speed_mps(speedMps);
   state.mutable_gear()->set_position(oas::vehicle::v1::GEAR_POSITION_DRIVE);
+  (*state.mutable_raw_signals())["CGW1.CF_Gway_DrvDrSw"] = 1.0;
   oas::vehicle::v1::HmiState hmi;
   *hmi.mutable_vehicle_state() = state;
   hmi.set_freshness(oas::vehicle::v1::HMI_FRESHNESS_FRESH);
@@ -73,6 +74,7 @@ int main(int argc, char *argv[]) {
   if (!waitFor([&] { return bridge.available(); })) fail("fresh VehicleState was not published");
   if (std::abs(bridge.speedKph() - 80.0) > 0.1 || bridge.gear() != "D") fail("published VehicleState values are incorrect");
   if (!bridge.mediaPlaybackAllowed() || !bridge.diagnosticsAvailable()) fail("runtime capabilities were not published");
+  if (!bridge.diagnosticsSummary().contains("Door switch 1.0")) fail("raw diagnostics were not published");
 
   if (!waitFor([&] { return !bridge.available(); }, 750)) fail("stale VehicleState stayed available");
   if (bridge.mediaPlaybackAllowed() || bridge.diagnosticsAvailable()) fail("stale state left capabilities enabled");

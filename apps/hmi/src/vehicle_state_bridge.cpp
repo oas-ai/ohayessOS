@@ -44,6 +44,7 @@ bool VehicleStateBridge::nightMode() const { return night_mode_; }
 bool VehicleStateBridge::mediaPlaybackAllowed() const { return media_playback_allowed_; }
 QString VehicleStateBridge::mediaPlaybackReason() const { return media_playback_reason_; }
 bool VehicleStateBridge::diagnosticsAvailable() const { return diagnostics_available_; }
+QString VehicleStateBridge::diagnosticsSummary() const { return diagnostics_summary_; }
 QString VehicleStateBridge::streamPath() const { return stream_path_; }
 
 void VehicleStateBridge::connectStream() {
@@ -98,6 +99,13 @@ bool VehicleStateBridge::applyFrame(QByteArrayView frame) {
   media_playback_allowed_ = hmi.media_playback() == oas::vehicle::v1::HMI_CAPABILITY_ALLOWED;
   media_playback_reason_ = QString::fromStdString(hmi.media_playback_reason());
   diagnostics_available_ = hmi.diagnostics() == oas::vehicle::v1::HMI_CAPABILITY_ALLOWED;
+  const auto raw = [state](const char *key) {
+    if (!state) return QString("—");
+    const auto value = state->raw_signals().find(key);
+    return value == state->raw_signals().end() ? QString("—") : QString::number(value->second, 'f', 1);
+  };
+  diagnostics_summary_ = QString("Door switch %1 · Belt D/P %2/%3 · Temp D/P %4/%5 °C")
+      .arg(raw("CGW1.CF_Gway_DrvDrSw"), raw("CGW1.CF_Gway_DrvSeatBeltSw"), raw("CGW1.CF_Gway_AstSeatBeltSw"), raw("DATC12.CR_Datc_DrTempDispC"), raw("DATC12.CR_Datc_PsTempDispC"));
   emit changed();
   return true;
 }
@@ -115,6 +123,7 @@ void VehicleStateBridge::disconnectStream() {
   media_playback_allowed_ = false;
   media_playback_reason_.clear();
   diagnostics_available_ = false;
+  diagnostics_summary_.clear();
   timestamp_ns_ = 0;
   emit changed();
   retry_timer_->start();
