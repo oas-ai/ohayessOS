@@ -13,6 +13,7 @@
 - Design the five top-level HMI destinations and route them in the virtual HMI shell.
 - Add local-only HVAC and vehicle-audio Comfort Control UI previews to Vehicle.
 - Complete the virtual HMI's in-menu screen inventory and add a global safety state banner.
+- Document the Gateway-supervised runtime and HMI fan-out deployment path.
 
 ## [0.1.0] - 2026-09-21
 
