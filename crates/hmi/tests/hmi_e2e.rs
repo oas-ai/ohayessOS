@@ -75,7 +75,14 @@ fn hmi_locks_media_after_drive_or_stale_state() {
         .spawn()
         .unwrap();
     assert!(server_is_up(&address));
-    for menu in ["Home", "Media", "Vehicle", "Settings", "Diagnostics"] {
+    for menu in [
+        "Home",
+        "Media",
+        "Vehicle",
+        "Settings",
+        "Diagnostics",
+        "Comfort control",
+    ] {
         assert!(page_contains(&address, "/", menu));
     }
     assert!(page_contains(&address, "/design.css", "--touch-target"));

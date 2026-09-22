@@ -11,6 +11,7 @@
 - Establish HMI design tokens, core components, responsive layout, and semantic safety-state presentation.
 - Define the HMI information architecture, safety overlay priority, MVP destinations, and settings ownership.
 - Design the five top-level HMI destinations and route them in the virtual HMI shell.
+- Add local-only HVAC and vehicle-audio Comfort Control UI previews to Vehicle.
 
 ## [0.1.0] - 2026-09-21
 

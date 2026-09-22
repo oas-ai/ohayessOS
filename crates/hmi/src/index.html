@@ -37,8 +37,14 @@
   </section>
 
   <section class="screen" data-screen="vehicle" hidden>
-    <header class="page-heading"><p class="eyebrow">Read only</p><h1>Vehicle</h1></header>
-    <div class="overview-grid"><article class="card"><p class="eyebrow">Driving state</p><div class="metric-list"><div class="metric"><span class="metric-label">Speed</span><span id="vehicle-speed" class="metric-value">—</span></div><div class="metric"><span class="metric-label">Gear</span><span id="vehicle-gear" class="metric-value">—</span></div></div></article><article class="card"><p class="eyebrow">Vision</p><h2>준비 중</h2><p class="muted">카메라와 영상 pipeline이 준비되면 이 위치에 표시됩니다.</p></article><article class="card"><p class="eyebrow">Boundary</p><h2>Read only</h2><p class="muted">이 화면은 차량 명령을 보내지 않습니다.</p></article></div>
+    <header class="page-heading"><p class="eyebrow">Comfort control · UI preview</p><h1>Vehicle</h1></header>
+    <div class="vehicle-layout">
+      <article class="card"><p class="eyebrow">Driving state</p><div class="metric-list"><div class="metric"><span class="metric-label">Speed</span><span id="vehicle-speed" class="metric-value">—</span></div><div class="metric"><span class="metric-label">Gear</span><span id="vehicle-gear" class="metric-value">—</span></div></div></article>
+      <article class="card comfort-card"><p class="eyebrow">Climate</p><h2>실내 환경</h2><div class="control-row"><span class="control-label">목표 온도</span><div class="stepper"><button class="button button--secondary" type="button" data-temperature="-0.5" aria-label="온도 낮추기">−</button><output id="target-temperature" class="control-value">22.0°C</output><button class="button button--secondary" type="button" data-temperature="0.5" aria-label="온도 높이기">+</button></div></div><div class="control-row"><span class="control-label">풍량</span><div class="fan-levels"><button class="fan-button" type="button" data-fan="1">1</button><button class="fan-button is-active" type="button" data-fan="2">2</button><button class="fan-button" type="button" data-fan="3">3</button><button class="fan-button" type="button" data-fan="4">4</button><button class="fan-button" type="button" data-fan="5">5</button></div></div><button id="ac-toggle" class="button button--secondary" type="button" aria-pressed="true">A/C 켜짐</button></article>
+      <article class="card comfort-card"><p class="eyebrow">Audio</p><h2>차량 오디오</h2><label class="control-label" for="audio-volume">음량 <output id="volume-value">45%</output></label><input id="audio-volume" class="range" type="range" min="0" max="100" value="45"><p class="muted">OAS HMI의 로컬 UI 값입니다.</p></article>
+      <article class="card"><p class="eyebrow">Vision</p><h2>준비 중</h2><p class="muted">카메라와 영상 pipeline이 준비되면 이 위치에 표시됩니다.</p></article>
+    </div>
+    <div class="simulation-note">UI 시뮬레이션 모드 · 현재 조작은 CAN, 네트워크, 차량에 어떤 명령도 보내지 않습니다.</div>
   </section>
 
   <section class="screen" data-screen="settings" hidden>
@@ -60,6 +66,19 @@
     routes.forEach(button => button.classList.toggle('is-active', button.dataset.route === route));
   }
   routes.forEach(button => button.addEventListener('click', () => navigate(button.dataset.route)));
+  let targetTemperature = 22;
+  let fanLevel = 2;
+  let acEnabled = true;
+  function renderComfortControls() {
+    byId('target-temperature').textContent = `${targetTemperature.toFixed(1)}°C`;
+    document.querySelectorAll('[data-fan]').forEach(button => button.classList.toggle('is-active', Number(button.dataset.fan) === fanLevel));
+    byId('ac-toggle').textContent = acEnabled ? 'A/C 켜짐' : 'A/C 꺼짐';
+    byId('ac-toggle').setAttribute('aria-pressed', String(acEnabled));
+  }
+  document.querySelectorAll('[data-temperature]').forEach(button => button.addEventListener('click', () => { targetTemperature = Math.min(30, Math.max(16, targetTemperature + Number(button.dataset.temperature))); renderComfortControls(); }));
+  document.querySelectorAll('[data-fan]').forEach(button => button.addEventListener('click', () => { fanLevel = Number(button.dataset.fan); renderComfortControls(); }));
+  byId('ac-toggle').addEventListener('click', () => { acEnabled = !acEnabled; renderComfortControls(); });
+  byId('audio-volume').addEventListener('input', event => { byId('volume-value').textContent = `${event.target.value}%`; });
   function showState(state) {
     const allowed = state.videoPlayback === 'allowed';
     const speed = state.speedMps === null ? '—' : `${state.speedMps} m/s`;
@@ -90,7 +109,7 @@
       byId('media-safety-banner').textContent = '안전 상태 확인 중';
     }
   }
-  refresh(); setInterval(refresh, 250);
+  renderComfortControls(); refresh(); setInterval(refresh, 250);
 </script>
 </body>
 </html>

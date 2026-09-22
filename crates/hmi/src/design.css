@@ -66,6 +66,17 @@ h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.08; }
 .overview-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
 .overview-grid .button { margin-top: var(--space-2); }
 .muted { color: var(--color-text-muted); }
+.vehicle-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.comfort-card { display: grid; align-content: start; gap: var(--space-2); }
+.control-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.control-label { color: var(--color-text-muted); font-weight: 700; }
+.stepper, .fan-levels { display: flex; align-items: center; gap: var(--space-1); }
+.control-value { min-width: 92px; text-align: center; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.fan-button { width: var(--touch-target); height: var(--touch-target); border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-raised); color: var(--color-text); font-weight: 800; }
+.fan-button.is-active { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-accent-foreground); }
+.fan-button:focus-visible { outline: 3px solid var(--color-text); outline-offset: 3px; }
+.range { width: 100%; accent-color: var(--color-accent); }
+.simulation-note { margin-top: var(--space-2); color: var(--color-text-muted); font-size: .85rem; text-align: center; }
 .settings-list { display: grid; gap: var(--space-2); }
 .setting-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .setting-row p { margin-bottom: 0; }
@@ -75,7 +86,8 @@ h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.08; }
   .top-bar { align-items: flex-start; flex-wrap: wrap; }
   .primary-nav { order: 3; justify-content: flex-start; width: 100%; }
   .page-heading { margin-top: var(--space-4); }
-  .dashboard-grid, .overview-grid { grid-template-columns: 1fr; }
+  .dashboard-grid, .overview-grid, .vehicle-layout { grid-template-columns: 1fr; }
   .card { padding: var(--space-2); }
   .setting-row { align-items: flex-start; flex-direction: column; }
+  .control-row { align-items: flex-start; flex-direction: column; }
 }

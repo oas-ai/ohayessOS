@@ -20,6 +20,7 @@
 - `button`: 최소 56px 터치 영역을 유지하며 `:focus-visible`을 제공한다.
 - `primary-nav`: Home, Media, Vehicle, Settings, Diagnostics의 최상위 이동을 담당한다.
 - `setting-row`: 설정의 소유 영역과 현재 값을 함께 표시한다.
+- `stepper`, `fan-button`, `range`: Comfort Control의 로컬 UI 입력이다. 실제 차량 명령 상태를 암시하지 않는다.
 
 ## Safety states
 
