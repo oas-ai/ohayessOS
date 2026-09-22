@@ -88,7 +88,11 @@ fn hmi_locks_media_after_drive_or_stale_state() {
     }
     assert!(page_contains(&address, "/design.css", "--touch-target"));
     assert!(page_contains(&address, "/", "data-theme-choice"));
-    assert!(page_contains(&address, "/", "제어·안전 판단에는 사용하지 않습니다"));
+    assert!(page_contains(
+        &address,
+        "/",
+        "제어·안전 판단에는 사용하지 않습니다"
+    ));
     let stdin = child.stdin.as_mut().unwrap();
     stdin
         .write_all(&frame(&VehicleState {
