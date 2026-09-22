@@ -64,6 +64,12 @@ void writeState(int fd, float speedMps) {
 
 int main(int argc, char *argv[]) {
   QCoreApplication app(argc, argv);
+  VehicleStateBridge demo("/missing", 1);
+  demo.showDemo();
+  QThread::msleep(20);
+  QCoreApplication::processEvents();
+  if (!demo.available() || !demo.diagnosticsAvailable()) fail("demo preview is not read-only available");
+
   QTemporaryDir directory;
   const auto path = directory.path() + "/vehicle-state";
   if (::mkfifo(path.toLocal8Bit().constData(), 0600) != 0) fail("mkfifo failed");

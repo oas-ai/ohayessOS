@@ -31,6 +31,7 @@ class VehicleStateBridge final : public QObject {
   bool diagnosticsAvailable() const;
   QString diagnosticsSummary() const;
   QString streamPath() const;
+  void showDemo();
 
  signals:
   void changed();
@@ -57,4 +58,5 @@ class VehicleStateBridge final : public QObject {
   QString media_playback_reason_;
   bool diagnostics_available_ = false;
   QString diagnostics_summary_;
+  bool demo_ = false;
 };

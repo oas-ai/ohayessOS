@@ -15,6 +15,25 @@ cmake --build build/hmi
 
 ## Local preview
 
+Install the macOS development dependencies once:
+
+```sh
+brew install qt protobuf
+```
+
+Then configure CMake with Homebrew Qt:
+
+```sh
+cmake -S apps/hmi -B build/hmi -DCMAKE_PREFIX_PATH="$(brew --prefix qt)" -DOAS_SDK_PROTO_DIR=/Users/sy/VSCodeProjects/oas-ai/sdk/proto
+cmake --build build/hmi
+```
+
+For a screen-only preview, use the explicit read-only demo mode:
+
+```sh
+./build/hmi/ohayess-hmi --demo
+```
+
 The Qt HMI previews the production `HmiState` contract. Start it before writing a fixture stream:
 
 ```sh

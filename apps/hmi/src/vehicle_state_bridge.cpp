@@ -47,6 +47,19 @@ bool VehicleStateBridge::diagnosticsAvailable() const { return diagnostics_avail
 QString VehicleStateBridge::diagnosticsSummary() const { return diagnostics_summary_; }
 QString VehicleStateBridge::streamPath() const { return stream_path_; }
 
+void VehicleStateBridge::showDemo() {
+  demo_ = true;
+  available_ = true;
+  speed_kph_ = 80.0;
+  gear_ = "D";
+  night_mode_ = false;
+  media_playback_allowed_ = false;
+  media_playback_reason_ = "not_parked";
+  diagnostics_available_ = true;
+  diagnostics_summary_ = "Door switch 1.0 · Belt D/P 1.0/1.0 · Temp D/P 20.0/22.0 °C";
+  emit changed();
+}
+
 void VehicleStateBridge::connectStream() {
   if (fd_ >= 0) return;
   fd_ = open(stream_path_.toLocal8Bit().constData(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
@@ -130,6 +143,7 @@ void VehicleStateBridge::disconnectStream() {
 }
 
 void VehicleStateBridge::refreshFreshness() {
+  if (demo_) return;
   const auto now_ns = static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()) * 1'000'000;
   const bool fresh = timestamp_ns_ > 0 && timestamp_ns_ <= now_ns && now_ns - timestamp_ns_ <= maximum_age_ns_;
   if (available_ && !fresh) {
