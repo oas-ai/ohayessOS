@@ -11,6 +11,12 @@ use prost::Message;
 pub const MAX_SNAPSHOT_BYTES: u32 = 1024 * 1024;
 pub const STOPPED_SPEED_MPS: f32 = 0.1;
 
+/// 미디어 정책의 명시적 예외다. 기본값은 모든 예외를 비활성화한다.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct MediaPlaybackConfig {
+    pub allow_drive_when_stopped: bool,
+}
+
 /// 운전자 화면에서 영상을 재생할 수 있는지 나타낸다.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum VideoPlayback {
@@ -39,6 +45,21 @@ pub fn video_playback_for_state(
     now_ns: u64,
     maximum_age_ns: u64,
 ) -> VideoPlayback {
+    video_playback_for_state_with_config(
+        state,
+        now_ns,
+        maximum_age_ns,
+        MediaPlaybackConfig::default(),
+    )
+}
+
+/// D 기어 정차 예외를 포함해 영상 재생 정책을 적용한다.
+pub fn video_playback_for_state_with_config(
+    state: Option<&VehicleState>,
+    now_ns: u64,
+    maximum_age_ns: u64,
+    config: MediaPlaybackConfig,
+) -> VideoPlayback {
     let Some(state) = state else {
         return VideoPlayback::NoVehicleState;
     };
@@ -55,11 +76,13 @@ pub fn video_playback_for_state(
     {
         return VideoPlayback::VehicleInMotion;
     }
-    if state
+    let gear = state
         .gear
         .as_ref()
         .and_then(|gear| GearPosition::try_from(gear.position).ok())
-        != Some(GearPosition::Park)
+        .unwrap_or(GearPosition::Unspecified);
+    if gear != GearPosition::Park
+        && !(config.allow_drive_when_stopped && gear == GearPosition::Drive)
     {
         return VideoPlayback::NotParked;
     }
@@ -166,7 +189,10 @@ mod tests {
     use oas_sdk::vehicle::v1::{GearPosition, GearState, VehicleState};
     use prost::Message;
 
-    use super::{MAX_SNAPSHOT_BYTES, Runtime, RuntimeError, VideoPlayback};
+    use super::{
+        MAX_SNAPSHOT_BYTES, MediaPlaybackConfig, Runtime, RuntimeError, VideoPlayback,
+        video_playback_for_state_with_config,
+    };
 
     #[test]
     fn reads_a_length_prefixed_snapshot_and_checks_freshness() {
@@ -276,6 +302,18 @@ mod tests {
         assert_eq!(
             runtime.video_playback(1_000, 500),
             VideoPlayback::VehicleInMotion
+        );
+        runtime.latest.as_mut().unwrap().vehicle_speed_mps = Some(0.0);
+        assert_eq!(
+            video_playback_for_state_with_config(
+                runtime.latest(),
+                1_000,
+                500,
+                MediaPlaybackConfig {
+                    allow_drive_when_stopped: true,
+                },
+            ),
+            VideoPlayback::Allowed
         );
     }
 }

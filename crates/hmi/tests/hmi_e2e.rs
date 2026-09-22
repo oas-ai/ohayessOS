@@ -47,7 +47,8 @@ fn hmi_locks_media_after_drive_or_stale_state() {
     let address = listener.local_addr().unwrap().to_string();
     drop(listener);
     let mut child = Command::new(env!("CARGO_BIN_EXE_ohayess-hmi"))
-        .args([&address, "500"])
+        .args([&address, "2000"])
+        .env("OAS_ALLOW_MEDIA_IN_DRIVE_WHEN_STOPPED", "true")
         .stdin(Stdio::piped())
         .spawn()
         .unwrap();
@@ -74,9 +75,24 @@ fn hmi_locks_media_after_drive_or_stale_state() {
             ..VehicleState::default()
         }))
         .unwrap();
-    assert!(state_is(&address, "\"videoPlayback\":\"not_parked\""));
+    assert!(state_is(&address, "\"videoPlayback\":\"allowed\""));
 
-    thread::sleep(Duration::from_millis(550));
+    stdin
+        .write_all(&frame(&VehicleState {
+            timestamp_ns: Some(now_ns()),
+            vehicle_speed_mps: Some(0.2),
+            gear: Some(GearState {
+                position: GearPosition::Drive as i32,
+            }),
+            ..VehicleState::default()
+        }))
+        .unwrap();
+    assert!(state_is(
+        &address,
+        "\"videoPlayback\":\"vehicle_in_motion\""
+    ));
+
+    thread::sleep(Duration::from_millis(2050));
     assert!(state_is(
         &address,
         "\"videoPlayback\":\"stale_vehicle_state\""

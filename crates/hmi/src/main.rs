@@ -5,7 +5,9 @@ use std::net::{TcpListener, TcpStream};
 use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use ohayess_runtime::{GearPosition, Runtime, VehicleState, video_playback_for_state};
+use ohayess_runtime::{
+    GearPosition, MediaPlaybackConfig, Runtime, VehicleState, video_playback_for_state_with_config,
+};
 
 const INDEX: &str = include_str!("index.html");
 
@@ -22,6 +24,9 @@ fn main() -> Result<(), String> {
     let maximum_age_ns = maximum_age_ms
         .checked_mul(1_000_000)
         .ok_or("maximum age is too large")?;
+    let config = MediaPlaybackConfig {
+        allow_drive_when_stopped: setting("OAS_ALLOW_MEDIA_IN_DRIVE_WHEN_STOPPED")?,
+    };
     let latest = Arc::new(Mutex::new(None));
     read_states(Arc::clone(&latest));
 
@@ -33,11 +38,20 @@ fn main() -> Result<(), String> {
     );
     for stream in listener.incoming() {
         match stream {
-            Ok(stream) => serve(stream, &latest, maximum_age_ns),
+            Ok(stream) => serve(stream, &latest, maximum_age_ns, config),
             Err(error) => eprintln!("ohayess-hmi: accept: {error}"),
         }
     }
     Ok(())
+}
+
+fn setting(name: &str) -> Result<bool, String> {
+    match std::env::var(name).as_deref() {
+        Ok("true") => Ok(true),
+        Ok("false") | Err(std::env::VarError::NotPresent) => Ok(false),
+        Ok(value) => Err(format!("{name} must be true or false, got {value:?}")),
+        Err(error) => Err(format!("{name}: {error}")),
+    }
 }
 
 fn read_states(latest: Arc<Mutex<Option<VehicleState>>>) {
@@ -58,7 +72,12 @@ fn read_states(latest: Arc<Mutex<Option<VehicleState>>>) {
     });
 }
 
-fn serve(mut stream: TcpStream, latest: &Arc<Mutex<Option<VehicleState>>>, maximum_age_ns: u64) {
+fn serve(
+    mut stream: TcpStream,
+    latest: &Arc<Mutex<Option<VehicleState>>>,
+    maximum_age_ns: u64,
+    config: MediaPlaybackConfig,
+) {
     let mut request = [0; 1024];
     let Ok(size) = stream.read(&mut request) else {
         return;
@@ -68,7 +87,10 @@ fn serve(mut stream: TcpStream, latest: &Arc<Mutex<Option<VehicleState>>>, maxim
         .and_then(|request| request.split_whitespace().nth(1));
     let (content_type, body) = match target {
         Some("/") => ("text/html; charset=utf-8", INDEX.to_owned()),
-        Some("/state") => ("application/json", state_json(latest, maximum_age_ns)),
+        Some("/state") => (
+            "application/json",
+            state_json(latest, maximum_age_ns, config),
+        ),
         _ => ("text/plain; charset=utf-8", "not found".to_owned()),
     };
     let status = if target == Some("/") || target == Some("/state") {
@@ -83,14 +105,19 @@ fn serve(mut stream: TcpStream, latest: &Arc<Mutex<Option<VehicleState>>>, maxim
     let _ = stream.write_all(response.as_bytes());
 }
 
-fn state_json(latest: &Arc<Mutex<Option<VehicleState>>>, maximum_age_ns: u64) -> String {
+fn state_json(
+    latest: &Arc<Mutex<Option<VehicleState>>>,
+    maximum_age_ns: u64,
+    config: MediaPlaybackConfig,
+) -> String {
     let state = latest.lock().expect("state lock poisoned").clone();
     let now_ns = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .ok()
         .and_then(|duration| u64::try_from(duration.as_nanos()).ok())
         .unwrap_or(u64::MAX);
-    let playback = video_playback_for_state(state.as_ref(), now_ns, maximum_age_ns);
+    let playback =
+        video_playback_for_state_with_config(state.as_ref(), now_ns, maximum_age_ns, config);
     let speed = state
         .as_ref()
         .and_then(|state| state.vehicle_speed_mps)
@@ -104,7 +131,8 @@ fn state_json(latest: &Arc<Mutex<Option<VehicleState>>>, maximum_age_ns: u64) ->
         .map(|gear| gear.as_str_name().to_ascii_lowercase())
         .unwrap_or_else(|| "unknown".to_owned());
     format!(
-        "{{\"videoPlayback\":\"{}\",\"speedMps\":{speed},\"gear\":\"{gear}\"}}",
-        playback.as_str()
+        "{{\"videoPlayback\":\"{}\",\"speedMps\":{speed},\"gear\":\"{gear}\",\"allowDriveWhenStopped\":{}}}",
+        playback.as_str(),
+        config.allow_drive_when_stopped
     )
 }
