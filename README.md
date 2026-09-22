@@ -10,6 +10,16 @@ E2E 테스트는 정상 stream 종료, stale 상태, 손상·절단·초과 크�
 
 운전자용 동영상 앱은 `Runtime::video_playback` 결과가 `Allowed`일 때만 재생해야 합니다. 이 정책은 최신 상태, 정차(0.1 m/s 이하), P 기어를 모두 확인하며 하나라도 알 수 없으면 차단합니다. 따라서 현재 차량 어댑터가 기어를 제공하지 않으면 영상은 의도적으로 열리지 않습니다.
 
+## 가상 HMI 개발
+
+`ohayess-hmi`는 length-prefixed `VehicleState` stream을 stdin으로 받아 loopback 전용 웹 HMI를 제공합니다. 하드웨어 없이 `vcan` Gateway의 stdout을 연결하거나 fixture를 pipe해 개발할 수 있습니다.
+
+```sh
+cargo run -p ohayess-hmi -- 127.0.0.1:8080 500 < vehicle-state-stream.bin
+```
+
+브라우저에서 `http://127.0.0.1:8080`을 열면 `/state`의 정책 결과를 250ms마다 반영합니다. HMI는 아직 플레이어를 포함하지 않는 안전한 shell이며, 하드웨어 단계에서 kiosk/WebView를 이 영역에 연결해야 합니다.
+
 ```rust
 use std::io::Read;
 

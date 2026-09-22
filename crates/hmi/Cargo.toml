@@ -1,0 +1,11 @@
+[package]
+name = "ohayess-hmi"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+
+[dependencies]
+ohayess-runtime = { path = "../runtime" }
+
+[dev-dependencies]
+prost = "0.14.4"

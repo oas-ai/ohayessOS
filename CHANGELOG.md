@@ -6,6 +6,7 @@
 - Add runtime binary fail-safe end-to-end tests for disconnects, stale state, and invalid snapshots.
 - Add a dependency-free blocking VehicleState subscription API for applications.
 - Add a fail-closed driver-video playback policy: fresh stationary state and P gear are required.
+- Add a hardware-independent loopback HMI shell with Park-to-Drive and stale-state media-lock E2E coverage.
 
 ## [0.1.0] - 2026-09-21
 

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OAS HMI</title>
+<style>
+  body { margin: 0; background: #10141b; color: #edf2f7; font: 18px system-ui, sans-serif; }
+  main { display: grid; min-height: 100vh; place-items: center; }
+  section { width: min(680px, 90vw); padding: 32px; border-radius: 24px; background: #1d2531; }
+  .ok { color: #5eea9a; } .locked { color: #ff9b9b; } small { color: #aeb9c8; }
+  #media { margin-top: 24px; padding: 32px; border-radius: 16px; background: #0c1016; text-align: center; }
+</style>
+<main><section>
+  <h1>OAS Media</h1>
+  <p id="status" class="locked">차량 상태를 기다리는 중</p>
+  <small id="telemetry">speed: — / gear: —</small>
+  <div id="media">동영상 재생은 정차 및 P 기어에서만 가능합니다.</div>
+</section></main>
+<script>
+  async function refresh() {
+    try {
+      const state = await fetch('/state', {cache: 'no-store'}).then(response => response.json());
+      const allowed = state.videoPlayback === 'allowed';
+      status.textContent = allowed ? '미디어를 사용할 수 있습니다' : '미디어 잠김: ' + state.videoPlayback;
+      status.className = allowed ? 'ok' : 'locked';
+      telemetry.textContent = `speed: ${state.speedMps ?? '—'} m/s / gear: ${state.gear}`;
+      media.textContent = allowed ? '미디어 플레이어 연결 준비됨' : '동영상 재생은 정차 및 P 기어에서만 가능합니다.';
+    } catch (_) { status.textContent = '상태 서비스에 연결할 수 없습니다'; status.className = 'locked'; }
+  }
+  refresh(); setInterval(refresh, 250);
+</script>
+</html>

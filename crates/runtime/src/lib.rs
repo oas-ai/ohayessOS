@@ -5,7 +5,7 @@
 use std::fmt;
 use std::io::{self, Read};
 
-pub use oas_sdk::vehicle::v1::{GearPosition, VehicleState};
+pub use oas_sdk::vehicle::v1::{GearPosition, GearState, VehicleState};
 use prost::Message;
 
 pub const MAX_SNAPSHOT_BYTES: u32 = 1024 * 1024;
@@ -19,6 +19,51 @@ pub enum VideoPlayback {
     StaleVehicleState,
     VehicleInMotion,
     NotParked,
+}
+
+impl VideoPlayback {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Allowed => "allowed",
+            Self::NoVehicleState => "no_vehicle_state",
+            Self::StaleVehicleState => "stale_vehicle_state",
+            Self::VehicleInMotion => "vehicle_in_motion",
+            Self::NotParked => "not_parked",
+        }
+    }
+}
+
+/// 영상 재생 정책을 state consumer가 동일하게 적용할 수 있도록 한다.
+pub fn video_playback_for_state(
+    state: Option<&VehicleState>,
+    now_ns: u64,
+    maximum_age_ns: u64,
+) -> VideoPlayback {
+    let Some(state) = state else {
+        return VideoPlayback::NoVehicleState;
+    };
+    if !state
+        .timestamp_ns
+        .and_then(|timestamp_ns| now_ns.checked_sub(timestamp_ns))
+        .is_some_and(|age_ns| age_ns <= maximum_age_ns)
+    {
+        return VideoPlayback::StaleVehicleState;
+    }
+    if !state
+        .vehicle_speed_mps
+        .is_some_and(|speed| speed.is_finite() && speed.abs() <= STOPPED_SPEED_MPS)
+    {
+        return VideoPlayback::VehicleInMotion;
+    }
+    if state
+        .gear
+        .as_ref()
+        .and_then(|gear| GearPosition::try_from(gear.position).ok())
+        != Some(GearPosition::Park)
+    {
+        return VideoPlayback::NotParked;
+    }
+    VideoPlayback::Allowed
 }
 
 /// Gateway stream에서 최신 차량 상태를 유지하는 runtime이다.
@@ -79,27 +124,7 @@ impl<R: Read> Runtime<R> {
 
     /// 최신 상태가 정차·P 기어임을 명시할 때만 운전자 영상 재생을 허용한다.
     pub fn video_playback(&self, now_ns: u64, maximum_age_ns: u64) -> VideoPlayback {
-        let Some(state) = self.latest() else {
-            return VideoPlayback::NoVehicleState;
-        };
-        if !self.latest_is_fresh(now_ns, maximum_age_ns) {
-            return VideoPlayback::StaleVehicleState;
-        }
-        if !state
-            .vehicle_speed_mps
-            .is_some_and(|speed| speed.is_finite() && speed.abs() <= STOPPED_SPEED_MPS)
-        {
-            return VideoPlayback::VehicleInMotion;
-        }
-        if state
-            .gear
-            .as_ref()
-            .and_then(|gear| GearPosition::try_from(gear.position).ok())
-            != Some(GearPosition::Park)
-        {
-            return VideoPlayback::NotParked;
-        }
-        VideoPlayback::Allowed
+        video_playback_for_state(self.latest(), now_ns, maximum_age_ns)
     }
 }
 

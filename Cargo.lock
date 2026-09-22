@@ -150,6 +150,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ohayess-hmi"
+version = "0.1.0"
+dependencies = [
+ "ohayess-runtime",
+ "prost",
+]
+
+[[package]]
 name = "ohayess-runtime"
 version = "0.1.0"
 dependencies = [
