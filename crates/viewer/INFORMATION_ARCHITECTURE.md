@@ -1,4 +1,4 @@
-# OAS HMI information architecture
+# OAS VehicleState Viewer information architecture
 
 초기 HMI는 read-only 상태와 미디어를 중심으로 하며, Vehicle에는 hardware integration 전까지 로컬 UI 시뮬레이션 Comfort Control을 둔다. 깊은 메뉴보다 하단의 다섯 최상위 목적지를 고정하고, 안전 상태는 어느 화면에서도 우선한다.
 

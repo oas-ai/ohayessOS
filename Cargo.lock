@@ -150,7 +150,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ohayess-hmi"
+name = "ohayess-viewer"
 version = "0.1.0"
 dependencies = [
  "ohayess-runtime",

@@ -64,11 +64,11 @@ fn page_contains(address: &str, path: &str, expected: &str) -> bool {
 }
 
 #[test]
-fn hmi_locks_media_after_drive_or_stale_state() {
+fn viewer_locks_media_after_drive_or_stale_state() {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let address = listener.local_addr().unwrap().to_string();
     drop(listener);
-    let mut child = Command::new(env!("CARGO_BIN_EXE_ohayess-hmi"))
+    let mut child = Command::new(env!("CARGO_BIN_EXE_ohayess-viewer"))
         .args([&address, "2000"])
         .env("OAS_ALLOW_MEDIA_IN_DRIVE_WHEN_STOPPED", "true")
         .stdin(Stdio::piped())

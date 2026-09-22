@@ -1,4 +1,4 @@
-# OAS HMI UI/UX audit
+# OAS VehicleState Viewer UI/UX audit
 
 ## Scope
 

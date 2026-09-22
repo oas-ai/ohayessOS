@@ -34,13 +34,13 @@ fn main() -> Result<(), String> {
     let listener =
         TcpListener::bind(&address).map_err(|error| format!("bind {address}: {error}"))?;
     eprintln!(
-        "ohayess-hmi: listening on {}",
+        "ohayess-viewer: listening on {}",
         listener.local_addr().unwrap()
     );
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => serve(stream, &latest, maximum_age_ns, config),
-            Err(error) => eprintln!("ohayess-hmi: accept: {error}"),
+            Err(error) => eprintln!("ohayess-viewer: accept: {error}"),
         }
     }
     Ok(())
@@ -65,7 +65,7 @@ fn read_states(latest: Arc<Mutex<Option<VehicleState>>>) {
                 }
                 Ok(None) => return,
                 Err(error) => {
-                    eprintln!("ohayess-hmi: vehicle state stream: {error}");
+                    eprintln!("ohayess-viewer: vehicle state stream: {error}");
                     return;
                 }
             }

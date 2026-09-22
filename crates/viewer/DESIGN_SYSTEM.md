@@ -1,4 +1,4 @@
-# OAS HMI design system
+# OAS VehicleState Viewer design system
 
 목표는 운전 중 짧게 봐도 안전 상태와 다음 행동을 알 수 있는 다크 HMI다. 장식보다 상태의 명확성, 대비, 큰 터치 영역을 우선한다.
 

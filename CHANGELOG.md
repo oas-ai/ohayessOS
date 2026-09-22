@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Split the production Qt/QML HMI target from the loopback web VehicleState Viewer.
 - Redesign Home as a vehicle-first drive brief with prioritized driving, media, vehicle, and diagnostics entry points.
 - Label Palisade diagnostics as DBC raw values that are excluded from control and safety decisions.
 - Show DBC-trusted Palisade body, seatbelt, door, and climate raw diagnostics in the read-only HMI.

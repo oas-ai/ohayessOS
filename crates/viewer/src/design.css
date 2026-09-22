@@ -1,3 +1,4 @@
+/* Development-only VehicleState Viewer. Production HMI lives in apps/hmi. */
 :root {
   --color-canvas: #0b0f14;
   --color-surface: #151c25;
