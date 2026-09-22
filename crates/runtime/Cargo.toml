@@ -8,5 +8,5 @@ license = "Apache-2.0"
 path = "src/lib.rs"
 
 [dependencies]
-oas-sdk = { git = "https://github.com/oas-ai/sdk.git", rev = "a7e1777a3df0ba0a27d38f772db09771cb5724df" }
+oas-sdk = { git = "https://github.com/oas-ai/sdk.git", rev = "5f536c640a15c1d4b31749a467fa9d86919c9d1b" }
 prost = "0.14.4"
