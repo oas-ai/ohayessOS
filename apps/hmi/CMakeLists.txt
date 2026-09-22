@@ -8,7 +8,10 @@ if(NOT EXISTS "${OAS_SDK_PROTO_DIR}/oas/vehicle/v1/vehicle.proto")
   message(FATAL_ERROR "Set OAS_SDK_PROTO_DIR to the SDK proto directory")
 endif()
 
-find_package(Protobuf CONFIG REQUIRED)
+find_package(Protobuf CONFIG QUIET)
+if(NOT TARGET protobuf::libprotobuf)
+  find_package(Protobuf 3.20 REQUIRED)
+endif()
 find_package(Qt6 6.2 REQUIRED COMPONENTS Quick)
 qt_standard_project_setup()
 
