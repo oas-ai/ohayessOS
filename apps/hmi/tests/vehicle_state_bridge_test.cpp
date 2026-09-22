@@ -47,8 +47,14 @@ void writeState(int fd, float speedMps) {
   state.set_timestamp_ns(static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()) * 1'000'000);
   state.set_vehicle_speed_mps(speedMps);
   state.mutable_gear()->set_position(oas::vehicle::v1::GEAR_POSITION_DRIVE);
+  oas::vehicle::v1::HmiState hmi;
+  *hmi.mutable_vehicle_state() = state;
+  hmi.set_freshness(oas::vehicle::v1::HMI_FRESHNESS_FRESH);
+  hmi.set_media_playback(oas::vehicle::v1::HMI_CAPABILITY_ALLOWED);
+  hmi.set_media_playback_reason("allowed");
+  hmi.set_diagnostics(oas::vehicle::v1::HMI_CAPABILITY_ALLOWED);
   std::string payload;
-  if (!state.SerializeToString(&payload)) fail("protobuf serialization failed");
+  if (!hmi.SerializeToString(&payload)) fail("protobuf serialization failed");
   const auto size = static_cast<quint32>(payload.size());
   const char header[] = {static_cast<char>(size >> 24), static_cast<char>(size >> 16), static_cast<char>(size >> 8), static_cast<char>(size)};
   if (write(fd, header, sizeof(header)) != sizeof(header) || write(fd, payload.data(), payload.size()) != static_cast<ssize_t>(payload.size())) fail("FIFO write failed");
@@ -66,8 +72,10 @@ int main(int argc, char *argv[]) {
   writeState(writer, 22.222F);
   if (!waitFor([&] { return bridge.available(); })) fail("fresh VehicleState was not published");
   if (std::abs(bridge.speedKph() - 80.0) > 0.1 || bridge.gear() != "D") fail("published VehicleState values are incorrect");
+  if (!bridge.mediaPlaybackAllowed() || !bridge.diagnosticsAvailable()) fail("runtime capabilities were not published");
 
   if (!waitFor([&] { return !bridge.available(); }, 750)) fail("stale VehicleState stayed available");
+  if (bridge.mediaPlaybackAllowed() || bridge.diagnosticsAvailable()) fail("stale state left capabilities enabled");
   writeState(writer, 0.0F);
   if (!waitFor([&] { return bridge.available(); })) fail("fresh VehicleState did not recover");
 

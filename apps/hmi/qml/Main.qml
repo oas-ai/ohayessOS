@@ -73,7 +73,7 @@ ApplicationWindow {
 
         Label {
             Layout.fillWidth: true
-            text: hasVehicleState ? "VehicleState stream is fresh. Vehicle controls remain unavailable." : "Waiting for a fresh VehicleState stream: " + vehicleState.streamPath
+            text: hasVehicleState ? "Media: " + vehicleState.mediaPlaybackReason + " · Vehicle controls remain unavailable." : "Waiting for a fresh HmiState stream: " + vehicleState.streamPath
             color: "#a6b2c2"
             font.pixelSize: 18
             wrapMode: Text.WordWrap
@@ -85,7 +85,7 @@ ApplicationWindow {
                 model: ["Media", "Vehicle", "Diagnostics"]
                 delegate: Button {
                     text: modelData
-                    enabled: false
+                    enabled: modelData === "Media" ? vehicleState.mediaPlaybackAllowed : modelData === "Diagnostics" ? vehicleState.diagnosticsAvailable : false
                     Layout.fillWidth: true
                     Layout.minimumHeight: 72
                 }

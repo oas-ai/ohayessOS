@@ -14,6 +14,9 @@ class VehicleStateBridge final : public QObject {
   Q_PROPERTY(double speedKph READ speedKph NOTIFY changed)
   Q_PROPERTY(QString gear READ gear NOTIFY changed)
   Q_PROPERTY(bool nightMode READ nightMode NOTIFY changed)
+  Q_PROPERTY(bool mediaPlaybackAllowed READ mediaPlaybackAllowed NOTIFY changed)
+  Q_PROPERTY(QString mediaPlaybackReason READ mediaPlaybackReason NOTIFY changed)
+  Q_PROPERTY(bool diagnosticsAvailable READ diagnosticsAvailable NOTIFY changed)
   Q_PROPERTY(QString streamPath READ streamPath CONSTANT)
 
  public:
@@ -22,6 +25,9 @@ class VehicleStateBridge final : public QObject {
   double speedKph() const;
   QString gear() const;
   bool nightMode() const;
+  bool mediaPlaybackAllowed() const;
+  QString mediaPlaybackReason() const;
+  bool diagnosticsAvailable() const;
   QString streamPath() const;
 
  signals:
@@ -45,4 +51,7 @@ class VehicleStateBridge final : public QObject {
   double speed_kph_ = 0.0;
   QString gear_;
   bool night_mode_ = false;
+  bool media_playback_allowed_ = false;
+  QString media_playback_reason_;
+  bool diagnostics_available_ = false;
 };

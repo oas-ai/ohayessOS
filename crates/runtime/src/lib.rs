@@ -5,7 +5,9 @@
 use std::fmt;
 use std::io::{self, Read};
 
-pub use oas_sdk::vehicle::v1::{GearPosition, GearState, VehicleState};
+pub use oas_sdk::vehicle::v1::{
+    GearPosition, GearState, HmiCapability, HmiFreshness, HmiState, VehicleState,
+};
 use prost::Message;
 
 pub const MAX_SNAPSHOT_BYTES: u32 = 1024 * 1024;
@@ -87,6 +89,49 @@ pub fn video_playback_for_state_with_config(
         return VideoPlayback::NotParked;
     }
     VideoPlayback::Allowed
+}
+
+/// Runtime 정책 결과를 포함한 HMI 전용 read-only 모델을 만든다.
+pub fn hmi_state_for_state(
+    state: Option<&VehicleState>,
+    now_ns: u64,
+    maximum_age_ns: u64,
+    config: MediaPlaybackConfig,
+) -> HmiState {
+    let freshness = match state {
+        None => HmiFreshness::Unavailable,
+        Some(state)
+            if state
+                .timestamp_ns
+                .and_then(|timestamp| now_ns.checked_sub(timestamp))
+                .is_some_and(|age| age <= maximum_age_ns) =>
+        {
+            HmiFreshness::Fresh
+        }
+        Some(_) => HmiFreshness::Stale,
+    };
+    let playback = video_playback_for_state_with_config(state, now_ns, maximum_age_ns, config);
+    let media_playback = if playback == VideoPlayback::Allowed {
+        HmiCapability::Allowed
+    } else if freshness == HmiFreshness::Fresh {
+        HmiCapability::Locked
+    } else {
+        HmiCapability::Unavailable
+    };
+    let diagnostics = if freshness == HmiFreshness::Fresh {
+        HmiCapability::Allowed
+    } else {
+        HmiCapability::Unavailable
+    };
+
+    HmiState {
+        vehicle_state: state.cloned(),
+        freshness: freshness as i32,
+        media_playback: media_playback as i32,
+        media_playback_reason: playback.as_str().to_owned(),
+        diagnostics: diagnostics as i32,
+        vehicle_controls: HmiCapability::Unavailable as i32,
+    }
 }
 
 /// Gateway stream에서 최신 차량 상태를 유지하는 runtime이다.
@@ -190,8 +235,8 @@ mod tests {
     use prost::Message;
 
     use super::{
-        MAX_SNAPSHOT_BYTES, MediaPlaybackConfig, Runtime, RuntimeError, VideoPlayback,
-        video_playback_for_state_with_config,
+        HmiCapability, HmiFreshness, MAX_SNAPSHOT_BYTES, MediaPlaybackConfig, Runtime,
+        RuntimeError, VideoPlayback, hmi_state_for_state, video_playback_for_state_with_config,
     };
 
     #[test]
@@ -315,5 +360,23 @@ mod tests {
             ),
             VideoPlayback::Allowed
         );
+    }
+
+    #[test]
+    fn hmi_state_exposes_runtime_policy_without_ui_recalculation() {
+        let state = VehicleState {
+            timestamp_ns: Some(1_000),
+            vehicle_speed_mps: Some(0.0),
+            gear: Some(GearState {
+                position: GearPosition::Park as i32,
+            }),
+            ..VehicleState::default()
+        };
+        let hmi = hmi_state_for_state(Some(&state), 1_100, 500, MediaPlaybackConfig::default());
+        assert_eq!(HmiFreshness::try_from(hmi.freshness), Ok(HmiFreshness::Fresh));
+        assert_eq!(HmiCapability::try_from(hmi.media_playback), Ok(HmiCapability::Allowed));
+        assert_eq!(HmiCapability::try_from(hmi.diagnostics), Ok(HmiCapability::Allowed));
+        assert_eq!(HmiCapability::try_from(hmi.vehicle_controls), Ok(HmiCapability::Unavailable));
+        assert_eq!(hmi.media_playback_reason, "allowed");
     }
 }

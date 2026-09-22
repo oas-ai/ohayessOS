@@ -41,6 +41,9 @@ bool VehicleStateBridge::available() const { return available_; }
 double VehicleStateBridge::speedKph() const { return speed_kph_; }
 QString VehicleStateBridge::gear() const { return gear_; }
 bool VehicleStateBridge::nightMode() const { return night_mode_; }
+bool VehicleStateBridge::mediaPlaybackAllowed() const { return media_playback_allowed_; }
+QString VehicleStateBridge::mediaPlaybackReason() const { return media_playback_reason_; }
+bool VehicleStateBridge::diagnosticsAvailable() const { return diagnostics_available_; }
 QString VehicleStateBridge::streamPath() const { return stream_path_; }
 
 void VehicleStateBridge::connectStream() {
@@ -83,14 +86,18 @@ void VehicleStateBridge::readFrames() {
 }
 
 bool VehicleStateBridge::applyFrame(QByteArrayView frame) {
-  oas::vehicle::v1::VehicleState state;
-  if (!state.ParseFromArray(frame.data(), frame.size())) return false;
-  timestamp_ns_ = state.has_timestamp_ns() ? state.timestamp_ns() : 0;
-  available_ = state.has_vehicle_speed_mps() && std::isfinite(state.vehicle_speed_mps());
-  speed_kph_ = available_ ? state.vehicle_speed_mps() * 3.6 : 0.0;
-  gear_ = state.has_gear() ? gearName(state.gear().position()) : "—";
-  night_mode_ = state.has_night_mode() && state.night_mode();
-  refreshFreshness();
+  oas::vehicle::v1::HmiState hmi;
+  if (!hmi.ParseFromArray(frame.data(), frame.size())) return false;
+  const auto fresh = hmi.freshness() == oas::vehicle::v1::HMI_FRESHNESS_FRESH;
+  const auto *state = hmi.has_vehicle_state() ? &hmi.vehicle_state() : nullptr;
+  timestamp_ns_ = state && state->has_timestamp_ns() ? state->timestamp_ns() : 0;
+  available_ = fresh && state && state->has_vehicle_speed_mps() && std::isfinite(state->vehicle_speed_mps());
+  speed_kph_ = available_ ? state->vehicle_speed_mps() * 3.6 : 0.0;
+  gear_ = state && state->has_gear() ? gearName(state->gear().position()) : "—";
+  night_mode_ = state && state->has_night_mode() && state->night_mode();
+  media_playback_allowed_ = hmi.media_playback() == oas::vehicle::v1::HMI_CAPABILITY_ALLOWED;
+  media_playback_reason_ = QString::fromStdString(hmi.media_playback_reason());
+  diagnostics_available_ = hmi.diagnostics() == oas::vehicle::v1::HMI_CAPABILITY_ALLOWED;
   emit changed();
   return true;
 }
@@ -105,6 +112,9 @@ void VehicleStateBridge::disconnectStream() {
   speed_kph_ = 0.0;
   gear_ = "—";
   night_mode_ = false;
+  media_playback_allowed_ = false;
+  media_playback_reason_.clear();
+  diagnostics_available_ = false;
   timestamp_ns_ = 0;
   emit changed();
   retry_timer_->start();
@@ -115,6 +125,8 @@ void VehicleStateBridge::refreshFreshness() {
   const bool fresh = timestamp_ns_ > 0 && timestamp_ns_ <= now_ns && now_ns - timestamp_ns_ <= maximum_age_ns_;
   if (available_ && !fresh) {
     available_ = false;
+    media_playback_allowed_ = false;
+    diagnostics_available_ = false;
     emit changed();
   }
 }
