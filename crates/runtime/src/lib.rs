@@ -5,7 +5,7 @@
 use std::fmt;
 use std::io::{self, Read};
 
-use oas_sdk::vehicle::v1::VehicleState;
+pub use oas_sdk::vehicle::v1::VehicleState;
 use prost::Message;
 
 pub const MAX_SNAPSHOT_BYTES: u32 = 1024 * 1024;
@@ -45,6 +45,17 @@ impl<R: Read> Runtime<R> {
 
     pub fn latest(&self) -> Option<&VehicleState> {
         self.latest.as_ref()
+    }
+
+    /// 정상 EOF까지 snapshot을 순서대로 전달한다.
+    pub fn subscribe(
+        &mut self,
+        mut subscriber: impl FnMut(&VehicleState),
+    ) -> Result<(), RuntimeError> {
+        while let Some(state) = self.read_next()? {
+            subscriber(state);
+        }
+        Ok(())
     }
 
     pub fn latest_is_fresh(&self, now_ns: u64, maximum_age_ns: u64) -> bool {
@@ -139,5 +150,34 @@ mod tests {
         assert_eq!(runtime.read_next().unwrap(), Some(&state));
         assert!(matches!(runtime.read_next(), Err(RuntimeError::Decode(_))));
         assert_eq!(runtime.latest(), Some(&state));
+    }
+
+    #[test]
+    fn subscription_receives_snapshots_in_order_until_disconnect() {
+        let states = [
+            VehicleState {
+                vehicle_speed_mps: Some(10.0),
+                ..VehicleState::default()
+            },
+            VehicleState {
+                vehicle_speed_mps: Some(20.0),
+                ..VehicleState::default()
+            },
+        ];
+        let mut stream = Vec::new();
+        for state in &states {
+            let payload = state.encode_to_vec();
+            stream.extend_from_slice(&(payload.len() as u32).to_be_bytes());
+            stream.extend_from_slice(&payload);
+        }
+        let mut runtime = Runtime::new(Cursor::new(stream));
+        let mut speeds = Vec::new();
+
+        runtime
+            .subscribe(|state| speeds.push(state.vehicle_speed_mps.unwrap()))
+            .unwrap();
+
+        assert_eq!(speeds, [10.0, 20.0]);
+        assert_eq!(runtime.latest(), Some(&states[1]));
     }
 }
