@@ -16,6 +16,7 @@
 - Document the Gateway-supervised runtime and HMI fan-out deployment path.
 - Add hash-addressable HMI destinations for browser end-to-end verification and kiosk recovery.
 - Add light/dark appearance preferences and an AVN split workspace to the HMI.
+- Feed the optional vehicle night-mode signal into automatic HMI appearance.
 
 ## [0.1.0] - 2026-09-21
 

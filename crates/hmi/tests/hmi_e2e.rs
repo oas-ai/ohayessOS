@@ -96,10 +96,12 @@ fn hmi_locks_media_after_drive_or_stale_state() {
             gear: Some(GearState {
                 position: GearPosition::Park as i32,
             }),
+            night_mode: Some(true),
             ..VehicleState::default()
         }))
         .unwrap();
     assert!(state_is(&address, "\"videoPlayback\":\"allowed\""));
+    assert!(state_is(&address, "\"nightMode\":true"));
 
     stdin
         .write_all(&frame(&VehicleState {

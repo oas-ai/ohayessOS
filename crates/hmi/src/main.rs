@@ -132,8 +132,13 @@ fn state_json(
         .and_then(|gear| GearPosition::try_from(gear.position).ok())
         .map(|gear| gear.as_str_name().to_ascii_lowercase())
         .unwrap_or_else(|| "unknown".to_owned());
+    let night_mode = state
+        .as_ref()
+        .and_then(|state| state.night_mode)
+        .map(|value| value.to_string())
+        .unwrap_or_else(|| "null".to_owned());
     format!(
-        "{{\"videoPlayback\":\"{}\",\"speedMps\":{speed},\"gear\":\"{gear}\",\"allowDriveWhenStopped\":{}}}",
+        "{{\"videoPlayback\":\"{}\",\"speedMps\":{speed},\"gear\":\"{gear}\",\"nightMode\":{night_mode},\"allowDriveWhenStopped\":{}}}",
         playback.as_str(),
         config.allow_drive_when_stopped
     )
