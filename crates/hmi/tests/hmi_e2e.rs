@@ -41,6 +41,16 @@ fn state_is(address: &str, expected: &str) -> bool {
     false
 }
 
+fn server_is_up(address: &str) -> bool {
+    for _ in 0..50 {
+        if TcpStream::connect(address).is_ok() {
+            return true;
+        }
+        thread::sleep(Duration::from_millis(10));
+    }
+    false
+}
+
 #[test]
 fn hmi_locks_media_after_drive_or_stale_state() {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
@@ -52,6 +62,7 @@ fn hmi_locks_media_after_drive_or_stale_state() {
         .stdin(Stdio::piped())
         .spawn()
         .unwrap();
+    assert!(server_is_up(&address));
     let stdin = child.stdin.as_mut().unwrap();
     stdin
         .write_all(&frame(&VehicleState {

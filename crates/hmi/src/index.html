@@ -3,30 +3,56 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OAS HMI</title>
-<style>
-  body { margin: 0; background: #10141b; color: #edf2f7; font: 18px system-ui, sans-serif; }
-  main { display: grid; min-height: 100vh; place-items: center; }
-  section { width: min(680px, 90vw); padding: 32px; border-radius: 24px; background: #1d2531; }
-  .ok { color: #5eea9a; } .locked { color: #ff9b9b; } small { color: #aeb9c8; }
-  #media { margin-top: 24px; padding: 32px; border-radius: 16px; background: #0c1016; text-align: center; }
-</style>
-<main><section>
-  <h1>OAS Media</h1>
-  <p id="status" class="locked">차량 상태를 기다리는 중</p>
-  <small id="telemetry">speed: — / gear: —</small>
-  <div id="media">동영상 재생은 정차 및 P 기어에서만 가능합니다.</div>
-</section></main>
+<link rel="stylesheet" href="/design.css">
+<body data-safety="unknown">
+<main class="app-shell">
+  <header class="top-bar">
+    <div class="brand"><span class="brand-mark">O</span> OAS</div>
+    <div id="status" class="status-pill">차량 상태를 기다리는 중</div>
+  </header>
+  <section class="page-heading">
+    <p class="eyebrow">Driver display</p>
+    <h1>Media</h1>
+  </section>
+  <section class="dashboard-grid">
+    <article class="card card--media">
+      <div class="media-state">
+        <h2 id="media-title">미디어 잠김</h2>
+        <p id="media">차량 상태를 확인하고 있습니다.</p>
+        <div id="safety-banner" class="safety-banner">안전 상태 확인 중</div>
+      </div>
+    </article>
+    <aside class="card">
+      <p class="eyebrow">Vehicle state</p>
+      <div class="metric-list">
+        <div class="metric"><span class="metric-label">Speed</span><span id="speed" class="metric-value">—</span></div>
+        <div class="metric"><span class="metric-label">Gear</span><span id="gear" class="metric-value">—</span></div>
+        <div class="metric"><span class="metric-label">D while stopped</span><span id="drive-setting" class="metric-value">—</span></div>
+      </div>
+    </aside>
+  </section>
+</main>
 <script>
   async function refresh() {
     try {
       const state = await fetch('/state', {cache: 'no-store'}).then(response => response.json());
       const allowed = state.videoPlayback === 'allowed';
-      status.textContent = allowed ? '미디어를 사용할 수 있습니다' : '미디어 잠김: ' + state.videoPlayback;
-      status.className = allowed ? 'ok' : 'locked';
-      telemetry.textContent = `speed: ${state.speedMps ?? '—'} m/s / gear: ${state.gear}`;
-      media.textContent = allowed ? '미디어 플레이어 연결 준비됨' : '동영상 재생은 정차 및 P 기어에서만 가능합니다.';
-    } catch (_) { status.textContent = '상태 서비스에 연결할 수 없습니다'; status.className = 'locked'; }
+      document.body.dataset.safety = allowed ? 'allowed' : 'locked';
+      status.textContent = allowed ? '미디어 사용 가능' : '미디어 잠김';
+      mediaTitle.textContent = allowed ? '미디어 준비됨' : '미디어 잠김';
+      media.textContent = allowed ? '미디어 플레이어 연결 준비됨' : `재생 조건: ${state.videoPlayback}`;
+      safetyBanner.textContent = allowed ? '정차 상태가 확인되었습니다' : '차량이 움직이거나 상태가 불명확하면 재생하지 않습니다';
+      speed.textContent = state.speedMps === null ? '—' : `${state.speedMps} m/s`;
+      gear.textContent = state.gear;
+      driveSetting.textContent = state.allowDriveWhenStopped ? '허용' : '차단';
+    } catch (_) {
+      document.body.dataset.safety = 'unknown';
+      status.textContent = '상태 서비스 연결 안 됨';
+      mediaTitle.textContent = '미디어 잠김';
+      media.textContent = '안전 상태를 확인할 수 없습니다.';
+      safetyBanner.textContent = '안전 상태 확인 중';
+    }
   }
   refresh(); setInterval(refresh, 250);
 </script>
-</html>
+</body>

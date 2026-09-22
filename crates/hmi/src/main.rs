@@ -10,6 +10,7 @@ use ohayess_runtime::{
 };
 
 const INDEX: &str = include_str!("index.html");
+const DESIGN: &str = include_str!("design.css");
 
 fn main() -> Result<(), String> {
     let address = std::env::args()
@@ -87,13 +88,14 @@ fn serve(
         .and_then(|request| request.split_whitespace().nth(1));
     let (content_type, body) = match target {
         Some("/") => ("text/html; charset=utf-8", INDEX.to_owned()),
+        Some("/design.css") => ("text/css; charset=utf-8", DESIGN.to_owned()),
         Some("/state") => (
             "application/json",
             state_json(latest, maximum_age_ns, config),
         ),
         _ => ("text/plain; charset=utf-8", "not found".to_owned()),
     };
-    let status = if target == Some("/") || target == Some("/state") {
+    let status = if matches!(target, Some("/") | Some("/design.css") | Some("/state")) {
         "200 OK"
     } else {
         "404 Not Found"
