@@ -4,13 +4,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OAS HMI</title>
 <link rel="stylesheet" href="/design.css">
-<body data-safety="unknown">
+<body data-safety="unknown" data-theme="dark">
 <main class="app-shell">
   <header class="top-bar">
     <div class="brand"><span class="brand-mark">O</span> OAS</div>
     <nav class="primary-nav" aria-label="주 메뉴">
       <button class="nav-button is-active" type="button" data-route="home">Home</button>
       <button class="nav-button" type="button" data-route="media">Media</button>
+      <button class="nav-button" type="button" data-route="workspace">Split</button>
       <button class="nav-button" type="button" data-route="vehicle">Vehicle</button>
       <button class="nav-button" type="button" data-route="settings">Settings</button>
       <button class="nav-button" type="button" data-route="diagnostics">Diagnostics</button>
@@ -25,6 +26,14 @@
       <article class="card card--emphasis"><p class="eyebrow">Media</p><h2 id="home-media-title">미디어 잠김</h2><p id="home-media-copy" class="muted">차량 상태를 확인하고 있습니다.</p><button class="button" type="button" data-route="media">미디어 열기</button></article>
       <article class="card"><p class="eyebrow">Vehicle</p><div class="metric-list"><div class="metric"><span class="metric-label">Speed</span><span id="home-speed" class="metric-value">—</span></div><div class="metric"><span class="metric-label">Gear</span><span id="home-gear" class="metric-value">—</span></div></div></article>
       <article class="card"><p class="eyebrow">System</p><h2>상태 확인</h2><p class="muted">CAN, Gateway, freshness 상태를 확인합니다.</p><button class="button button--secondary" type="button" data-route="diagnostics">진단 열기</button></article>
+    </div>
+  </section>
+
+  <section class="screen" data-screen="workspace" hidden>
+    <header class="page-heading"><p class="eyebrow">AVN workspace</p><h1>Split</h1></header>
+    <div class="split-workspace">
+      <article class="card split-pane"><p class="eyebrow">Media</p><h2 id="split-media-title">미디어 잠김</h2><p id="split-media-copy" class="muted">차량 상태를 확인하고 있습니다.</p><button class="button" type="button" data-route="media">미디어 열기</button></article>
+      <article class="card split-pane"><p class="eyebrow">Climate</p><h2>실내 환경</h2><p class="muted">온도·풍량·A/C 제어는 Vehicle에서 엽니다.</p><button class="button button--secondary" type="button" data-route="vehicle">차량 제어 열기</button></article>
     </div>
   </section>
 
@@ -54,7 +63,7 @@
   <section class="screen" data-screen="settings" hidden>
     <header class="page-heading"><p class="eyebrow">Preferences</p><h1>Settings</h1></header>
     <nav class="sub-nav" aria-label="설정 메뉴"><button class="sub-nav-button is-active" type="button" data-tab-group="settings" data-tab="display">Display</button><button class="sub-nav-button" type="button" data-tab-group="settings" data-tab="audio">Audio</button><button class="sub-nav-button" type="button" data-tab-group="settings" data-tab="safety">Media safety</button><button class="sub-nav-button" type="button" data-tab-group="settings" data-tab="system">System</button></nav>
-    <div data-tab-panel-group="settings" data-tab-panel="display" class="settings-list"><article class="card setting-row"><div><p class="eyebrow">Display</p><h2>화면</h2><p class="muted">밝기와 주·야간 테마는 디스플레이 hardware integration 후 적용합니다.</p></div><span class="setting-value">준비 중</span></article></div>
+    <div data-tab-panel-group="settings" data-tab-panel="display" class="settings-list"><article class="card setting-row"><div><p class="eyebrow">Appearance</p><h2>테마</h2><p id="theme-source" class="muted">차량 낮/밤 신호를 기다리는 동안 시스템 설정을 따릅니다.</p></div><div class="choice-row" aria-label="테마 선택"><button class="button button--secondary" type="button" data-theme-choice="auto">자동</button><button class="button button--secondary" type="button" data-theme-choice="light">라이트</button><button class="button button--secondary" type="button" data-theme-choice="dark">다크</button></div></article><article class="card setting-row"><div><p class="eyebrow">Workspace</p><h2>화면 분할</h2><p class="muted">미디어와 공조를 나란히 표시하는 AVN 작업 공간입니다.</p></div><button class="button button--secondary" type="button" data-route="workspace">분할 화면 열기</button></article></div>
     <div data-tab-panel-group="settings" data-tab-panel="audio" class="settings-list" hidden><article class="card setting-row"><div><p class="eyebrow">Audio</p><h2>출력 장치</h2><p class="muted">OAS 장치의 음량·출력 장치를 hardware integration 후 선택합니다.</p></div><span class="setting-value">준비 중</span></article></div>
     <div data-tab-panel-group="settings" data-tab-panel="safety" class="settings-list" hidden><article class="card setting-row"><div><p class="eyebrow">Media safety</p><h2>D 기어 정차 시 미디어</h2><p class="muted">움직임·상태 불명·stale에서는 항상 차단됩니다.</p></div><span id="settings-drive-setting" class="setting-value">—</span></article></div>
     <div data-tab-panel-group="settings" data-tab-panel="system" class="settings-list" hidden><article class="card setting-row"><div><p class="eyebrow">System</p><h2>업데이트와 재시작</h2><p class="muted">대상 Linux의 systemd 배포가 준비되면 상태와 업데이트를 표시합니다.</p></div><span class="setting-value">준비 중</span></article></div>
@@ -72,6 +81,8 @@
   const byId = id => document.getElementById(id);
   const routes = document.querySelectorAll('[data-route]');
   const screens = document.querySelectorAll('[data-screen]');
+  const themeChoices = document.querySelectorAll('[data-theme-choice]');
+  let themeChoice = localStorage.getItem('oas-theme-choice') || 'auto';
   function navigate(route) {
     screens.forEach(screen => { screen.hidden = screen.dataset.screen !== route; });
     routes.forEach(button => button.classList.toggle('is-active', button.dataset.route === route));
@@ -89,6 +100,15 @@
     document.querySelectorAll(`[data-tab-group="${group}"]`).forEach(button => button.classList.toggle('is-active', button.dataset.tab === tab));
   }
   document.querySelectorAll('[data-tab-group]').forEach(button => button.addEventListener('click', () => { location.hash = `${activeRoute()}/${button.dataset.tab}`; }));
+  function applyTheme(state) {
+    const vehicleTheme = state?.nightMode === true ? 'dark' : state?.nightMode === false ? 'light' : null;
+    const systemTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const theme = themeChoice === 'auto' ? vehicleTheme || systemTheme : themeChoice;
+    document.body.dataset.theme = theme;
+    byId('theme-source').textContent = themeChoice === 'auto' ? vehicleTheme ? `차량 ${vehicleTheme === 'dark' ? '야간' : '주간'} 신호를 적용합니다.` : '차량 낮/밤 신호를 기다리는 동안 시스템 설정을 따릅니다.' : `${theme === 'dark' ? '다크' : '라이트'} 모드를 고정합니다.`;
+    themeChoices.forEach(button => button.classList.toggle('is-active', button.dataset.themeChoice === themeChoice));
+  }
+  themeChoices.forEach(button => button.addEventListener('click', () => { themeChoice = button.dataset.themeChoice; localStorage.setItem('oas-theme-choice', themeChoice); applyTheme(); }));
   let targetTemperature = 22;
   let fanLevel = 2;
   let acEnabled = true;
@@ -103,6 +123,7 @@
   byId('ac-toggle').addEventListener('click', () => { acEnabled = !acEnabled; renderComfortControls(); });
   byId('audio-volume').addEventListener('input', event => { byId('volume-value').textContent = `${event.target.value}%`; });
   function showState(state) {
+    applyTheme(state);
     const allowed = state.videoPlayback === 'allowed';
     const speed = state.speedMps === null ? '—' : `${state.speedMps} m/s`;
     const policy = allowed ? '미디어 사용 가능' : '미디어 잠김';
@@ -112,6 +133,8 @@
     byId('home-media-copy').textContent = allowed ? '미디어 플레이어 연결 준비됨' : `재생 조건: ${state.videoPlayback}`;
     byId('media-title').textContent = policy;
     byId('media-copy').textContent = allowed ? '미디어 플레이어 연결 준비됨' : `재생 조건: ${state.videoPlayback}`;
+    byId('split-media-title').textContent = policy;
+    byId('split-media-copy').textContent = allowed ? '미디어 플레이어 연결 준비됨' : `재생 조건: ${state.videoPlayback}`;
     const safetyText = allowed ? '정차 상태가 확인되었습니다' : '차량이 움직이거나 상태가 불명확하면 재생하지 않습니다';
     byId('global-safety-banner').textContent = safetyText;
     byId('media-safety-banner').textContent = safetyText;
@@ -125,6 +148,7 @@
   async function refresh() {
     try { showState(await fetch('/state', {cache: 'no-store'}).then(response => response.json())); }
     catch (_) {
+      applyTheme();
       document.body.dataset.safety = 'unknown';
       byId('status').textContent = '상태 서비스 연결 안 됨';
       byId('home-media-title').textContent = '미디어 잠김';
@@ -134,7 +158,7 @@
     }
   }
   window.addEventListener('hashchange', applyLocation);
-  applyLocation(); renderComfortControls(); refresh(); setInterval(refresh, 250);
+  applyLocation(); applyTheme(); renderComfortControls(); refresh(); setInterval(refresh, 250);
 </script>
 </body>
 </html>

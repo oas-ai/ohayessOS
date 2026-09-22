@@ -22,6 +22,8 @@ cargo run -p ohayess-hmi -- 127.0.0.1:8080 500 < vehicle-state-stream.bin
 
 `#media/library`, `#vehicle/vision`, `#settings/safety`, `#diagnostics/can`처럼 URL fragment로 각 HMI menu와 in-menu view를 직접 열 수 있습니다. 이는 가상 CAN browser E2E와 kiosk 화면 복구에 사용합니다.
 
+`#workspace`는 미디어와 공조를 동시에 표시하는 2분할 AVN 작업 공간입니다. Settings → Display에서 자동·라이트·다크 테마를 선택할 수 있습니다. 자동 테마는 HMI state stream의 향후 `nightMode` 차량 신호를 우선하며, 신호가 없을 때는 Linux/WebView의 시스템 테마를 따릅니다.
+
 운영 배포에서는 Gateway 패키지의 감독 서비스가 한 `VehicleState` stream을 runtime과 HMI에 동시에 fan-out합니다. 설치·재연결·systemd 절차는 [gateway deployment guide](https://github.com/oas-ai/gateway/tree/main/packaging/systemd)를 따릅니다.
 
 HMI의 색상·간격·컴포넌트·안전 상태 규칙은 [design system](crates/hmi/DESIGN_SYSTEM.md)에 정의되어 있습니다.

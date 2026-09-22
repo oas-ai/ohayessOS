@@ -6,6 +6,7 @@
 flowchart TD
   Safety[Safety overlay<br/>always available] --> Home
   Home[Home] --> Media[Media]
+  Home --> Split[Split workspace]
   Home --> Vehicle[Vehicle]
   Home --> Settings[Settings]
   Home --> Diagnostics[Diagnostics]
@@ -31,6 +32,7 @@ flowchart TD
 | --- | --- | --- |
 | Home | Yes | 현재 안전 상태, 속도·기어, 현재 미디어의 요약과 다음 행동을 표시한다. |
 | Media | Yes | 재생 surface와 라이브러리를 제공한다. 정책이 허용할 때만 재생 surface를 연다. |
+| Split | Yes | 미디어와 공조를 2분할로 동시에 표시한다. |
 | Vehicle | Yes | read-only 주행 상태, Comfort Control UI 시뮬레이션, 카메라·영상 입력을 표시한다. |
 | Settings | Yes | 화면, 오디오, 미디어 안전, 시스템 설정을 소유한다. |
 | Diagnostics | Yes | CAN·Gateway 연결, freshness, 시스템 health와 로그 export를 제공한다. |
@@ -43,6 +45,7 @@ flowchart TD
 
 - Home은 부팅 후 첫 화면이며, 최상위 화면 간 이동은 한 번의 탭으로 끝난다.
 - Media의 Player와 Library는 해당 화면 안의 tab으로 둔다. 독립 top-level 화면을 늘리지 않는다.
+- Settings → Display에서 자동·라이트·다크 테마를 선택한다. 자동은 차량의 `nightMode` 신호를 우선한다.
 - Comfort Control은 목표 온도, 풍량, A/C, 오디오 음량의 UI 상태만 변경한다. 현재는 CAN 송신이나 네트워크 요청을 만들지 않는다.
 - Diagnostics의 쓰기 동작은 로그 export만 허용한다. CAN 송신이나 차량 제어는 제공하지 않는다.
 - Vision은 실제 카메라 하드웨어·영상 pipeline이 준비될 때까지 숨긴다. 빈 메뉴를 노출하지 않는다.

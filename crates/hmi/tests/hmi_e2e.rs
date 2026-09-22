@@ -78,6 +78,7 @@ fn hmi_locks_media_after_drive_or_stale_state() {
     for menu in [
         "Home",
         "Media",
+        "Split",
         "Vehicle",
         "Settings",
         "Diagnostics",
@@ -86,6 +87,7 @@ fn hmi_locks_media_after_drive_or_stale_state() {
         assert!(page_contains(&address, "/", menu));
     }
     assert!(page_contains(&address, "/design.css", "--touch-target"));
+    assert!(page_contains(&address, "/", "data-theme-choice"));
     let stdin = child.stdin.as_mut().unwrap();
     stdin
         .write_all(&frame(&VehicleState {

@@ -15,6 +15,7 @@
 - Complete the virtual HMI's in-menu screen inventory and add a global safety state banner.
 - Document the Gateway-supervised runtime and HMI fan-out deployment path.
 - Add hash-addressable HMI destinations for browser end-to-end verification and kiosk recovery.
+- Add light/dark appearance preferences and an AVN split workspace to the HMI.
 
 ## [0.1.0] - 2026-09-21
 

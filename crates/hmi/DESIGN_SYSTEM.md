@@ -4,7 +4,7 @@
 
 ## Foundations
 
-- 색상은 `design.css`의 `--color-*` 토큰만 사용한다. 의미색은 `accent`, `success`, `danger`로 한정한다.
+- 색상은 `design.css`의 `--color-*` 토큰만 사용한다. 의미색은 `accent`, `success`, `danger`로 한정하며, `body[data-theme]`가 라이트·다크 토큰을 선택한다.
 - 간격은 8px 단위 `--space-1`부터 `--space-4`까지 사용한다.
 - 컨트롤의 최소 높이는 `--touch-target`(56px)이다.
 - 본문은 시스템 글꼴 18px 이상, 숫자는 tabular 숫자를 사용한다.
@@ -22,6 +22,12 @@
 - `setting-row`: 설정의 소유 영역과 현재 값을 함께 표시한다.
 - `stepper`, `fan-button`, `range`: Comfort Control의 로컬 UI 입력이다. 실제 차량 명령 상태를 암시하지 않는다.
 - `sub-nav`: 한 top-level 목적지 안의 Player/Library처럼 서로 배타적인 상세 view를 전환한다.
+- `split-workspace`: 미디어와 공조처럼 동등한 두 작업을 동시에 표시하며, 좁은 화면에서는 한 열로 전환한다.
+
+## Appearance
+
+- Settings → Display가 자동·라이트·다크 선택의 유일한 소유자다.
+- 자동은 state stream의 `nightMode`를 우선한다. 이 신호가 아직 없는 대상에서는 OS/WebView의 `prefers-color-scheme`를 사용한다.
 
 ## Safety states
 
