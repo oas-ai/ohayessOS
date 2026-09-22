@@ -19,11 +19,22 @@ protobuf_generate(TARGET oas-vehicle-proto LANGUAGE cpp PROTOC_OUT_DIR "${CMAKE_
 target_include_directories(oas-vehicle-proto PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_link_libraries(oas-vehicle-proto PUBLIC protobuf::libprotobuf)
 
-qt_add_executable(ohayess-hmi src/main.cpp src/vehicle_state_bridge.cpp)
+add_library(oas-hmi-bridge STATIC src/vehicle_state_bridge.cpp)
+target_include_directories(oas-hmi-bridge PUBLIC src)
+target_link_libraries(oas-hmi-bridge PUBLIC Qt6::Core oas-vehicle-proto)
+
+qt_add_executable(ohayess-hmi src/main.cpp)
 qt_add_qml_module(ohayess-hmi
   URI OAS.HMI
   VERSION 1.0
   QML_FILES qml/Main.qml
 )
-target_link_libraries(ohayess-hmi PRIVATE Qt6::Quick oas-vehicle-proto)
+target_link_libraries(ohayess-hmi PRIVATE Qt6::Quick oas-hmi-bridge)
 install(TARGETS ohayess-hmi)
+
+include(CTest)
+if(BUILD_TESTING)
+  add_executable(vehicle-state-bridge-test tests/vehicle_state_bridge_test.cpp)
+  target_link_libraries(vehicle-state-bridge-test PRIVATE Qt6::Core oas-hmi-bridge oas-vehicle-proto)
+  add_test(NAME vehicle-state-bridge COMMAND vehicle-state-bridge-test)
+endif()
