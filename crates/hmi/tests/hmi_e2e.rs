@@ -83,6 +83,8 @@ fn hmi_locks_media_after_drive_or_stale_state() {
         "Settings",
         "Diagnostics",
         "Comfort control",
+        "오늘의 주행",
+        "Drive brief",
     ] {
         assert!(page_contains(&address, "/", menu));
     }

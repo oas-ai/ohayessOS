@@ -21,11 +21,12 @@
   <div id="global-safety-banner" class="safety-banner global-safety" aria-live="polite">안전 상태 확인 중</div>
 
   <section class="screen" data-screen="home">
-    <header class="page-heading"><p class="eyebrow">Overview</p><h1>안전한 시작</h1></header>
-    <div class="overview-grid">
-      <article class="card card--emphasis"><p class="eyebrow">Media</p><h2 id="home-media-title">미디어 잠김</h2><p id="home-media-copy" class="muted">차량 상태를 확인하고 있습니다.</p><button class="button" type="button" data-route="media">미디어 열기</button></article>
-      <article class="card"><p class="eyebrow">Vehicle</p><div class="metric-list"><div class="metric"><span class="metric-label">Speed</span><span id="home-speed" class="metric-value">—</span></div><div class="metric"><span class="metric-label">Gear</span><span id="home-gear" class="metric-value">—</span></div></div></article>
-      <article class="card"><p class="eyebrow">System</p><h2>상태 확인</h2><p class="muted">CAN, Gateway, freshness 상태를 확인합니다.</p><button class="button button--secondary" type="button" data-route="diagnostics">진단 열기</button></article>
+    <header class="page-heading home-heading"><div><p class="eyebrow">Drive brief</p><h1>오늘의 주행</h1></div><p class="muted">주행 중에는 필요한 상태만 조용히 표시합니다.</p></header>
+    <div class="home-dashboard">
+      <article class="card home-drive-card"><div><p class="eyebrow">Vehicle state</p><output id="home-speed" class="home-speed">—</output><p class="muted">현재 속도</p></div><div class="home-gear"><span class="metric-label">Gear</span><strong id="home-gear">—</strong></div></article>
+      <article class="card home-action-card card--emphasis"><p class="eyebrow">Media</p><h2 id="home-media-title">미디어 잠김</h2><p id="home-media-copy" class="muted">차량 상태를 확인하고 있습니다.</p><button class="button" type="button" data-route="media">미디어</button></article>
+      <article class="card home-action-card"><p class="eyebrow">Vehicle</p><h2>차량 상태</h2><p class="muted">공조, 오디오와 차량 정보를 확인합니다.</p><button class="button button--secondary" type="button" data-route="vehicle">Vehicle</button></article>
+      <article class="card home-action-card"><p class="eyebrow">System</p><h2>상태 확인</h2><p class="muted">CAN, Gateway, freshness 상태를 확인합니다.</p><button class="button button--secondary" type="button" data-route="diagnostics">진단</button></article>
     </div>
   </section>
 
