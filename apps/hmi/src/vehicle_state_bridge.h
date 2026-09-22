@@ -11,6 +11,8 @@ class QTimer;
 class VehicleStateBridge final : public QObject {
   Q_OBJECT
   Q_PROPERTY(bool available READ available NOTIFY changed)
+  Q_PROPERTY(QString freshness READ freshness NOTIFY changed)
+  Q_PROPERTY(bool demo READ isDemo NOTIFY changed)
   Q_PROPERTY(double speedKph READ speedKph NOTIFY changed)
   Q_PROPERTY(QString gear READ gear NOTIFY changed)
   Q_PROPERTY(bool nightMode READ nightMode NOTIFY changed)
@@ -22,6 +24,7 @@ class VehicleStateBridge final : public QObject {
 
  public:
   explicit VehicleStateBridge(QString streamPath, quint64 maximumAgeMs, QObject *parent = nullptr);
+  ~VehicleStateBridge() override;
   bool available() const;
   double speedKph() const;
   QString gear() const;
@@ -31,7 +34,9 @@ class VehicleStateBridge final : public QObject {
   bool diagnosticsAvailable() const;
   QString diagnosticsSummary() const;
   QString streamPath() const;
-  void showDemo();
+  QString freshness() const { return freshness_; }
+  bool isDemo() const { return demo_; }
+  void showDemo(const QString &scenario = "drive");
 
  signals:
   void changed();
@@ -59,4 +64,5 @@ class VehicleStateBridge final : public QObject {
   bool diagnostics_available_ = false;
   QString diagnostics_summary_;
   bool demo_ = false;
+  QString freshness_ = "waiting";
 };

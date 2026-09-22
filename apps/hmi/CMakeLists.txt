@@ -27,10 +27,12 @@ target_include_directories(oas-hmi-bridge PUBLIC src)
 target_link_libraries(oas-hmi-bridge PUBLIC Qt6::Core oas-vehicle-proto)
 
 qt_add_executable(ohayess-hmi src/main.cpp)
+set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 qt_add_qml_module(ohayess-hmi
   URI OAS.HMI
   VERSION 1.0
-  QML_FILES qml/Main.qml
+  RESOURCE_PREFIX /
+  QML_FILES qml/Main.qml qml/Theme.qml qml/GlassPanel.qml qml/StatusPill.qml qml/NavDock.qml qml/VehicleVisual.qml
 )
 target_link_libraries(ohayess-hmi PRIVATE Qt6::Quick oas-hmi-bridge)
 install(TARGETS ohayess-hmi)
@@ -40,4 +42,12 @@ if(BUILD_TESTING)
   add_executable(vehicle-state-bridge-test tests/vehicle_state_bridge_test.cpp)
   target_link_libraries(vehicle-state-bridge-test PRIVATE Qt6::Core oas-hmi-bridge oas-vehicle-proto)
   add_test(NAME vehicle-state-bridge COMMAND vehicle-state-bridge-test)
+  foreach(scenario drive park waiting stale)
+    add_test(NAME hmi-${scenario} COMMAND ohayess-hmi --demo --scenario ${scenario} --size 1280x720 --capture ${CMAKE_CURRENT_BINARY_DIR}/${scenario}.png)
+    set_tests_properties(hmi-${scenario} PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 15 FAIL_REGULAR_EXPRESSION "ReferenceError;TypeError;Unable to assign;failed to load;is not installed;does not support customization")
+  endforeach()
+  foreach(page media diagnostics vehicle)
+    add_test(NAME hmi-${page} COMMAND ohayess-hmi --demo --scenario park --page ${page} --size 1920x1080 --capture ${CMAKE_CURRENT_BINARY_DIR}/${page}.png)
+    set_tests_properties(hmi-${page} PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software" TIMEOUT 15 FAIL_REGULAR_EXPRESSION "ReferenceError;TypeError;Unable to assign;failed to load;is not installed")
+  endforeach()
 endif()

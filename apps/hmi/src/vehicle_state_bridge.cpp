@@ -32,9 +32,18 @@ VehicleStateBridge::VehicleStateBridge(QString streamPath, quint64 maximumAgeMs,
   connect(retry_timer_, &QTimer::timeout, this, &VehicleStateBridge::connectStream);
   auto *freshness_timer = new QTimer(this);
   freshness_timer->setInterval(100);
-  connect(freshness_timer, &QTimer::timeout, this, &VehicleStateBridge::refreshFreshness);
+  connect(freshness_timer, &QTimer::timeout, this, [this] {
+    // Nonblocking read also detects FIFO EOF on platforms without an EOF notification.
+    if (!demo_ && fd_ >= 0) readFrames();
+    refreshFreshness();
+  });
   freshness_timer->start();
   connectStream();
+}
+
+VehicleStateBridge::~VehicleStateBridge() {
+  if (notifier_) notifier_->setEnabled(false);
+  if (fd_ >= 0) close(fd_);
 }
 
 bool VehicleStateBridge::available() const { return available_; }
@@ -47,20 +56,24 @@ bool VehicleStateBridge::diagnosticsAvailable() const { return diagnostics_avail
 QString VehicleStateBridge::diagnosticsSummary() const { return diagnostics_summary_; }
 QString VehicleStateBridge::streamPath() const { return stream_path_; }
 
-void VehicleStateBridge::showDemo() {
+void VehicleStateBridge::showDemo(const QString &scenario) {
+  disconnectStream();
+  retry_timer_->stop();
   demo_ = true;
-  available_ = true;
-  speed_kph_ = 80.0;
-  gear_ = "D";
+  freshness_ = scenario == "stale" ? "stale" : scenario == "waiting" ? "waiting" : "fresh";
+  available_ = freshness_ == "fresh";
+  speed_kph_ = scenario == "park" ? 0.0 : 80.0;
+  gear_ = scenario == "park" ? "P" : "D";
   night_mode_ = false;
-  media_playback_allowed_ = false;
-  media_playback_reason_ = "not_parked";
-  diagnostics_available_ = true;
+  media_playback_allowed_ = scenario == "park";
+  media_playback_reason_ = scenario == "park" ? "allowed" : scenario == "stale" ? "stale_vehicle_state" : scenario == "waiting" ? "no_vehicle_state" : "vehicle_in_motion";
+  diagnostics_available_ = available_;
   diagnostics_summary_ = "Door switch 1.0 · Belt D/P 1.0/1.0 · Temp D/P 20.0/22.0 °C";
   emit changed();
 }
 
 void VehicleStateBridge::connectStream() {
+  if (demo_) return;
   if (fd_ >= 0) return;
   fd_ = open(stream_path_.toLocal8Bit().constData(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
   if (fd_ < 0) {
@@ -82,7 +95,7 @@ void VehicleStateBridge::readFrames() {
   }
   buffer_.append(chunk, bytes);
   while (buffer_.size() >= 4) {
-    const auto size = (static_cast<unsigned char>(buffer_[0]) << 24) |
+    const quint32 size = (static_cast<quint32>(static_cast<unsigned char>(buffer_[0])) << 24) |
                       (static_cast<unsigned char>(buffer_[1]) << 16) |
                       (static_cast<unsigned char>(buffer_[2]) << 8) |
                       static_cast<unsigned char>(buffer_[3]);
@@ -104,14 +117,15 @@ bool VehicleStateBridge::applyFrame(QByteArrayView frame) {
   if (!hmi.ParseFromArray(frame.data(), frame.size())) return false;
   const auto fresh = hmi.freshness() == oas::vehicle::v1::HMI_FRESHNESS_FRESH;
   const auto *state = hmi.has_vehicle_state() ? &hmi.vehicle_state() : nullptr;
+  freshness_ = fresh ? "fresh" : hmi.freshness() == oas::vehicle::v1::HMI_FRESHNESS_STALE ? "stale" : "waiting";
   timestamp_ns_ = state && state->has_timestamp_ns() ? state->timestamp_ns() : 0;
   available_ = fresh && state && state->has_vehicle_speed_mps() && std::isfinite(state->vehicle_speed_mps());
   speed_kph_ = available_ ? state->vehicle_speed_mps() * 3.6 : 0.0;
   gear_ = state && state->has_gear() ? gearName(state->gear().position()) : "—";
   night_mode_ = state && state->has_night_mode() && state->night_mode();
-  media_playback_allowed_ = hmi.media_playback() == oas::vehicle::v1::HMI_CAPABILITY_ALLOWED;
+  media_playback_allowed_ = fresh && hmi.media_playback() == oas::vehicle::v1::HMI_CAPABILITY_ALLOWED;
   media_playback_reason_ = QString::fromStdString(hmi.media_playback_reason());
-  diagnostics_available_ = hmi.diagnostics() == oas::vehicle::v1::HMI_CAPABILITY_ALLOWED;
+  diagnostics_available_ = fresh && hmi.diagnostics() == oas::vehicle::v1::HMI_CAPABILITY_ALLOWED;
   const auto raw = [state](const char *key) {
     if (!state) return QString("—");
     const auto value = state->raw_signals().find(key);
@@ -119,6 +133,7 @@ bool VehicleStateBridge::applyFrame(QByteArrayView frame) {
   };
   diagnostics_summary_ = QString("Door switch %1 · Belt D/P %2/%3 · Temp D/P %4/%5 °C")
       .arg(raw("CGW1.CF_Gway_DrvDrSw"), raw("CGW1.CF_Gway_DrvSeatBeltSw"), raw("CGW1.CF_Gway_AstSeatBeltSw"), raw("DATC12.CR_Datc_DrTempDispC"), raw("DATC12.CR_Datc_PsTempDispC"));
+  refreshFreshness();
   emit changed();
   return true;
 }
@@ -130,6 +145,7 @@ void VehicleStateBridge::disconnectStream() {
   fd_ = -1;
   buffer_.clear();
   available_ = false;
+  freshness_ = "waiting";
   speed_kph_ = 0.0;
   gear_ = "—";
   night_mode_ = false;
@@ -146,9 +162,11 @@ void VehicleStateBridge::refreshFreshness() {
   if (demo_) return;
   const auto now_ns = static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()) * 1'000'000;
   const bool fresh = timestamp_ns_ > 0 && timestamp_ns_ <= now_ns && now_ns - timestamp_ns_ <= maximum_age_ns_;
-  if (available_ && !fresh) {
+  if ((freshness_ == "fresh" || media_playback_allowed_ || diagnostics_available_) && !fresh) {
+    freshness_ = "stale";
     available_ = false;
     media_playback_allowed_ = false;
+    media_playback_reason_ = "stale_vehicle_state";
     diagnostics_available_ = false;
     emit changed();
   }

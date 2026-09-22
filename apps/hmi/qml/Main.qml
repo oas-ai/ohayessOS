@@ -1,216 +1,151 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import OAS.HMI
 
 ApplicationWindow {
-    width: 1440
-    height: 900
+    id: window
+    width: 1440; height: 810
+    minimumWidth: 1280; minimumHeight: 720
     visible: true
-    title: "ohayessOS"
-    color: "#070809"
-
-    readonly property bool hasVehicleState: vehicleState.available
-    readonly property color ink: "#f5f5f7"
-    readonly property color muted: "#8b8f98"
-    readonly property color surface: "#111214"
-    readonly property color surfaceRaised: "#191a1d"
+    title: "OAS · Calm Future Mobility"
+    color: Theme.background
     property int page: 0
+    readonly property bool hasState: vehicleState.available
+    readonly property string connection: vehicleState.freshness === "fresh" ? "Connected" : vehicleState.freshness === "stale" ? "Update delayed" : "Waiting for connection"
+    readonly property color stateColor: vehicleState.freshness === "fresh" ? Theme.success : Theme.warning
 
-    component NavItem: Rectangle {
-        required property string label
-        required property int destination
-        property bool available: true
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        radius: 16
-        color: page === destination ? "#303238" : "transparent"
-        opacity: available ? 1 : 0.36
+    Rectangle { anchors.fill: parent; gradient: Gradient { GradientStop { position: 0; color: Theme.horizon } GradientStop { position: 1; color: Theme.background } } }
 
-        Text {
-            anchors.centerIn: parent
-            text: label
-            color: page === destination ? ink : muted
-            font.pixelSize: 16
-            font.weight: Font.DemiBold
-        }
-        MouseArea {
-            anchors.fill: parent
-            enabled: available
-            onClicked: page = destination
-        }
-    }
-
-    component SectionTitle: Text {
-        color: muted
-        font.pixelSize: 15
-        font.weight: Font.DemiBold
-        font.letterSpacing: 1.6
-    }
+    component Caption: Text { color: Theme.muted; font.pixelSize: 12; font.letterSpacing: 2; font.weight: Font.Medium }
+    component Body: Text { color: Theme.muted; font.pixelSize: 16; wrapMode: Text.WordWrap; Layout.fillWidth: true }
 
     ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 32
-        spacing: 20
-
+        anchors.fill: parent; anchors.margins: 32; spacing: 24
         RowLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 42
-
-            Text {
-                text: page === 0 ? "OAS" : "‹  OAS"
-                color: ink
-                font.pixelSize: 22
-                font.weight: Font.DemiBold
-                MouseArea { anchors.fill: parent; onClicked: page = 0 }
-            }
-            Text { text: page === 0 ? "DRIVE" : page === 1 ? "MEDIA" : "DIAGNOSTICS"; color: muted; font.pixelSize: 15; font.letterSpacing: 1.8 }
+            Layout.fillWidth: true; Layout.preferredHeight: 42; spacing: 20
+            Text { text: "o a s"; color: Theme.text; font.pixelSize: 27; font.weight: Font.Medium }
+            Rectangle { width: 1; height: 20; color: Theme.border }
+            Caption { text: "CALM FUTURE MOBILITY" }
             Item { Layout.fillWidth: true }
-            Rectangle { width: 8; height: 8; radius: 4; color: hasVehicleState ? "#49d17d" : "#e8b254" }
-            Text { text: hasVehicleState ? "LIVE" : "WAITING"; color: hasVehicleState ? "#75dfa0" : "#e8b254"; font.pixelSize: 14; font.weight: Font.DemiBold }
+            StatusPill { text: vehicleState.demo ? "DEMO · SYNTHETIC" : "READ ONLY"; tone: Theme.cyan }
+            Text { text: connection; color: stateColor; font.pixelSize: 14 }
         }
 
         StackLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            currentIndex: page
-
+            Layout.fillWidth: true; Layout.fillHeight: true; currentIndex: page
             Item {
                 RowLayout {
-                    anchors.fill: parent
-                    spacing: 20
-
-                    Rectangle {
-                        Layout.preferredWidth: 318
-                        Layout.fillHeight: true
-                        radius: 28
-                        color: surface
-
-                        ColumnLayout {
-                            anchors.fill: parent
-                            anchors.margins: 30
-                            spacing: 0
-                            SectionTitle { text: "SPEED" }
-                            Item { Layout.fillHeight: true }
-                            Text { text: hasVehicleState ? Math.round(vehicleState.speedKph) : "—"; color: ink; font.pixelSize: 154; font.weight: Font.Light; Layout.alignment: Qt.AlignHCenter }
-                            Text { text: "km/h"; color: muted; font.pixelSize: 22; Layout.alignment: Qt.AlignHCenter }
-                            Item { Layout.fillHeight: true }
-                            Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: "#2a2c31" }
-                            Item { Layout.preferredHeight: 22 }
-                            SectionTitle { text: "RANGE" }
-                            Text { text: "— km"; color: ink; font.pixelSize: 30; font.weight: Font.Light; Layout.topMargin: 6 }
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        radius: 28
-                        color: vehicleState.nightMode ? "#0d1116" : surface
-
-                        Item {
-                            anchors.fill: parent
-                            anchors.margins: 42
-
-                            SectionTitle { anchors.top: parent.top; anchors.horizontalCenter: parent.horizontalCenter; text: "PALISADE · 2020" }
-
-                            Item {
-                                anchors.centerIn: parent
-                                width: Math.min(parent.width * 0.72, 560)
-                                height: 250
-
-                                Rectangle { anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; width: parent.width * 0.86; height: 76; radius: 38; color: "#d9dde3" }
-                                Rectangle { anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 57; width: parent.width * 0.56; height: 100; radius: 45; color: "#d9dde3" }
-                                Rectangle { x: parent.width * 0.12; y: parent.height - 20; width: 68; height: 34; radius: 17; color: "#070809" }
-                                Rectangle { x: parent.width * 0.72; y: parent.height - 20; width: 68; height: 34; radius: 17; color: "#070809" }
-                                Rectangle { anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 17; width: parent.width * 0.58; height: 2; color: "#8d939d" }
-                            }
-
-                            RowLayout {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.bottom: parent.bottom
-                                spacing: 28
-                                Repeater {
-                                    model: ["P", "R", "N", "D"]
-                                    delegate: Text {
-                                        required property string modelData
-                                        text: modelData
-                                        color: hasVehicleState && vehicleState.gear === modelData ? ink : "#555961"
-                                        font.pixelSize: 26
-                                        font.weight: hasVehicleState && vehicleState.gear === modelData ? Font.DemiBold : Font.Normal
-                                    }
+                    anchors.fill: parent; spacing: 24
+                    ColumnLayout {
+                        Layout.minimumWidth: 240; Layout.maximumWidth: 240; Layout.preferredWidth: 240; Layout.fillHeight: true; spacing: 16
+                        Caption { text: "YOUR DRIVE" }
+                        Text { text: hasState ? "In the moment." : "Ready when you are."; color: Theme.text; font.pixelSize: 27; font.weight: Font.Light; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                        Item { Layout.fillHeight: true }
+                        Text { text: hasState ? Math.round(vehicleState.speedKph) : "—"; color: Theme.text; font.pixelSize: 136; font.weight: Font.Light; font.letterSpacing: -7 }
+                        Caption { text: "KILOMETRES / HOUR" }
+                        Item { Layout.preferredHeight: 12 }
+                        RowLayout {
+                            spacing: 12
+                            Repeater {
+                                model: ["P", "R", "N", "D"]
+                                delegate: Rectangle {
+                                    required property string modelData
+                                    width: 46; height: 46; radius: 15
+                                    color: hasState && vehicleState.gear === modelData ? "#264251" : "transparent"
+                                    border.color: hasState && vehicleState.gear === modelData ? "#467586" : "transparent"
+                                    Text { anchors.centerIn: parent; text: modelData; color: hasState && vehicleState.gear === modelData ? Theme.cyan : Theme.muted; font.pixelSize: 21 }
                                 }
                             }
                         }
+                        Item { Layout.fillHeight: true }
+                        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
+                        Caption { text: "PALISADE / 2020" }
+                        Body { text: "A quieter connection\nto your journey." }
                     }
 
-                    Rectangle {
-                        Layout.preferredWidth: 318
-                        Layout.fillHeight: true
-                        radius: 28
-                        color: surface
+                    Item {
+                        Layout.fillWidth: true; Layout.fillHeight: true
+                        Column {
+                            anchors.top: parent.top; anchors.horizontalCenter: parent.horizontalCenter; spacing: 12
+                            Caption { text: "VEHICLE OVERVIEW"; anchors.horizontalCenter: parent.horizontalCenter }
+                            Text { text: "Room to breathe."; color: Theme.text; font.pixelSize: 34; font.weight: Font.Light; anchors.horizontalCenter: parent.horizontalCenter }
+                        }
+                        VehicleVisual { anchors.centerIn: parent; anchors.verticalCenterOffset: 10; width: parent.width; height: Math.min(parent.height - 120, width * 0.78) }
+                        Column {
+                            anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter; spacing: 10
+                            StatusPill { anchors.horizontalCenter: parent.horizontalCenter; text: vehicleState.freshness === "fresh" ? "STATE RECEIVED" : vehicleState.freshness === "stale" ? "SIGNAL STALE" : "AWAITING SIGNAL"; tone: stateColor }
+                            Text { anchors.horizontalCenter: parent.horizontalCenter; text: "Concept illustration · surroundings are not sensed"; color: Theme.muted; font.pixelSize: 11 }
+                        }
+                    }
 
-                        ColumnLayout {
-                            anchors.fill: parent
-                            anchors.margins: 30
-                            spacing: 12
-                            SectionTitle { text: "VEHICLE" }
-                            Text { text: hasVehicleState ? "All systems normal" : "Awaiting vehicle state"; color: ink; font.pixelSize: 27; font.weight: Font.Light; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                            Item { Layout.preferredHeight: 18 }
-                            Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: "#2a2c31" }
-                            Item { Layout.preferredHeight: 10 }
-                            SectionTitle { text: "MEDIA" }
-                            Text { text: vehicleState.mediaPlaybackAllowed ? "Available" : vehicleState.mediaPlaybackReason; color: vehicleState.mediaPlaybackAllowed ? "#75dfa0" : muted; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                            Item { Layout.fillHeight: true }
-                            Text { text: "Read-only preview"; color: muted; font.pixelSize: 14 }
+                    ColumnLayout {
+                        Layout.minimumWidth: 288; Layout.maximumWidth: 288; Layout.preferredWidth: 288; Layout.fillHeight: true; spacing: 16
+                        GlassPanel {
+                            Layout.fillWidth: true; Layout.fillHeight: true
+                            ColumnLayout {
+                                anchors.fill: parent; anchors.margins: 24; spacing: 14
+                                Caption { text: "CONNECTION" }
+                                Text { text: connection; color: Theme.text; font.pixelSize: 25; font.weight: Font.Light; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                                Body { text: vehicleState.freshness === "fresh" ? "Vehicle data is available.\nControls remain read-only." : "Driving values stay hidden until fresh data arrives." }
+                                Item { Layout.fillHeight: true }
+                                StatusPill { text: "VEHICLE CONTROL OFF"; tone: Theme.muted }
+                            }
+                        }
+                        GlassPanel {
+                            Layout.fillWidth: true; Layout.fillHeight: true
+                            ColumnLayout {
+                                anchors.fill: parent; anchors.margins: 24; spacing: 14
+                                Caption { text: "MEDIA / VIDEO" }
+                                Text { text: vehicleState.mediaPlaybackAllowed ? "Make yourself\nat home." : "Enjoy the\njourney."; color: Theme.text; font.pixelSize: 29; font.weight: Font.Light }
+                                Body { text: Theme.reason(vehicleState.mediaPlaybackReason) }
+                                Item { Layout.fillHeight: true }
+                                StatusPill { text: vehicleState.mediaPlaybackAllowed ? "PERMITTED · NO PLAYER" : "PLAYBACK UNAVAILABLE"; tone: vehicleState.mediaPlaybackAllowed ? Theme.cyan : Theme.muted }
+                            }
                         }
                     }
                 }
             }
-
-            Rectangle {
-                radius: 28
-                color: surface
+            GlassPanel {
                 ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 48
-                    spacing: 16
-                    SectionTitle { text: "MEDIA" }
-                    Text { text: vehicleState.mediaPlaybackAllowed ? "Playback is available" : "Playback is unavailable"; color: ink; font.pixelSize: 54; font.weight: Font.Light }
-                    Text { text: vehicleState.mediaPlaybackAllowed ? "Select a source when a playback engine is installed." : "Runtime policy: " + vehicleState.mediaPlaybackReason; color: muted; font.pixelSize: 20 }
+                    anchors.fill: parent; anchors.margins: 48; spacing: 22
+                    Caption { text: "YOUR SPACE / MEDIA" }
+                    Text { text: "A pause in the journey."; color: Theme.text; font.pixelSize: 48; font.weight: Font.Light }
+                    StatusPill { text: vehicleState.mediaPlaybackAllowed ? "PERMISSION GRANTED" : "PLAYBACK LOCKED"; tone: vehicleState.mediaPlaybackAllowed ? Theme.success : Theme.warning }
+                    Body { text: Theme.reason(vehicleState.mediaPlaybackReason) }
                     Item { Layout.fillHeight: true }
-                    Text { text: "No playback engine is installed in this safety-focused preview."; color: muted; font.pixelSize: 16 }
+                    Body { text: "No media player is installed. Playback and audio controls will appear when a source is connected." }
                 }
             }
-
-            Rectangle {
-                radius: 28
-                color: surface
+            GlassPanel {
                 ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 48
-                    spacing: 16
-                    SectionTitle { text: "DIAGNOSTICS" }
-                    Text { text: vehicleState.diagnosticsAvailable ? "Vehicle signals" : "Diagnostics unavailable"; color: ink; font.pixelSize: 54; font.weight: Font.Light }
-                    Text { text: vehicleState.diagnosticsSummary; color: muted; font.pixelSize: 20; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                    anchors.fill: parent; anchors.margins: 48; spacing: 22
+                    Caption { text: "VEHICLE / SIGNALS" }
+                    Text { text: "A closer look."; color: Theme.text; font.pixelSize: 48; font.weight: Font.Light }
+                    StatusPill { text: vehicleState.diagnosticsAvailable ? "READ-ONLY DBC SIGNALS" : "SIGNALS UNAVAILABLE"; tone: vehicleState.diagnosticsAvailable ? Theme.cyan : Theme.warning }
+                    Body { text: vehicleState.diagnosticsAvailable ? vehicleState.diagnosticsSummary : "Fresh vehicle data is needed to display signal values."; font.pixelSize: 23 }
                     Item { Layout.fillHeight: true }
-                    Text { text: "Raw DBC values only. Never used for vehicle control or safety decisions."; color: "#e8b254"; font.pixelSize: 16 }
+                    Body { text: "Raw DBC values. These readings do not indicate vehicle health and are not used for vehicle control." }
+                }
+            }
+            GlassPanel {
+                ColumnLayout {
+                    anchors.fill: parent; anchors.margins: 48; spacing: 22
+                    Caption { text: "PALISADE / 2020" }
+                    Text { text: "Connected. Read-only."; color: Theme.text; font.pixelSize: 48; font.weight: Font.Light }
+                    StatusPill { text: "VEHICLE CONTROLS UNAVAILABLE"; tone: Theme.muted }
+                    Body { text: "This installation displays vehicle information. Climate, locks, steering and driving controls are not connected." }
+                    Item { Layout.fillHeight: true }
+                    Body { text: "Range, fuel level and cabin temperature are not available in the current display contract." }
                 }
             }
         }
 
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 76
-            radius: 22
-            color: surfaceRaised
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: 8
-                spacing: 4
-                NavItem { label: "Drive"; destination: 0 }
-                NavItem { label: "Media"; destination: 1; available: vehicleState.mediaPlaybackAllowed }
-                NavItem { label: "Diagnostics"; destination: 2; available: vehicleState.diagnosticsAvailable }
-            }
+        RowLayout {
+            Layout.fillWidth: true; spacing: 24
+            Caption { text: "OAS / 01"; Layout.preferredWidth: 160 }
+            NavDock { Layout.fillWidth: true; Layout.preferredHeight: 76; selected: page; onNavigate: function(destination) { page = destination } }
+            Text { text: "READ-ONLY\nVEHICLE PLATFORM"; color: Theme.muted; font.pixelSize: 11; font.letterSpacing: 1.2; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: 160 }
         }
     }
 }

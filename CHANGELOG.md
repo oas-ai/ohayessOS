@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add Calm Future Mobility QML tokens, reusable panels, accessible navigation and an original concept vehicle illustration.
+- Distinguish synthetic demo, waiting and stale states; remove unsupported vehicle-health claims.
+- Add drive/park/waiting/stale previews, PNG capture and actual QML launch tests at 720p/1080p.
+- Close expired capabilities even when speed is missing, and reject oversized unsigned frame lengths.
+
 - Split the production Qt/QML HMI target from the loopback web VehicleState Viewer.
 - Redesign Home as a vehicle-first drive brief with prioritized driving, media, vehicle, and diagnostics entry points.
 - Label Palisade diagnostics as DBC raw values that are excluded from control and safety decisions.

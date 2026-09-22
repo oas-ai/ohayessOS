@@ -26,7 +26,7 @@ cargo run -p ohayess-viewer -- 127.0.0.1:8080 500 < vehicle-state-stream.bin
 
 `#workspace`는 미디어와 공조를 동시에 표시하는 2분할 AVN 작업 공간입니다. Settings → Display에서 자동·라이트·다크 테마를 선택할 수 있습니다. 자동 테마는 HMI state stream의 `nightMode` 차량 신호를 우선하며, 신호가 없을 때는 Linux/WebView의 시스템 테마를 따릅니다.
 
-운영 배포에서는 Gateway 패키지의 감독 서비스가 한 `VehicleState` stream을 runtime과 HMI bridge에 fan-out합니다. 설치·재연결·systemd 절차는 [gateway deployment guide](https://github.com/oas-ai/gateway/tree/main/packaging/systemd)를 따릅니다.
+운영 경로에서 Gateway는 `VehicleState`를 Runtime에 전달하고, Runtime이 생성한 `HmiState`만 Qt HMI에 전달합니다. `OAS_HMI_STREAM`은 HMI FIFO 경로입니다. 웹 Viewer에만 개발용 raw snapshot fan-out이 적용됩니다. 설치·재연결·systemd 절차는 [gateway deployment guide](https://github.com/oas-ai/gateway/tree/main/packaging/systemd)를 따릅니다.
 
 Viewer의 색상·간격·컴포넌트·안전 상태 규칙은 [design system](crates/viewer/DESIGN_SYSTEM.md)에 정의되어 있습니다.
 화면 구조와 MVP 범위는 [information architecture](crates/viewer/INFORMATION_ARCHITECTURE.md)에 정의되어 있습니다.
