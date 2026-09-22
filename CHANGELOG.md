@@ -10,6 +10,7 @@
 - Allow an explicit, default-off HMI setting for media while stationary in D; motion and stale-state locks remain mandatory.
 - Establish HMI design tokens, core components, responsive layout, and semantic safety-state presentation.
 - Define the HMI information architecture, safety overlay priority, MVP destinations, and settings ownership.
+- Design the five top-level HMI destinations and route them in the virtual HMI shell.
 
 ## [0.1.0] - 2026-09-21
 

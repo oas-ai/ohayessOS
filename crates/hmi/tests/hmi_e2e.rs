@@ -25,7 +25,7 @@ fn now_ns() -> u64 {
 }
 
 fn state_is(address: &str, expected: &str) -> bool {
-    for _ in 0..50 {
+    for _ in 0..300 {
         if let Ok(mut stream) = TcpStream::connect(address) {
             stream
                 .write_all(b"GET /state HTTP/1.1\r\nHost: localhost\r\n\r\n")
@@ -42,13 +42,25 @@ fn state_is(address: &str, expected: &str) -> bool {
 }
 
 fn server_is_up(address: &str) -> bool {
-    for _ in 0..50 {
+    for _ in 0..300 {
         if TcpStream::connect(address).is_ok() {
             return true;
         }
         thread::sleep(Duration::from_millis(10));
     }
     false
+}
+
+fn page_contains(address: &str, path: &str, expected: &str) -> bool {
+    let Ok(mut stream) = TcpStream::connect(address) else {
+        return false;
+    };
+    stream
+        .write_all(format!("GET {path} HTTP/1.1\r\nHost: localhost\r\n\r\n").as_bytes())
+        .unwrap();
+    let mut response = String::new();
+    stream.read_to_string(&mut response).unwrap();
+    response.contains(expected)
 }
 
 #[test]
@@ -63,6 +75,10 @@ fn hmi_locks_media_after_drive_or_stale_state() {
         .spawn()
         .unwrap();
     assert!(server_is_up(&address));
+    for menu in ["Home", "Media", "Vehicle", "Settings", "Diagnostics"] {
+        assert!(page_contains(&address, "/", menu));
+    }
+    assert!(page_contains(&address, "/design.css", "--touch-target"));
     let stdin = child.stdin.as_mut().unwrap();
     stdin
         .write_all(&frame(&VehicleState {

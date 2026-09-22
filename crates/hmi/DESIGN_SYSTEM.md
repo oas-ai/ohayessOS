@@ -18,6 +18,8 @@
 - `metric`: label/value 쌍으로 차량 상태를 표시한다.
 - `safety-banner`: 허용·잠금·불명 상태를 텍스트와 함께 표시한다.
 - `button`: 최소 56px 터치 영역을 유지하며 `:focus-visible`을 제공한다.
+- `primary-nav`: Home, Media, Vehicle, Settings, Diagnostics의 최상위 이동을 담당한다.
+- `setting-row`: 설정의 소유 영역과 현재 값을 함께 표시한다.
 
 ## Safety states
 

@@ -8,51 +8,89 @@
 <main class="app-shell">
   <header class="top-bar">
     <div class="brand"><span class="brand-mark">O</span> OAS</div>
-    <div id="status" class="status-pill">차량 상태를 기다리는 중</div>
+    <nav class="primary-nav" aria-label="주 메뉴">
+      <button class="nav-button is-active" type="button" data-route="home">Home</button>
+      <button class="nav-button" type="button" data-route="media">Media</button>
+      <button class="nav-button" type="button" data-route="vehicle">Vehicle</button>
+      <button class="nav-button" type="button" data-route="settings">Settings</button>
+      <button class="nav-button" type="button" data-route="diagnostics">Diagnostics</button>
+    </nav>
+    <div id="status" class="status-pill" aria-live="polite">차량 상태를 기다리는 중</div>
   </header>
-  <section class="page-heading">
-    <p class="eyebrow">Driver display</p>
-    <h1>Media</h1>
+
+  <section class="screen" data-screen="home">
+    <header class="page-heading"><p class="eyebrow">Overview</p><h1>안전한 시작</h1></header>
+    <div class="overview-grid">
+      <article class="card card--emphasis"><p class="eyebrow">Media</p><h2 id="home-media-title">미디어 잠김</h2><p id="home-media-copy" class="muted">차량 상태를 확인하고 있습니다.</p><button class="button" type="button" data-route="media">미디어 열기</button></article>
+      <article class="card"><p class="eyebrow">Vehicle</p><div class="metric-list"><div class="metric"><span class="metric-label">Speed</span><span id="home-speed" class="metric-value">—</span></div><div class="metric"><span class="metric-label">Gear</span><span id="home-gear" class="metric-value">—</span></div></div></article>
+      <article class="card"><p class="eyebrow">System</p><h2>상태 확인</h2><p class="muted">CAN, Gateway, freshness 상태를 확인합니다.</p><button class="button button--secondary" type="button" data-route="diagnostics">진단 열기</button></article>
+    </div>
+    <div id="safety-banner" class="safety-banner">안전 상태 확인 중</div>
   </section>
-  <section class="dashboard-grid">
-    <article class="card card--media">
-      <div class="media-state">
-        <h2 id="media-title">미디어 잠김</h2>
-        <p id="media">차량 상태를 확인하고 있습니다.</p>
-        <div id="safety-banner" class="safety-banner">안전 상태 확인 중</div>
-      </div>
-    </article>
-    <aside class="card">
-      <p class="eyebrow">Vehicle state</p>
-      <div class="metric-list">
-        <div class="metric"><span class="metric-label">Speed</span><span id="speed" class="metric-value">—</span></div>
-        <div class="metric"><span class="metric-label">Gear</span><span id="gear" class="metric-value">—</span></div>
-        <div class="metric"><span class="metric-label">D while stopped</span><span id="drive-setting" class="metric-value">—</span></div>
-      </div>
-    </aside>
+
+  <section class="screen" data-screen="media" hidden>
+    <header class="page-heading"><p class="eyebrow">Entertainment</p><h1>Media</h1></header>
+    <div class="dashboard-grid">
+      <article class="card card--media"><div class="media-state"><p class="eyebrow">Playback</p><h2 id="media-title">미디어 잠김</h2><p id="media-copy">차량 상태를 확인하고 있습니다.</p><div id="media-safety-banner" class="safety-banner">안전 상태 확인 중</div></div></article>
+      <aside class="card"><p class="eyebrow">Playback policy</p><div class="metric-list"><div class="metric"><span class="metric-label">Speed</span><span id="media-speed" class="metric-value">—</span></div><div class="metric"><span class="metric-label">Gear</span><span id="media-gear" class="metric-value">—</span></div><div class="metric"><span class="metric-label">D while stopped</span><span id="media-drive-setting" class="metric-value">—</span></div></div></aside>
+    </div>
+  </section>
+
+  <section class="screen" data-screen="vehicle" hidden>
+    <header class="page-heading"><p class="eyebrow">Read only</p><h1>Vehicle</h1></header>
+    <div class="overview-grid"><article class="card"><p class="eyebrow">Driving state</p><div class="metric-list"><div class="metric"><span class="metric-label">Speed</span><span id="vehicle-speed" class="metric-value">—</span></div><div class="metric"><span class="metric-label">Gear</span><span id="vehicle-gear" class="metric-value">—</span></div></div></article><article class="card"><p class="eyebrow">Vision</p><h2>준비 중</h2><p class="muted">카메라와 영상 pipeline이 준비되면 이 위치에 표시됩니다.</p></article><article class="card"><p class="eyebrow">Boundary</p><h2>Read only</h2><p class="muted">이 화면은 차량 명령을 보내지 않습니다.</p></article></div>
+  </section>
+
+  <section class="screen" data-screen="settings" hidden>
+    <header class="page-heading"><p class="eyebrow">Preferences</p><h1>Settings</h1></header>
+    <div class="settings-list"><article class="card setting-row"><div><p class="eyebrow">Display</p><h2>화면</h2><p class="muted">밝기와 주·야간 테마는 하드웨어 단계에서 연결합니다.</p></div><span class="setting-value">준비 중</span></article><article class="card setting-row"><div><p class="eyebrow">Audio</p><h2>오디오</h2><p class="muted">OAS 장치의 음량과 출력 장치를 관리합니다.</p></div><span class="setting-value">준비 중</span></article><article class="card setting-row"><div><p class="eyebrow">Media safety</p><h2>D 기어 정차 시 미디어</h2><p class="muted">움직임·상태 불명·stale에서는 항상 차단됩니다.</p></div><span id="settings-drive-setting" class="setting-value">—</span></article><article class="card setting-row"><div><p class="eyebrow">System</p><h2>시스템</h2><p class="muted">업데이트와 재시작은 배포 단계에서 연결합니다.</p></div><span class="setting-value">준비 중</span></article></div>
+  </section>
+
+  <section class="screen" data-screen="diagnostics" hidden>
+    <header class="page-heading"><p class="eyebrow">Read only</p><h1>Diagnostics</h1></header>
+    <div class="overview-grid"><article class="card"><p class="eyebrow">State stream</p><h2 id="diagnostics-stream">확인 중</h2><p id="diagnostics-copy" class="muted">Gateway stream의 최신 상태를 기다립니다.</p></article><article class="card"><p class="eyebrow">Safety policy</p><h2 id="diagnostics-policy">확인 중</h2><p class="muted">모든 정책 판정은 runtime이 제공합니다.</p></article><article class="card"><p class="eyebrow">CAN / Gateway</p><h2>배포 후 연결</h2><p class="muted">대상 Linux에서 systemd 로그와 연결 상태를 표시합니다.</p></article></div>
   </section>
 </main>
 <script>
+  const byId = id => document.getElementById(id);
+  const routes = document.querySelectorAll('[data-route]');
+  const screens = document.querySelectorAll('[data-screen]');
+  function navigate(route) {
+    screens.forEach(screen => { screen.hidden = screen.dataset.screen !== route; });
+    routes.forEach(button => button.classList.toggle('is-active', button.dataset.route === route));
+  }
+  routes.forEach(button => button.addEventListener('click', () => navigate(button.dataset.route)));
+  function showState(state) {
+    const allowed = state.videoPlayback === 'allowed';
+    const speed = state.speedMps === null ? '—' : `${state.speedMps} m/s`;
+    const policy = allowed ? '미디어 사용 가능' : '미디어 잠김';
+    document.body.dataset.safety = allowed ? 'allowed' : 'locked';
+    byId('status').textContent = policy;
+    byId('home-media-title').textContent = policy;
+    byId('home-media-copy').textContent = allowed ? '미디어 플레이어 연결 준비됨' : `재생 조건: ${state.videoPlayback}`;
+    byId('media-title').textContent = policy;
+    byId('media-copy').textContent = allowed ? '미디어 플레이어 연결 준비됨' : `재생 조건: ${state.videoPlayback}`;
+    byId('safety-banner').textContent = allowed ? '정차 상태가 확인되었습니다' : '차량이 움직이거나 상태가 불명확하면 재생하지 않습니다';
+    byId('media-safety-banner').textContent = byId('safety-banner').textContent;
+    ['home-speed', 'media-speed', 'vehicle-speed'].forEach(id => { byId(id).textContent = speed; });
+    ['home-gear', 'media-gear', 'vehicle-gear'].forEach(id => { byId(id).textContent = state.gear; });
+    ['media-drive-setting', 'settings-drive-setting'].forEach(id => { byId(id).textContent = state.allowDriveWhenStopped ? '허용' : '차단'; });
+    byId('diagnostics-stream').textContent = state.videoPlayback === 'no_vehicle_state' ? '상태 대기 중' : '상태 수신 중';
+    byId('diagnostics-copy').textContent = `speed ${speed} · gear ${state.gear}`;
+    byId('diagnostics-policy').textContent = state.videoPlayback;
+  }
   async function refresh() {
-    try {
-      const state = await fetch('/state', {cache: 'no-store'}).then(response => response.json());
-      const allowed = state.videoPlayback === 'allowed';
-      document.body.dataset.safety = allowed ? 'allowed' : 'locked';
-      status.textContent = allowed ? '미디어 사용 가능' : '미디어 잠김';
-      mediaTitle.textContent = allowed ? '미디어 준비됨' : '미디어 잠김';
-      media.textContent = allowed ? '미디어 플레이어 연결 준비됨' : `재생 조건: ${state.videoPlayback}`;
-      safetyBanner.textContent = allowed ? '정차 상태가 확인되었습니다' : '차량이 움직이거나 상태가 불명확하면 재생하지 않습니다';
-      speed.textContent = state.speedMps === null ? '—' : `${state.speedMps} m/s`;
-      gear.textContent = state.gear;
-      driveSetting.textContent = state.allowDriveWhenStopped ? '허용' : '차단';
-    } catch (_) {
+    try { showState(await fetch('/state', {cache: 'no-store'}).then(response => response.json())); }
+    catch (_) {
       document.body.dataset.safety = 'unknown';
-      status.textContent = '상태 서비스 연결 안 됨';
-      mediaTitle.textContent = '미디어 잠김';
-      media.textContent = '안전 상태를 확인할 수 없습니다.';
-      safetyBanner.textContent = '안전 상태 확인 중';
+      byId('status').textContent = '상태 서비스 연결 안 됨';
+      byId('home-media-title').textContent = '미디어 잠김';
+      byId('media-title').textContent = '미디어 잠김';
+      byId('safety-banner').textContent = '안전 상태 확인 중';
+      byId('media-safety-banner').textContent = '안전 상태 확인 중';
     }
   }
   refresh(); setInterval(refresh, 250);
 </script>
 </body>
+</html>
