@@ -12,6 +12,7 @@
 - Define the HMI information architecture, safety overlay priority, MVP destinations, and settings ownership.
 - Design the five top-level HMI destinations and route them in the virtual HMI shell.
 - Add local-only HVAC and vehicle-audio Comfort Control UI previews to Vehicle.
+- Complete the virtual HMI's in-menu screen inventory and add a global safety state banner.
 
 ## [0.1.0] - 2026-09-21
 

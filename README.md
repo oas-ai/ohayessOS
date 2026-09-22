@@ -22,6 +22,7 @@ cargo run -p ohayess-hmi -- 127.0.0.1:8080 500 < vehicle-state-stream.bin
 
 HMI의 색상·간격·컴포넌트·안전 상태 규칙은 [design system](crates/hmi/DESIGN_SYSTEM.md)에 정의되어 있습니다.
 화면 구조와 MVP 범위는 [information architecture](crates/hmi/INFORMATION_ARCHITECTURE.md)에 정의되어 있습니다.
+화면 완성도와 빈 상태 점검 결과는 [UI/UX audit](crates/hmi/UI_UX_AUDIT.md)에 기록되어 있습니다.
 
 정차 중 D 기어에서도 HMI 미디어를 열어야 할 경우에만 `OAS_ALLOW_MEDIA_IN_DRIVE_WHEN_STOPPED=true`으로 실행합니다. 기본값은 `false`이며, 이 예외를 켜도 움직임·stale·기어 상태 불명은 항상 차단됩니다.
 
