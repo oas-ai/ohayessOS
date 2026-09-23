@@ -34,6 +34,8 @@ cmake --build build/hmi
 ./build/hmi/ohayess-hmi --demo
 ```
 
+상단의 `밝은 화면` / `어두운 화면` 버튼으로 화면 테마를 즉시 바꿉니다. 밝은 화면은 흰색 기반, 어두운 화면은 검정색 기반이며, 이 선택은 HMI 렌더링에만 적용됩니다. 재현 가능한 캡처는 `--appearance light` 또는 `--appearance dark`를 사용합니다.
+
 Additional synthetic states and reproducible PNG capture use the same QML views:
 
 ```sh

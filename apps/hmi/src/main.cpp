@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
   parser.addOption({"scenario", "데모 프리셋: drive, park, waiting, stale.", "name", "drive"});
   parser.addOption({"demo-speed-kph", "데모 속도를 km/h 단위로 주입합니다.", "value"});
   parser.addOption({"demo-gear", "데모 기어를 주입합니다: P, R, N, D.", "gear"});
+  parser.addOption({"appearance", "시작 화면 테마: dark 또는 light.", "name", "dark"});
   parser.addOption({"capture", "렌더링한 PNG를 저장하고 종료합니다.", "path"});
   parser.addOption({"size", "미리보기 창 크기.", "WIDTHxHEIGHT", "1440x810"});
   parser.addOption({"page", "처음 열 화면: drive, media, diagnostics, vehicle.", "name", "drive"});
@@ -39,6 +40,8 @@ int main(int argc, char *argv[]) {
   if (dimensions.size() != 2 || dimensions[0].toInt() < 1280 || dimensions[1].toInt() < 720) return 2;
   const auto page = QStringList{"drive", "media", "diagnostics", "vehicle"}.indexOf(parser.value("page"));
   if (page < 0) return 2;
+  const auto appearance = parser.value("appearance");
+  if (!QStringList{"dark", "light"}.contains(appearance)) return 2;
   std::optional<double> demoSpeed;
   if (parser.isSet("demo-speed-kph")) {
     bool validSpeed = false;
@@ -63,6 +66,7 @@ int main(int argc, char *argv[]) {
   auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().first());
   if (!window) return 1;
   window->resize(dimensions[0].toInt(), dimensions[1].toInt());
+  window->setProperty("darkMode", appearance == "dark");
   window->setProperty("page", page);
   if (parser.isSet("capture")) {
     if (parser.isSet("expect-speed")) {

@@ -1,18 +1,21 @@
 import QtQuick
+import OAS.HMI
 Item {
     // Original concept SUV illustration. Decorative, not sensed surroundings.
     Canvas {
+        id: canvas
         anchors.fill: parent
         onWidthChanged: requestPaint()
         onHeightChanged: requestPaint()
+        Connections { target: Theme; function onDarkModeChanged() { canvas.requestPaint() } }
         onPaint: {
             var c = getContext("2d"); c.reset(); c.scale(width / 640, height / 460);
             var glow = c.createRadialGradient(320, 290, 8, 320, 290, 245);
-            glow.addColorStop(0, "#244657"); glow.addColorStop(1, "rgba(13,19,33,0)");
+            glow.addColorStop(0, Theme.darkMode ? "#244657" : "#BDEDF5"); glow.addColorStop(1, Theme.darkMode ? "rgba(13,19,33,0)" : "rgba(255,255,255,0)");
             c.fillStyle = glow; c.fillRect(0, 0, 640, 460);
-            c.strokeStyle = "#23364a"; c.lineWidth = 1;
+            c.strokeStyle = Theme.darkMode ? "#23364a" : "#D5E0E9"; c.lineWidth = 1;
             for (var i = 0; i < 5; i++) { c.beginPath(); c.moveTo(40, 340+i*24); c.lineTo(600, 340+i*24); c.stroke(); }
-            c.beginPath(); c.ellipse(90, 319, 470, 70); c.fillStyle = "#080d17"; c.fill();
+            c.beginPath(); c.ellipse(90, 319, 470, 70); c.fillStyle = Theme.darkMode ? "#080d17" : "#E6ECF2"; c.fill();
             // Rear three-quarter body with roof, glazing and machined wheels.
             var body = c.createLinearGradient(200, 140, 420, 330);
             body.addColorStop(0, "#d7e3ee"); body.addColorStop(0.42, "#839bab"); body.addColorStop(1, "#293b50");

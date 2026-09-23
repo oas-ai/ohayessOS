@@ -11,9 +11,13 @@ ApplicationWindow {
     title: "OAS · 차분한 미래 모빌리티"
     color: Theme.background
     property int page: 0
+    property bool darkMode: true
     readonly property bool hasState: vehicleState.available
     readonly property string connection: vehicleState.freshness === "fresh" ? "연결됨" : vehicleState.freshness === "stale" ? "업데이트 지연" : "연결 대기 중"
     readonly property color stateColor: vehicleState.freshness === "fresh" ? Theme.success : Theme.warning
+
+    onDarkModeChanged: Theme.darkMode = darkMode
+    Component.onCompleted: Theme.darkMode = darkMode
 
     Rectangle { anchors.fill: parent; gradient: Gradient { GradientStop { position: 0; color: Theme.horizon } GradientStop { position: 1; color: Theme.background } } }
 
@@ -29,6 +33,14 @@ ApplicationWindow {
             Caption { text: "차분한 미래 모빌리티" }
             Item { Layout.fillWidth: true }
             StatusPill { text: vehicleState.demo ? "데모 · 합성 상태" : "읽기 전용"; tone: Theme.cyan }
+            Button {
+                text: darkMode ? "밝은 화면" : "어두운 화면"
+                Accessible.name: text
+                onClicked: darkMode = !darkMode
+                contentItem: Text { text: parent.text; color: Theme.text; font.pixelSize: 13; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                background: Rectangle { radius: 17; color: Qt.rgba(Theme.muted.r, Theme.muted.g, Theme.muted.b, 0.12); border.color: Theme.border }
+                implicitWidth: 92; implicitHeight: 34
+            }
             Text { text: connection; color: stateColor; font.pixelSize: 14 }
         }
 
@@ -52,8 +64,8 @@ ApplicationWindow {
                                 delegate: Rectangle {
                                     required property string modelData
                                     width: 46; height: 46; radius: 15
-                                    color: hasState && vehicleState.gear === modelData ? "#264251" : "transparent"
-                                    border.color: hasState && vehicleState.gear === modelData ? "#467586" : "transparent"
+                                    color: hasState && vehicleState.gear === modelData ? Theme.selection : "transparent"
+                                    border.color: hasState && vehicleState.gear === modelData ? Theme.selectionBorder : "transparent"
                                     Text { anchors.centerIn: parent; text: modelData; color: hasState && vehicleState.gear === modelData ? Theme.cyan : Theme.muted; font.pixelSize: 21 }
                                 }
                             }
