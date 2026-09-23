@@ -56,17 +56,18 @@ bool VehicleStateBridge::diagnosticsAvailable() const { return diagnostics_avail
 QString VehicleStateBridge::diagnosticsSummary() const { return diagnostics_summary_; }
 QString VehicleStateBridge::streamPath() const { return stream_path_; }
 
-void VehicleStateBridge::showDemo(const QString &scenario) {
+void VehicleStateBridge::showDemo(const QString &scenario, std::optional<double> speedKph,
+                                  std::optional<QString> gear) {
   disconnectStream();
   retry_timer_->stop();
   demo_ = true;
   freshness_ = scenario == "stale" ? "stale" : scenario == "waiting" ? "waiting" : "fresh";
   available_ = freshness_ == "fresh";
-  speed_kph_ = scenario == "park" ? 0.0 : 80.0;
-  gear_ = scenario == "park" ? "P" : "D";
+  speed_kph_ = speedKph.value_or(scenario == "park" ? 0.0 : 80.0);
+  gear_ = gear.value_or(scenario == "park" ? "P" : "D");
   night_mode_ = false;
-  media_playback_allowed_ = scenario == "park";
-  media_playback_reason_ = scenario == "park" ? "allowed" : scenario == "stale" ? "stale_vehicle_state" : scenario == "waiting" ? "no_vehicle_state" : "vehicle_in_motion";
+  media_playback_allowed_ = available_ && speed_kph_ <= 0.1 && gear_ == "P";
+  media_playback_reason_ = media_playback_allowed_ ? "allowed" : scenario == "stale" ? "stale_vehicle_state" : scenario == "waiting" ? "no_vehicle_state" : speed_kph_ > 0.1 ? "vehicle_in_motion" : "not_parked";
   diagnostics_available_ = available_;
   diagnostics_summary_ = "Door switch 1.0 · Belt D/P 1.0/1.0 · Temp D/P 20.0/22.0 °C";
   emit changed();

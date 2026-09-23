@@ -5,6 +5,8 @@
 #include <QByteArrayView>
 #include <QString>
 
+#include <optional>
+
 class QSocketNotifier;
 class QTimer;
 
@@ -36,7 +38,8 @@ class VehicleStateBridge final : public QObject {
   QString streamPath() const;
   QString freshness() const { return freshness_; }
   bool isDemo() const { return demo_; }
-  void showDemo(const QString &scenario = "drive");
+  void showDemo(const QString &scenario = "drive", std::optional<double> speedKph = std::nullopt,
+                std::optional<QString> gear = std::nullopt);
 
  signals:
   void changed();

@@ -17,12 +17,12 @@ QtObject {
     readonly property int motion: 240
     function reason(code) {
         switch (code) {
-        case "allowed": return "Playback permission granted";
-        case "vehicle_in_motion": return "Video is paused while moving";
-        case "not_parked": return "Shift to Park to enable video";
-        case "stale_vehicle_state": return "Waiting for a fresh vehicle update";
-        case "no_vehicle_state": return "Connect a vehicle state stream";
-        default: return "Playback permission unavailable";
+        case "allowed": return "재생이 허용되었습니다";
+        case "vehicle_in_motion": return "주행 중에는 영상이 일시 정지됩니다";
+        case "not_parked": return "영상을 보려면 P에 주차하세요";
+        case "stale_vehicle_state": return "최신 차량 상태를 기다리는 중입니다";
+        case "no_vehicle_state": return "차량 상태 스트림을 연결하세요";
+        default: return "재생 권한을 확인할 수 없습니다";
         }
     }
 }

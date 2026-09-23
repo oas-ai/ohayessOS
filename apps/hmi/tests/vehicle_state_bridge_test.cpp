@@ -99,6 +99,8 @@ int main(int argc, char *argv[]) {
   close(writer);
   if (!waitFor([&] { return !bridge.available(); })) fail("stream disconnect stayed available");
   if (!waitFor([&] { return bridge.freshness() == "waiting"; })) fail("disconnect did not reset freshness");
+  demo.showDemo("park", 12.5, "R");
+  if (std::abs(demo.speedKph() - 12.5) > 0.1 || demo.gear() != "R") fail("demo values were not injected");
   demo.showDemo("park");
   if (!demo.isDemo() || !demo.mediaPlaybackAllowed() || demo.gear() != "P") fail("park preview is invalid");
   demo.showDemo("stale");

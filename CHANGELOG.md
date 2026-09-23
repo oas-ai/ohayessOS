@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Translate the production Qt HMI into Korean and add injected demo speed and gear values for product previews.
 - Add Calm Future Mobility QML tokens, reusable panels, accessible navigation and an original concept vehicle illustration.
 - Distinguish synthetic demo, waiting and stale states; remove unsupported vehicle-health claims.
 - Add drive/park/waiting/stale previews, PNG capture and actual QML launch tests at 720p/1080p.

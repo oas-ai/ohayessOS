@@ -16,17 +16,19 @@ int main(int argc, char *argv[]) {
   qputenv("QT_QUICK_CONTROLS_STYLE", "Basic");
   QGuiApplication app(argc, argv);
   QCommandLineParser parser;
-  QCommandLineOption streamOption("stream", "HmiState FIFO path.", "path", "/run/ohayess/vehicle-state");
-  QCommandLineOption maximumAgeOption("maximum-age-ms", "Maximum accepted VehicleState age.", "milliseconds", "500");
-  QCommandLineOption demoOption("demo", "Show a read-only development preview without a stream.");
+  QCommandLineOption streamOption("stream", "HmiState FIFO 경로.", "path", "/run/ohayess/vehicle-state");
+  QCommandLineOption maximumAgeOption("maximum-age-ms", "허용할 VehicleState 최대 경과 시간.", "milliseconds", "500");
+  QCommandLineOption demoOption("demo", "스트림 없이 읽기 전용 개발 미리보기를 표시합니다.");
   parser.addOption(streamOption);
   parser.addOption(maximumAgeOption);
   parser.addOption(demoOption);
-  parser.addOption({"scenario", "Demo: drive, park, waiting, stale.", "name", "drive"});
-  parser.addOption({"capture", "Save a rendered PNG and exit.", "path"});
-  parser.addOption({"size", "Window dimensions for preview.", "WIDTHxHEIGHT", "1440x810"});
-  parser.addOption({"page", "Initial preview page: drive, media, diagnostics, vehicle.", "name", "drive"});
-  parser.addOption({"expect-speed", "Capture only after a live speed arrives (km/h); fail after 10 seconds.", "value"});
+  parser.addOption({"scenario", "데모 프리셋: drive, park, waiting, stale.", "name", "drive"});
+  parser.addOption({"demo-speed-kph", "데모 속도를 km/h 단위로 주입합니다.", "value"});
+  parser.addOption({"demo-gear", "데모 기어를 주입합니다: P, R, N, D.", "gear"});
+  parser.addOption({"capture", "렌더링한 PNG를 저장하고 종료합니다.", "path"});
+  parser.addOption({"size", "미리보기 창 크기.", "WIDTHxHEIGHT", "1440x810"});
+  parser.addOption({"page", "처음 열 화면: drive, media, diagnostics, vehicle.", "name", "drive"});
+  parser.addOption({"expect-speed", "실시간 속도가 도착한 뒤 PNG를 저장합니다(km/h). 10초 뒤 실패합니다.", "value"});
   parser.process(app);
   bool validAge = false;
   const auto maximumAge = parser.value(maximumAgeOption).toULongLong(&validAge);
@@ -37,8 +39,22 @@ int main(int argc, char *argv[]) {
   if (dimensions.size() != 2 || dimensions[0].toInt() < 1280 || dimensions[1].toInt() < 720) return 2;
   const auto page = QStringList{"drive", "media", "diagnostics", "vehicle"}.indexOf(parser.value("page"));
   if (page < 0) return 2;
+  std::optional<double> demoSpeed;
+  if (parser.isSet("demo-speed-kph")) {
+    bool validSpeed = false;
+    const auto speed = parser.value("demo-speed-kph").toDouble(&validSpeed);
+    if (!validSpeed || !std::isfinite(speed) || speed < 0 || speed > 400) return 2;
+    demoSpeed = speed;
+  }
+  std::optional<QString> demoGear;
+  if (parser.isSet("demo-gear")) {
+    const auto gear = parser.value("demo-gear").trimmed().toUpper();
+    if (!QStringList{"P", "R", "N", "D"}.contains(gear)) return 2;
+    demoGear = gear;
+  }
+  if ((demoSpeed || demoGear) && !parser.isSet(demoOption)) return 2;
   VehicleStateBridge vehicleState(parser.value(streamOption), maximumAge);
-  if (parser.isSet(demoOption)) vehicleState.showDemo(scenario);
+  if (parser.isSet(demoOption)) vehicleState.showDemo(scenario, demoSpeed, demoGear);
   QQmlApplicationEngine engine;
   engine.addImportPath("qrc:/");
   engine.rootContext()->setContextProperty("vehicleState", &vehicleState);
