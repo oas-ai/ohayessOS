@@ -50,69 +50,76 @@ ApplicationWindow {
                 RowLayout {
                     anchors.fill: parent; spacing: 24
                     ColumnLayout {
-                        Layout.minimumWidth: 240; Layout.maximumWidth: 240; Layout.preferredWidth: 240; Layout.fillHeight: true; spacing: 16
-                        Caption { text: "현재 주행" }
-                        Text { text: hasState ? "지금 이 순간에 집중하세요." : "차량 상태를 기다리고 있습니다."; color: Theme.text; font.pixelSize: 27; font.weight: Font.Light; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                        Item { Layout.fillHeight: true }
-                        Text { text: hasState ? Math.round(vehicleState.speedKph) : "—"; color: Theme.text; font.pixelSize: 136; font.weight: Font.Light; font.letterSpacing: -7 }
-                        Caption { text: "킬로미터 / 시" }
-                        Item { Layout.preferredHeight: 12 }
-                        RowLayout {
-                            spacing: 12
-                            Repeater {
-                                model: ["P", "R", "N", "D"]
-                                delegate: Rectangle {
-                                    required property string modelData
-                                    width: 46; height: 46; radius: 15
-                                    color: hasState && vehicleState.gear === modelData ? Theme.selection : "transparent"
-                                    border.color: hasState && vehicleState.gear === modelData ? Theme.selectionBorder : "transparent"
-                                    Text { anchors.centerIn: parent; text: modelData; color: hasState && vehicleState.gear === modelData ? Theme.cyan : Theme.muted; font.pixelSize: 21 }
+                        Layout.minimumWidth: 300; Layout.maximumWidth: 340; Layout.preferredWidth: 320; Layout.fillHeight: true; spacing: 16
+                        GlassPanel {
+                            Layout.fillWidth: true; Layout.preferredHeight: 260
+                            ColumnLayout { anchors.fill: parent; anchors.margins: 24; spacing: 12
+                                Caption { text: "내비게이션" }
+                                Text { text: "목적지 없음"; color: Theme.text; font.pixelSize: 25; font.weight: Font.Medium }
+                                Body { text: "지도 공급자를 연결하면 현재 위치와 다음 안내를 표시합니다." }
+                                Item { Layout.fillHeight: true }
+                                Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 98; radius: 14; color: Qt.rgba(Theme.muted.r, Theme.muted.g, Theme.muted.b, 0.08)
+                                    Canvas { anchors.fill: parent; onPaint: { var c = getContext("2d"); c.reset(); c.strokeStyle = Theme.border; c.lineWidth = 2; c.beginPath(); c.moveTo(0, 76); c.lineTo(width * .32, 40); c.lineTo(width * .66, 60); c.lineTo(width, 15); c.stroke(); c.beginPath(); c.moveTo(width * .12, 0); c.lineTo(width * .38, height); c.moveTo(width * .7, 0); c.lineTo(width * .48, height); c.stroke(); } }
+                                }
+                                StatusPill { text: "지도 데이터 연결 전"; tone: Theme.muted }
+                            }
+                        }
+                        RowLayout { Layout.fillWidth: true; Layout.preferredHeight: 142; spacing: 16
+                            GlassPanel { Layout.fillWidth: true; Layout.fillHeight: true
+                                Column { anchors.fill: parent; anchors.margins: 20; spacing: 8
+                                    Caption { text: "주행" }
+                                    Text { text: hasState ? Math.round(vehicleState.speedKph) : "—"; color: Theme.text; font.pixelSize: 52; font.weight: Font.Light }
+                                    Caption { text: "km/h" }
+                                }
+                            }
+                            GlassPanel { Layout.fillWidth: true; Layout.fillHeight: true
+                                Column { anchors.fill: parent; anchors.margins: 20; spacing: 8
+                                    Caption { text: "연결" }
+                                    Text { text: connection; color: stateColor; font.pixelSize: 20; font.weight: Font.Medium; width: parent.width; wrapMode: Text.WordWrap }
+                                    Caption { text: "읽기 전용" }
                                 }
                             }
                         }
-                        Item { Layout.fillHeight: true }
-                        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
-                        Caption { text: "팰리세이드 / 2020" }
-                        Body { text: "여정에 더 조용하게\n연결됩니다." }
                     }
 
-                    Item {
-                        Layout.fillWidth: true; Layout.fillHeight: true
-                        Column {
-                            anchors.top: parent.top; anchors.horizontalCenter: parent.horizontalCenter; spacing: 12
-                            Caption { text: "차량 개요"; anchors.horizontalCenter: parent.horizontalCenter }
-                            Text { text: "여유로운 이동."; color: Theme.text; font.pixelSize: 34; font.weight: Font.Light; anchors.horizontalCenter: parent.horizontalCenter }
-                        }
-                        VehicleVisual { anchors.centerIn: parent; anchors.verticalCenterOffset: 10; width: parent.width; height: Math.min(parent.height - 120, width * 0.78) }
-                        Column {
-                            anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter; spacing: 10
-                            StatusPill { anchors.horizontalCenter: parent.horizontalCenter; text: vehicleState.freshness === "fresh" ? "상태 수신됨" : vehicleState.freshness === "stale" ? "신호 지연" : "신호 대기 중"; tone: stateColor }
-                            Text { anchors.horizontalCenter: parent.horizontalCenter; text: "콘셉트 일러스트 · 주변 환경을 감지하지 않습니다"; color: Theme.muted; font.pixelSize: 11 }
+                    GlassPanel {
+                        Layout.minimumWidth: 400; Layout.fillWidth: true; Layout.fillHeight: true
+                        Item {
+                            anchors.fill: parent
+                            Column { anchors.top: parent.top; anchors.topMargin: 26; anchors.horizontalCenter: parent.horizontalCenter; spacing: 7
+                                Caption { text: "차량 개요"; anchors.horizontalCenter: parent.horizontalCenter }
+                                Row { anchors.horizontalCenter: parent.horizontalCenter; spacing: 14; Repeater { model: ["P", "R", "N", "D"]; delegate: Text { required property string modelData; text: modelData; color: hasState && vehicleState.gear === modelData ? Theme.text : Theme.muted; font.pixelSize: 16; font.weight: hasState && vehicleState.gear === modelData ? Font.DemiBold : Font.Normal } } }
+                            }
+                            VehicleVisual { anchors.centerIn: parent; anchors.verticalCenterOffset: 12; width: parent.width * .9; height: Math.min(parent.height * .72, width * .75) }
+                            Column { anchors.bottom: parent.bottom; anchors.bottomMargin: 24; anchors.horizontalCenter: parent.horizontalCenter; spacing: 0
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: hasState ? Math.round(vehicleState.speedKph) : "—"; color: Theme.text; font.pixelSize: 70; font.weight: Font.Light }
+                                Caption { text: "km/h"; anchors.horizontalCenter: parent.horizontalCenter }
+                            }
                         }
                     }
 
                     ColumnLayout {
-                        Layout.minimumWidth: 288; Layout.maximumWidth: 288; Layout.preferredWidth: 288; Layout.fillHeight: true; spacing: 16
+                        Layout.minimumWidth: 300; Layout.maximumWidth: 340; Layout.preferredWidth: 320; Layout.fillHeight: true; spacing: 16
                         GlassPanel {
                             Layout.fillWidth: true; Layout.fillHeight: true
                             ColumnLayout {
                                 anchors.fill: parent; anchors.margins: 24; spacing: 14
-                                Caption { text: "연결 상태" }
-                                Text { text: connection; color: Theme.text; font.pixelSize: 25; font.weight: Font.Light; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                                Body { text: vehicleState.freshness === "fresh" ? "차량 데이터를 받고 있습니다.\n제어 기능은 읽기 전용입니다." : "최신 데이터가 도착할 때까지 주행 값은 표시하지 않습니다." }
+                                Caption { text: "미디어" }
+                                Text { text: vehicleState.mediaPlaybackAllowed ? "재생 준비됨" : "재생 불가"; color: Theme.text; font.pixelSize: 25; font.weight: Font.Medium; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                                Body { text: Theme.reason(vehicleState.mediaPlaybackReason) }
                                 Item { Layout.fillHeight: true }
-                                StatusPill { text: "차량 제어 사용 안 함"; tone: Theme.muted }
+                                Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 82; radius: 14; color: Theme.darkMode ? "#080A12" : "#17191D"; Text { anchors.centerIn: parent; text: "재생 소스 연결 전"; color: "#FFFFFF"; font.pixelSize: 15 } }
                             }
                         }
                         GlassPanel {
                             Layout.fillWidth: true; Layout.fillHeight: true
                             ColumnLayout {
                                 anchors.fill: parent; anchors.margins: 24; spacing: 14
-                                Caption { text: "미디어 / 영상" }
-                                Text { text: vehicleState.mediaPlaybackAllowed ? "잠시\n쉬어가세요." : "여정을\n즐기세요."; color: Theme.text; font.pixelSize: 29; font.weight: Font.Light }
-                                Body { text: Theme.reason(vehicleState.mediaPlaybackReason) }
+                                Caption { text: "차량 상태" }
+                                Text { text: "팰리세이드 / 2020"; color: Theme.text; font.pixelSize: 24; font.weight: Font.Medium }
+                                Body { text: vehicleState.diagnosticsAvailable ? vehicleState.diagnosticsSummary : "최신 차량 데이터를 기다리고 있습니다." }
                                 Item { Layout.fillHeight: true }
-                                StatusPill { text: vehicleState.mediaPlaybackAllowed ? "허용됨 · 플레이어 없음" : "재생 불가"; tone: vehicleState.mediaPlaybackAllowed ? Theme.cyan : Theme.muted }
+                                StatusPill { text: "제어 기능 사용 안 함"; tone: Theme.muted }
                             }
                         }
                     }

@@ -17,7 +17,7 @@ QtObject {
     readonly property color success: "#57E3A1"
     readonly property color warning: "#FFB45B"
     readonly property color danger: "#FF6B78"
-    readonly property int radius: 30
+    readonly property int radius: darkMode ? 30 : 20
     readonly property int spacing: 24
     readonly property int motion: 240
     function reason(code) {
