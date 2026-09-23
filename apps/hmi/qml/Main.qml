@@ -121,6 +121,28 @@ ApplicationWindow {
             GlassPanel {
                 ColumnLayout {
                     anchors.fill: parent; anchors.margins: 48; spacing: 22
+                    Caption { text: "지도 / 경로" }
+                    Text { text: "다음 여정을 준비합니다."; color: Theme.text; font.pixelSize: 48; font.weight: Font.Light }
+                    StatusPill { text: "지도 데이터 연결 전"; tone: Theme.muted }
+                    Body { text: "현재 위치, 목적지, ETA, 교통 정보는 지도 공급자가 연결되면 이 화면에 오버레이로 표시됩니다." }
+                    Item { Layout.fillHeight: true }
+                    Text { text: "경로 없음"; color: Theme.muted; font.pixelSize: 22; Layout.alignment: Qt.AlignHCenter }
+                }
+            }
+            GlassPanel {
+                ColumnLayout {
+                    anchors.fill: parent; anchors.margins: 48; spacing: 22
+                    Caption { text: "공조 / 편의" }
+                    Text { text: "실내 환경"; color: Theme.text; font.pixelSize: 48; font.weight: Font.Light }
+                    StatusPill { text: "읽기 전용 · 제어 연결 전"; tone: Theme.muted }
+                    Body { text: vehicleState.diagnosticsAvailable ? vehicleState.diagnosticsSummary : "온도와 시트 상태를 표시하려면 최신 차량 데이터가 필요합니다."; font.pixelSize: 23 }
+                    Item { Layout.fillHeight: true }
+                    Body { text: "온도, 팬, 열선·통풍은 향후 Runtime capability가 제공될 때만 표시·조작합니다." }
+                }
+            }
+            GlassPanel {
+                ColumnLayout {
+                    anchors.fill: parent; anchors.margins: 48; spacing: 22
                     Caption { text: "나만의 공간 / 미디어" }
                     Text { text: "여정 속 작은 쉼표."; color: Theme.text; font.pixelSize: 48; font.weight: Font.Light }
                     StatusPill { text: vehicleState.mediaPlaybackAllowed ? "재생 권한 허용됨" : "재생 잠김"; tone: vehicleState.mediaPlaybackAllowed ? Theme.success : Theme.warning }
@@ -132,23 +154,14 @@ ApplicationWindow {
             GlassPanel {
                 ColumnLayout {
                     anchors.fill: parent; anchors.margins: 48; spacing: 22
-                    Caption { text: "차량 / 신호" }
-                    Text { text: "차량을 더 가까이."; color: Theme.text; font.pixelSize: 48; font.weight: Font.Light }
-                    StatusPill { text: vehicleState.diagnosticsAvailable ? "읽기 전용 DBC 신호" : "신호를 사용할 수 없음"; tone: vehicleState.diagnosticsAvailable ? Theme.cyan : Theme.warning }
-                    Body { text: vehicleState.diagnosticsAvailable ? vehicleState.diagnosticsSummary : "신호 값을 표시하려면 최신 차량 데이터가 필요합니다."; font.pixelSize: 23 }
-                    Item { Layout.fillHeight: true }
-                    Body { text: "원시 DBC 값입니다. 차량 상태의 건전성을 의미하지 않으며 차량 제어에 사용하지 않습니다." }
-                }
-            }
-            GlassPanel {
-                ColumnLayout {
-                    anchors.fill: parent; anchors.margins: 48; spacing: 22
                     Caption { text: "팰리세이드 / 2020" }
                     Text { text: "연결됨. 읽기 전용."; color: Theme.text; font.pixelSize: 48; font.weight: Font.Light }
                     StatusPill { text: "차량 제어를 사용할 수 없음"; tone: Theme.muted }
                     Body { text: "이 설치 환경은 차량 정보만 표시합니다. 공조, 잠금, 조향, 주행 제어는 연결하지 않습니다." }
                     Item { Layout.fillHeight: true }
-                    Body { text: "현재 표시 계약에는 주행 가능 거리, 연료량, 실내 온도가 포함되지 않습니다." }
+                    Caption { text: "진단 / 원시 DBC 신호" }
+                    Body { text: vehicleState.diagnosticsAvailable ? vehicleState.diagnosticsSummary : "신호 값을 표시하려면 최신 차량 데이터가 필요합니다." }
+                    Body { text: "ADAS, 에너지, 카메라, 전화, 설정, 소프트웨어 업데이트는 데이터·권한 공급자가 연결된 뒤 이 차량 공간에서 점진적으로 제공합니다." }
                 }
             }
         }

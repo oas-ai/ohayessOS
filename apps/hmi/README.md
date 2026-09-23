@@ -42,7 +42,7 @@ Additional synthetic states and reproducible PNG capture use the same QML views:
 ./build/hmi/ohayess-hmi --demo --scenario park
 ./build/hmi/ohayess-hmi --demo --scenario stale --size 1280x720 --capture /tmp/oas-stale.png
 ./build/hmi/ohayess-hmi --demo --scenario waiting
-./build/hmi/ohayess-hmi --demo --page diagnostics --size 1920x1080 --capture /tmp/oas-signals.png
+./build/hmi/ohayess-hmi --demo --page vehicle --size 1920x1080 --capture /tmp/oas-vehicle.png
 # 주행 프리셋에서 정차 P 상태를 직접 주입
 ./build/hmi/ohayess-hmi --demo --demo-speed-kph 0 --demo-gear P
 # R 기어의 12.5 km/h 상태를 주입
@@ -50,7 +50,9 @@ Additional synthetic states and reproducible PNG capture use the same QML views:
 ctest --test-dir build/hmi --output-on-failure
 ```
 
-`--scenario`은 drive, park, stale, waiting 프리셋을 지원합니다. `--demo-speed-kph`는 0~400 km/h, `--demo-gear`는 P/R/N/D를 받으며 프리셋 값을 덮어씁니다. 데모는 실제 프레임을 읽지 않고 화면에 합성 상태임을 표시합니다. `--page`는 drive, media, diagnostics, vehicle을 지원합니다. 헤드리스 캡처에는 `QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software`를 설정합니다. 자세한 기준은 [디자인과 상태 규칙](DESIGN.md)을 참고하세요. CI는 `hmi-previews`에 캡처를 보관합니다.
+제품 UX 구조와 실제 데이터 계약의 경계는 [UX_ARCHITECTURE.ko.md](UX_ARCHITECTURE.ko.md)를 참고하세요.
+
+`--scenario`은 drive, park, stale, waiting 프리셋을 지원합니다. `--demo-speed-kph`는 0~400 km/h, `--demo-gear`는 P/R/N/D를 받으며 프리셋 값을 덮어씁니다. 데모는 실제 프레임을 읽지 않고 화면에 합성 상태임을 표시합니다. `--page`는 home, map, climate, media, vehicle을 지원합니다. 헤드리스 캡처에는 `QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software`를 설정합니다. 자세한 기준은 [디자인과 상태 규칙](DESIGN.md)을 참고하세요. CI는 `hmi-previews`에 캡처를 보관합니다.
 
 If preserving an existing build directory, configure with a new `-B` directory and use the same path for build, CTest and executable commands.
 

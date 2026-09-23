@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
   parser.addOption({"appearance", "시작 화면 테마: dark 또는 light.", "name", "dark"});
   parser.addOption({"capture", "렌더링한 PNG를 저장하고 종료합니다.", "path"});
   parser.addOption({"size", "미리보기 창 크기.", "WIDTHxHEIGHT", "1440x810"});
-  parser.addOption({"page", "처음 열 화면: drive, media, diagnostics, vehicle.", "name", "drive"});
+  parser.addOption({"page", "처음 열 화면: home, map, climate, media, vehicle.", "name", "home"});
   parser.addOption({"expect-speed", "실시간 속도가 도착한 뒤 PNG를 저장합니다(km/h). 10초 뒤 실패합니다.", "value"});
   parser.process(app);
   bool validAge = false;
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
   if (!QStringList{"drive", "park", "waiting", "stale"}.contains(scenario)) return 2;
   const auto dimensions = parser.value("size").split('x');
   if (dimensions.size() != 2 || dimensions[0].toInt() < 1280 || dimensions[1].toInt() < 720) return 2;
-  const auto page = QStringList{"drive", "media", "diagnostics", "vehicle"}.indexOf(parser.value("page"));
+  const auto page = QStringList{"home", "map", "climate", "media", "vehicle"}.indexOf(parser.value("page"));
   if (page < 0) return 2;
   const auto appearance = parser.value("appearance");
   if (!QStringList{"dark", "light"}.contains(appearance)) return 2;

@@ -11,7 +11,7 @@ GlassPanel {
     RowLayout {
         anchors.fill: parent; anchors.margins: 9; spacing: 6
         Repeater {
-            model: ["주행", "미디어", "신호", "차량"]
+            model: ["홈", "지도", "공조", "미디어", "차량"]
             delegate: Button {
                 id: entry
                 required property string modelData
