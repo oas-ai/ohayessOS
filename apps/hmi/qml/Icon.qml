@@ -9,14 +9,14 @@ Item {
 
     property string name: ""
     property int size: Tokens.iconMd
-    property color tone: Tokens.textSecondary
+    property color tone: Tokens.inkSecondary
     property bool active: false
 
     implicitWidth: size
     implicitHeight: size
 
-    readonly property color _stroke: active ? Tokens.accent : tone
-    readonly property real _weight: active ? 2.25 : 1.75
+    readonly property color _stroke: active ? Tokens.ink : tone
+    readonly property real _weight: active ? 2.1 : 1.6
 
     onNameChanged: canvas.requestPaint()
     on_StrokeChanged: canvas.requestPaint()

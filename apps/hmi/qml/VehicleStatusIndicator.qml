@@ -1,16 +1,15 @@
 import QtQuick
 import OAS.HMI
 
-// Dot cluster for corner-addressed state. An invalid corner is an outline, so
-// "unknown" is never mistaken for "fine".
+// Corner-addressed state. An invalid corner is an outline, so "unknown" is
+// never mistaken for "fine".
 Flow {
     id: cluster
 
     // [{ id, label, state, valid }] where state is ok | open | warn | critical
     property var items: []
-    property string title: ""
 
-    spacing: Tokens.s4
+    spacing: Tokens.s5
 
     function toneFor(state) {
         switch (state) {
@@ -18,7 +17,7 @@ Flow {
         case "open": return Tokens.warning
         case "warn": return Tokens.warning
         case "critical": return Tokens.critical
-        default: return Tokens.textTertiary
+        default: return Tokens.inkTertiary
         }
     }
 
@@ -31,10 +30,10 @@ Flow {
 
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                width: 12; height: 12; radius: 6
+                width: 10; height: 10
                 color: modelData.valid ? cluster.toneFor(modelData.state) : "transparent"
-                border.width: modelData.valid ? 0 : 1.5
-                border.color: Tokens.textTertiary
+                border.width: modelData.valid ? 0 : Tokens.hairline
+                border.color: Tokens.inkTertiary
 
                 Behavior on color { ColorAnimation { duration: Tokens.mBase; easing.type: Tokens.easeOut } }
             }
@@ -42,7 +41,7 @@ Flow {
             Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: modelData.label
-                color: modelData.valid ? Tokens.textSecondary : Tokens.textTertiary
+                color: modelData.valid ? Tokens.inkSecondary : Tokens.inkTertiary
                 font.pixelSize: Tokens.label
             }
         }

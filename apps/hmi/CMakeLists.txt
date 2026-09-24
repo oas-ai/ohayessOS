@@ -33,16 +33,18 @@ set(OAS_QML_SINGLETONS qml/Tokens.qml qml/Nav.qml qml/Providers.qml)
 set_source_files_properties(${OAS_QML_SINGLETONS} PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 set(OAS_QML_FOUNDATION
-  qml/Icon.qml qml/Panel.qml qml/Caption.qml qml/Divider.qml qml/Readout.qml
-  qml/StatusBadge.qml qml/EmptyState.qml)
+  qml/Icon.qml qml/GridBoard.qml qml/Cell.qml qml/Metric.qml qml/Caption.qml
+  qml/Divider.qml qml/BarSeries.qml qml/MeterBar.qml qml/StatusBadge.qml
+  qml/EmptyState.qml)
 
 set(OAS_QML_CONTROLS
   qml/OasButton.qml qml/OasIconButton.qml qml/OasToggle.qml qml/OasSlider.qml
-  qml/OasSegmented.qml qml/OasStepper.qml)
+  qml/OasSegmented.qml qml/TabRow.qml)
 
 set(OAS_QML_SHELL
-  qml/StatusRail.qml qml/ControlDock.qml qml/SidePanel.qml qml/OasModal.qml
-  qml/Toast.qml qml/NotificationItem.qml qml/CriticalOverlay.qml qml/CategoryTile.qml)
+  qml/TopBar.qml qml/Launcher.qml qml/LauncherMenu.qml qml/SidePanel.qml
+  qml/OasModal.qml qml/Toast.qml qml/NotificationItem.qml qml/CriticalOverlay.qml
+  qml/CategoryTile.qml)
 
 set(OAS_QML_DOMAIN
   qml/VehicleVisual.qml qml/VehicleStatusIndicator.qml qml/TempZone.qml

@@ -1,40 +1,29 @@
 import QtQuick
 import OAS.HMI
 
-Rectangle {
+// A square mark and a word. No pill, no tint block — colour here always means
+// a safety state, so it stays as plain as possible.
+Row {
     id: badge
 
     property string text: ""
-    property color tone: Tokens.accent
-    property string iconName: ""
+    property color tone: Tokens.inkSecondary
 
-    implicitWidth: row.implicitWidth + Tokens.s5
-    implicitHeight: 34
-    radius: Tokens.rPill
-    color: Tokens.wash(badge.tone)
-    border.width: 1
-    border.color: Tokens.wash(badge.tone, 0.25)
+    spacing: Tokens.s2
 
-    Row {
-        id: row
-        anchors.centerIn: parent
-        spacing: Tokens.s2
+    Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: 8
+        height: 8
+        color: badge.tone
+        Behavior on color { ColorAnimation { duration: Tokens.mBase } }
+    }
 
-        Icon {
-            name: badge.iconName
-            visible: badge.iconName.length > 0
-            size: Tokens.iconSm
-            tone: badge.tone
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
-        Text {
-            anchors.verticalCenter: parent.verticalCenter
-            text: badge.text
-            color: badge.tone
-            font.pixelSize: Tokens.caption
-            font.weight: Tokens.weightDemi
-            font.letterSpacing: 1.2
-        }
+    Text {
+        anchors.verticalCenter: parent.verticalCenter
+        text: badge.text
+        color: badge.tone === Tokens.inkSecondary ? Tokens.inkSecondary : badge.tone
+        font.pixelSize: Tokens.caption
+        font.weight: Tokens.weightMedium
     }
 }

@@ -1,11 +1,10 @@
 import QtQuick
 import OAS.HMI
 
+// Sentence case, grey, small. It names the value below it and never shouts.
 Text {
-    color: Tokens.textTertiary
+    color: Tokens.inkSecondary
     font.pixelSize: Tokens.caption
-    font.weight: Tokens.weightMedium
-    font.letterSpacing: 1.6
-    font.capitalization: Font.AllUppercase
+    font.weight: Tokens.weightRegular
     elide: Text.ElideRight
 }

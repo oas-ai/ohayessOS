@@ -13,7 +13,6 @@ Item {
     readonly property var nav: Providers.navigation
 
     MapSurface {
-        id: surface
         anchors.fill: parent
         available: screen.nav.connected
         routeActive: screen.nav.routeActive
@@ -26,7 +25,7 @@ Item {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.margins: Tokens.s5
-        width: Math.min(420, parent.width * 0.38)
+        width: Math.min(440, parent.width * 0.38)
         overlay: true
         available: screen.nav.connected
         turnIcon: screen.nav.nextTurnIcon
@@ -36,43 +35,39 @@ Item {
     }
 
     // ── Overlay 2 · trip summary (bottom left) ────────────────────────────
-    Rectangle {
-        id: summary
+    GridBoard {
         visible: screen.nav.connected
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.margins: Tokens.s5
-        width: Math.min(420, parent.width * 0.38)
-        height: summaryLayout.implicitHeight + Tokens.s5 * 2
-        radius: Tokens.rXl
-        color: Tokens.wash(Tokens.surface, 0.92)
-        border.width: 1
-        border.color: Tokens.borderStrong
+        width: Math.min(460, parent.width * 0.4)
+        columns: 3
 
-        ColumnLayout {
-            id: summaryLayout
-            anchors.fill: parent
-            anchors.margins: Tokens.s5
-            spacing: Tokens.s3
+        Cell {
+            Layout.columnSpan: 3
+            Layout.fillWidth: true
+            spacing: Tokens.s2
+
+            Caption { text: "목적지" }
 
             Text {
                 text: screen.nav.destinationShort
-                color: Tokens.textPrimary
-                font.pixelSize: Tokens.bodyLg
-                font.weight: Tokens.weightMedium
+                Layout.fillWidth: true
                 elide: Text.ElideRight
-                Layout.fillWidth: true
+                color: Tokens.ink
+                font.pixelSize: Tokens.bodyLg
+                font.weight: Tokens.weightDemi
             }
+        }
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Tokens.s5
+        Metric { Layout.fillWidth: true; label: "도착"; value: screen.nav.eta }
+        Metric { Layout.fillWidth: true; label: "남은 시간"; value: screen.nav.remainingMin; unit: "분" }
+        Metric { Layout.fillWidth: true; label: "거리"; value: screen.nav.remainingKm.toFixed(1); unit: "km" }
 
-                Readout { label: "도착"; value: screen.nav.eta; valueSize: Tokens.titleSection }
-                Readout { label: "남은 시간"; value: screen.nav.remainingMin; unit: "분"; valueSize: Tokens.titleSection }
-                Readout { label: "거리"; value: screen.nav.remainingKm.toFixed(1); unit: "km"; valueSize: Tokens.titleSection }
-                Item { Layout.fillWidth: true }
-            }
+        Cell {
+            Layout.columnSpan: 3
+            Layout.fillWidth: true
+            padding: 0
 
             OasButton {
                 Layout.fillWidth: true
@@ -84,73 +79,53 @@ Item {
     }
 
     // ── Overlay 3 · charging and points of interest (top right) ───────────
-    Rectangle {
+    GridBoard {
         visible: screen.nav.connected
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.margins: Tokens.s5
-        width: Math.min(340, parent.width * 0.3)
-        height: poiLayout.implicitHeight + Tokens.s5 * 2
-        radius: Tokens.rXl
-        color: Tokens.wash(Tokens.surface, 0.92)
-        border.width: 1
-        border.color: Tokens.borderStrong
+        width: Math.min(360, parent.width * 0.3)
+        columns: 1
 
-        ColumnLayout {
-            id: poiLayout
-            anchors.fill: parent
-            anchors.margins: Tokens.s5
-            spacing: Tokens.s2
-
+        Cell {
+            Layout.fillWidth: true
             Caption { text: "경로 주변" }
+        }
 
-            Repeater {
-                model: screen.nav.pois
+        Repeater {
+            model: screen.nav.pois
 
-                delegate: Item {
-                    required property var modelData
+            delegate: Cell {
+                required property var modelData
+                Layout.fillWidth: true
+                padding: Tokens.s4
+
+                RowLayout {
                     Layout.fillWidth: true
-                    implicitHeight: Tokens.touchMin
+                    spacing: Tokens.s3
 
-                    Icon {
-                        id: poiIcon
-                        anchors.left: parent.left
-                        anchors.verticalCenter: parent.verticalCenter
-                        name: modelData.icon
-                        size: Tokens.iconMd
-                        tone: Tokens.textSecondary
-                    }
+                    Icon { name: modelData.icon; size: Tokens.iconMd; tone: Tokens.inkSecondary }
 
-                    Column {
-                        anchors.left: poiIcon.right
-                        anchors.leftMargin: Tokens.s3
-                        anchors.right: poiDistance.left
-                        anchors.rightMargin: Tokens.s2
-                        anchors.verticalCenter: parent.verticalCenter
+                    ColumnLayout {
                         spacing: 1
+                        Layout.fillWidth: true
 
                         Text {
                             text: modelData.name
-                            width: parent.width
+                            Layout.fillWidth: true
                             elide: Text.ElideRight
-                            color: Tokens.textPrimary
+                            color: Tokens.ink
                             font.pixelSize: Tokens.bodyMd
                         }
 
-                        Text {
-                            text: modelData.kind
-                            color: Tokens.textTertiary
-                            font.pixelSize: Tokens.caption
-                        }
+                        Caption { text: modelData.kind }
                     }
 
                     Text {
-                        id: poiDistance
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
                         text: modelData.distanceKm.toFixed(1) + " km"
-                        color: Tokens.textSecondary
+                        color: Tokens.inkSecondary
                         font.pixelSize: Tokens.label
+                        font.weight: Tokens.weightMedium
                     }
                 }
             }
@@ -158,16 +133,15 @@ Item {
     }
 
     // ── Overlay 4 · destination entry (bottom right) ──────────────────────
-    RowLayout {
+    Row {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: Tokens.s5
-        spacing: Tokens.s3
+        spacing: Tokens.hairline
 
         OasButton {
             text: "즐겨찾기"
             iconName: "star"
-            variant: "secondary"
             size: Tokens.touchLarge
             onClicked: screen.notify("즐겨찾기 목적지 없음", "star")
         }
@@ -175,7 +149,7 @@ Item {
         OasButton {
             // Text entry is the one input that stays locked while moving.
             text: screen.driving ? "주행 중 검색 잠금" : "목적지 검색"
-            iconName: screen.driving ? "mic" : "search"
+            iconName: "search"
             variant: "primary"
             size: Tokens.touchLarge
             enabled: !screen.driving
@@ -186,7 +160,6 @@ Item {
         OasIconButton {
             iconName: "mic"
             size: Tokens.touchLarge
-            variant: "secondary"
             text: "음성으로 목적지 말하기"
             onClicked: screen.notify("음성 인식 공급자 연결 전", "mic")
         }

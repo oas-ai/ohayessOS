@@ -17,14 +17,13 @@ ColumnLayout {
     Icon {
         name: empty.iconName
         size: Tokens.iconXl
-        tone: Tokens.textTertiary
+        tone: Tokens.inkTertiary
         Layout.alignment: Qt.AlignHCenter
-        Layout.bottomMargin: Tokens.s1
     }
 
     Text {
         text: empty.title
-        color: Tokens.textSecondary
+        color: Tokens.inkSecondary
         font.pixelSize: Tokens.bodyLg
         font.weight: Tokens.weightMedium
         horizontalAlignment: Text.AlignHCenter
@@ -35,19 +34,18 @@ ColumnLayout {
     Text {
         text: empty.detail
         visible: empty.detail.length > 0
-        color: Tokens.textTertiary
+        color: Tokens.inkTertiary
         font.pixelSize: Tokens.label
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
-        Layout.maximumWidth: 420
+        Layout.maximumWidth: 440
     }
 
     StatusBadge {
         text: empty.badge
         visible: empty.badge.length > 0
-        tone: Tokens.textTertiary
+        tone: Tokens.inkTertiary
         Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: Tokens.s1
     }
 }

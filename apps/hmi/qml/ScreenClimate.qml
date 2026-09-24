@@ -12,175 +12,165 @@ Item {
 
     readonly property var climate: Providers.climate
 
-    Panel {
+    EmptyState {
+        anchors.centerIn: parent
+        width: Math.min(parent.width - Tokens.s8, 480)
+        visible: !screen.climate.connected
+        iconName: "climate"
+        title: "공조 공급자 연결 전"
+        detail: "실내 온도, 풍량, 시트 열선과 통풍은 공조 데이터가 연결되면 이 화면에서 직접 조절합니다."
+        badge: "제어 전송 없음"
+    }
+
+    ColumnLayout {
         anchors.fill: parent
+        spacing: Tokens.hairline
+        visible: screen.climate.connected
 
-        EmptyState {
-            anchors.centerIn: parent
-            width: Math.min(parent.width - Tokens.s8, 480)
-            visible: !screen.climate.connected
-            iconName: "climate"
-            title: "공조 공급자 연결 전"
-            detail: "실내 온도, 풍량, 시트 열선과 통풍은 공조 데이터가 연결되면 이 화면에서 직접 조절합니다."
-            badge: "제어 전송 없음"
-        }
+        // ── Dual zone temperature ─────────────────────────────────────────
+        GridBoard {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.maximumHeight: Tokens.breakpoint === "compact" ? 280 : 360
+            columns: 3
 
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Tokens.s5
-            spacing: Tokens.s4
-            visible: screen.climate.connected
-
-            RowLayout {
-                Layout.fillWidth: true
-                Caption { text: "실내 환경" }
-                Item { Layout.fillWidth: true }
-                StatusBadge { text: "로컬 UI 상태"; tone: Tokens.textTertiary }
-            }
-
-            // ── Dual zone temperature ─────────────────────────────────────
-            RowLayout {
+            TempZone {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.minimumHeight: Tokens.touchLarge * 2.4
-                spacing: Tokens.s4
-
-                TempZone {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    label: "운전석"
-                    value: screen.climate.driverTemp
-                    from: screen.climate.minTemp
-                    to: screen.climate.maxTemp
-                    onMoved: function (v) {
-                        screen.climate.driverTemp = v
-                        if (screen.climate.sync) screen.climate.passengerTemp = v
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.preferredWidth: Tokens.touchLarge
-                    spacing: Tokens.s2
-
-                    Item { Layout.fillHeight: true }
-
-                    OasIconButton {
-                        iconName: "sync"
-                        size: Tokens.touchLarge
-                        active: screen.climate.sync
-                        text: "좌우 온도 동기화"
-                        onClicked: {
-                            screen.climate.sync = !screen.climate.sync
-                            if (screen.climate.sync) screen.climate.passengerTemp = screen.climate.driverTemp
-                            screen.notify(screen.climate.sync ? "좌우 온도 동기화" : "동기화 해제", "check")
-                        }
-                    }
-
-                    Caption {
-                        text: "SYNC"
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-
-                    Item { Layout.fillHeight: true }
-                }
-
-                TempZone {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    label: "동승석"
-                    value: screen.climate.passengerTemp
-                    from: screen.climate.minTemp
-                    to: screen.climate.maxTemp
-                    enabled: !screen.climate.sync
-                    onMoved: function (v) { screen.climate.passengerTemp = v }
+                Layout.preferredWidth: 5
+                label: "운전석"
+                value: screen.climate.driverTemp
+                from: screen.climate.minTemp
+                to: screen.climate.maxTemp
+                onMoved: function (v) {
+                    screen.climate.driverTemp = v
+                    if (screen.climate.sync) screen.climate.passengerTemp = v
                 }
             }
 
-            // ── Fan ───────────────────────────────────────────────────────
-            OasSlider {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Tokens.touchLarge
-                label: "풍량"
-                iconName: "fan"
-                from: 0
-                to: screen.climate.maxFan
-                stepSize: 1
-                value: screen.climate.fanLevel
-                displayText: screen.climate.fanLevel + " / " + screen.climate.maxFan
-                onMoved: function (v) { screen.climate.fanLevel = v; if (v > 0) screen.climate.auto = false }
+            Cell {
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: Tokens.touchHero
+
+                Item { Layout.fillHeight: true }
+
+                OasIconButton {
+                    Layout.alignment: Qt.AlignHCenter
+                    iconName: "sync"
+                    size: Tokens.touchLarge
+                    active: screen.climate.sync
+                    text: "좌우 온도 동기화"
+                    onClicked: {
+                        screen.climate.sync = !screen.climate.sync
+                        if (screen.climate.sync) screen.climate.passengerTemp = screen.climate.driverTemp
+                        screen.notify(screen.climate.sync ? "좌우 온도 동기화" : "동기화 해제", "check")
+                    }
+                }
+
+                Caption { text: "SYNC"; Layout.alignment: Qt.AlignHCenter }
+
+                Item { Layout.fillHeight: true }
             }
 
-            // ── Seats ─────────────────────────────────────────────────────
-            // The icon labels the whole control from outside it; putting it on
-            // segment 0 made two controls read as one eight-step strip.
-            RowLayout {
+            TempZone {
                 Layout.fillWidth: true
-                spacing: Tokens.s8
+                Layout.fillHeight: true
+                Layout.preferredWidth: 5
+                label: "동승석"
+                value: screen.climate.passengerTemp
+                from: screen.climate.minTemp
+                to: screen.climate.maxTemp
+                enabled: !screen.climate.sync
+                onMoved: function (v) { screen.climate.passengerTemp = v }
+            }
+        }
 
-                Repeater {
-                    model: [
-                        { zone: "운전석 시트", heat: "driverSeatHeat", vent: "driverSeatVent" },
-                        { zone: "동승석 시트", heat: "passengerSeatHeat", vent: "passengerSeatVent" }
-                    ]
+        // ── Fan ───────────────────────────────────────────────────────────
+        OasSlider {
+            Layout.fillWidth: true
+            Layout.preferredHeight: Tokens.touchLarge
+            label: "풍량"
+            iconName: "fan"
+            from: 0
+            to: screen.climate.maxFan
+            stepSize: 1
+            value: screen.climate.fanLevel
+            displayText: screen.climate.fanLevel + " / " + screen.climate.maxFan
+            onMoved: function (v) { screen.climate.fanLevel = v; if (v > 0) screen.climate.auto = false }
+        }
 
-                    delegate: ColumnLayout {
-                        required property var modelData
+        // ── Seats ─────────────────────────────────────────────────────────
+        GridBoard {
+            Layout.fillWidth: true
+            columns: 2
+
+            Repeater {
+                model: [
+                    { zone: "운전석 시트", heat: "driverSeatHeat", vent: "driverSeatVent" },
+                    { zone: "동승석 시트", heat: "passengerSeatHeat", vent: "passengerSeatVent" }
+                ]
+
+                delegate: Cell {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    spacing: Tokens.s3
+
+                    Caption { text: modelData.zone }
+
+                    RowLayout {
                         Layout.fillWidth: true
-                        spacing: Tokens.s2
+                        spacing: Tokens.s5
 
-                        Caption { text: modelData.zone }
+                        Icon {
+                            name: "seatHeat"
+                            size: Tokens.iconMd
+                            active: screen.climate[modelData.heat] > 0
+                            Layout.alignment: Qt.AlignVCenter
+                        }
 
-                        RowLayout {
+                        OasSegmented {
                             Layout.fillWidth: true
-                            spacing: Tokens.s4
-
-                            Icon {
-                                name: "seatHeat"
-                                size: Tokens.iconMd
-                                tone: Tokens.textSecondary
-                                active: screen.climate[modelData.heat] > 0
-                                Layout.alignment: Qt.AlignVCenter
+                            model: ["0", "1", "2", "3"]
+                            currentIndex: screen.climate[modelData.heat]
+                            onActivated: function (i) {
+                                screen.climate[modelData.heat] = i
+                                if (i > 0) screen.climate[modelData.vent] = 0
                             }
+                        }
 
-                            OasSegmented {
-                                Layout.fillWidth: true
-                                model: ["0", "1", "2", "3"]
-                                currentIndex: screen.climate[modelData.heat]
-                                onActivated: function (i) {
-                                    screen.climate[modelData.heat] = i
-                                    if (i > 0) screen.climate[modelData.vent] = 0
-                                }
-                            }
+                        Icon {
+                            name: "seatVent"
+                            size: Tokens.iconMd
+                            active: screen.climate[modelData.vent] > 0
+                            Layout.alignment: Qt.AlignVCenter
+                        }
 
-                            Icon {
-                                name: "seatVent"
-                                size: Tokens.iconMd
-                                tone: Tokens.textSecondary
-                                active: screen.climate[modelData.vent] > 0
-                                Layout.leftMargin: Tokens.s4
-                                Layout.alignment: Qt.AlignVCenter
-                            }
-
-                            OasSegmented {
-                                Layout.fillWidth: true
-                                model: ["0", "1", "2", "3"]
-                                currentIndex: screen.climate[modelData.vent]
-                                onActivated: function (i) {
-                                    screen.climate[modelData.vent] = i
-                                    if (i > 0) screen.climate[modelData.heat] = 0
-                                }
+                        OasSegmented {
+                            Layout.fillWidth: true
+                            model: ["0", "1", "2", "3"]
+                            currentIndex: screen.climate[modelData.vent]
+                            onActivated: function (i) {
+                                screen.climate[modelData.vent] = i
+                                if (i > 0) screen.climate[modelData.heat] = 0
                             }
                         }
                     }
                 }
             }
+        }
 
-            Divider { Layout.fillWidth: true }
+        // ── Modes ─────────────────────────────────────────────────────────
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: Tokens.touchLarge + Tokens.s5 * 2
+            color: Tokens.surface
 
-            // ── Modes ─────────────────────────────────────────────────────
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Tokens.s3
+            Row {
+                anchors.left: parent.left
+                anchors.leftMargin: Tokens.cellPadding
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: Tokens.hairline
 
                 OasIconButton {
                     iconName: "defrostFront"
@@ -224,15 +214,22 @@ Item {
                     size: Tokens.touchLarge
                     onClicked: { screen.climate.recirculate = !screen.climate.recirculate; screen.notify(screen.climate.recirculate ? "내기 순환" : "외기 유입", "fan") }
                 }
+            }
 
-                Item { Layout.fillWidth: true }
+            Column {
+                anchors.right: parent.right
+                anchors.rightMargin: Tokens.cellPadding
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 2
 
-                Readout {
-                    label: "실외"
-                    value: screen.climate.outsideTemp.toFixed(1)
-                    unit: "°C"
-                    valid: screen.climate.outsideValid
-                    valueSize: Tokens.titleSection
+                Caption { text: "실외"; anchors.right: parent.right }
+
+                Text {
+                    anchors.right: parent.right
+                    text: screen.climate.outsideValid ? screen.climate.outsideTemp.toFixed(1) + " °C" : "—"
+                    color: Tokens.ink
+                    font.pixelSize: Tokens.titleMd
+                    font.weight: Tokens.weightDemi
                 }
             }
         }

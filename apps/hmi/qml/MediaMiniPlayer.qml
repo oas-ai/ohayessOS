@@ -2,7 +2,7 @@ import QtQuick
 import OAS.HMI
 
 // Artwork, track, artist and three transport controls. Nothing else — the rest
-// is one tap away in the Media screen.
+// is one destination away.
 Item {
     id: player
 
@@ -17,7 +17,6 @@ Item {
     signal expand()
 
     implicitHeight: Tokens.touchHero
-    // Below this width the skip buttons would squeeze the track name to nothing.
     readonly property bool _roomForSkip: width >= 420
     readonly property bool _roomForArt: width >= 360
 
@@ -26,18 +25,17 @@ Item {
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
         visible: player._roomForArt
-        width: player._roomForArt ? 72 : 0
-        height: 72
-        radius: Tokens.rLg
+        width: player._roomForArt ? 64 : 0
+        height: 64
         color: Tokens.surfaceAlt
-        border.width: 1
-        border.color: Tokens.borderStrong
+        border.width: Tokens.hairline
+        border.color: Tokens.line
 
         Icon {
             anchors.centerIn: parent
             name: "media"
             size: Tokens.iconLg
-            tone: player.available ? Tokens.accent : Tokens.textTertiary
+            tone: player.available ? Tokens.ink : Tokens.inkTertiary
         }
 
         MouseArea { anchors.fill: parent; onClicked: player.expand() }
@@ -55,16 +53,16 @@ Item {
             text: player.available ? player.track : "재생 소스 연결 전"
             width: parent.width
             elide: Text.ElideRight
-            color: player.available ? Tokens.textPrimary : Tokens.textSecondary
+            color: player.available ? Tokens.ink : Tokens.inkSecondary
             font.pixelSize: Tokens.bodyLg
-            font.weight: Tokens.weightMedium
+            font.weight: Tokens.weightDemi
         }
 
         Text {
             text: player.available ? player.artist : player.lockReason
             width: parent.width
             elide: Text.ElideRight
-            color: Tokens.textTertiary
+            color: Tokens.inkTertiary
             font.pixelSize: Tokens.label
         }
     }
@@ -73,11 +71,11 @@ Item {
         id: transport
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        spacing: Tokens.s1
+        spacing: Tokens.hairline
 
         OasIconButton {
             iconName: "prev"
-            variant: "ghost"
+            variant: "secondary"
             size: Tokens.touchLarge
             text: "이전 곡"
             visible: player._roomForSkip
@@ -96,7 +94,7 @@ Item {
 
         OasIconButton {
             iconName: "next"
-            variant: "ghost"
+            variant: "secondary"
             size: Tokens.touchLarge
             text: "다음 곡"
             visible: player._roomForSkip

@@ -1,7 +1,8 @@
 import QtQuick
 import OAS.HMI
 
-// 2–5 mutually exclusive options. The indicator moves; the segments do not.
+// Boxed options separated by hairlines. The selection is inked rather than
+// outlined, so it reads at a glance without colour.
 Item {
     id: segmented
 
@@ -11,9 +12,7 @@ Item {
     signal activated(int index)
 
     implicitHeight: Tokens.touchBase
-    implicitWidth: Math.max(Tokens.touchMin * Math.max(1, model.length), 240)
-
-    readonly property real _segmentWidth: model.length > 0 ? width / model.length : width
+    implicitWidth: Math.max(Tokens.touchMin * Math.max(1, model.length), 220)
 
     function _entry(index, key, fallback) {
         const item = model[index]
@@ -24,91 +23,75 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: Tokens.rMd
-        color: Tokens.surfaceAlt
-        border.width: 1
-        border.color: Tokens.borderStrong
-    }
+        color: Tokens.line
 
-    Rectangle {
-        id: indicator
-        width: segmented._segmentWidth - Tokens.s1 * 2
-        height: parent.height - Tokens.s1 * 2
-        x: segmented.currentIndex * segmented._segmentWidth + Tokens.s1
-        y: Tokens.s1
-        radius: Tokens.rMd - 4
-        color: Tokens.surfaceRaised
-        border.width: 1
-        border.color: Tokens.accent
-        visible: segmented.currentIndex >= 0 && segmented.currentIndex < segmented.model.length
+        Row {
+            anchors.fill: parent
+            anchors.margins: Tokens.hairline
+            spacing: Tokens.hairline
 
-        Behavior on x { NumberAnimation { duration: Tokens.mBase; easing.type: Tokens.easeOut } }
-    }
+            Repeater {
+                model: segmented.model
 
-    Row {
-        anchors.fill: parent
+                delegate: Rectangle {
+                    id: segment
+                    required property int index
+                    readonly property bool selected: segmented.currentIndex === index
+                    readonly property bool segmentEnabled: segmented._entry(index, "enabled", true)
 
-        Repeater {
-            model: segmented.model
+                    width: (parent.width - Tokens.hairline * Math.max(0, segmented.model.length - 1)) / Math.max(1, segmented.model.length)
+                    height: parent.height
+                    color: !segmentEnabled ? Tokens.surfaceAlt
+                        : selected ? Tokens.ink : Tokens.surface
+                    activeFocusOnTab: segmentEnabled
+                    Accessible.name: segmented._entry(index, "text", "")
+                    Accessible.role: Accessible.RadioButton
 
-            delegate: Item {
-                id: segment
-                required property int index
-                readonly property bool selected: segmented.currentIndex === index
-                readonly property bool segmentEnabled: segmented._entry(index, "enabled", true)
+                    Behavior on color { ColorAnimation { duration: Tokens.mFast; easing.type: Tokens.easeOut } }
 
-                width: segmented._segmentWidth
-                height: segmented.height
-                activeFocusOnTab: segmentEnabled
-                Accessible.name: segmented._entry(index, "text", "")
-                Accessible.role: Accessible.RadioButton
-
-                Rectangle {
-                    anchors.fill: parent
-                    anchors.margins: Tokens.s1
-                    radius: Tokens.rMd - 4
-                    color: "transparent"
-                    border.width: segment.activeFocus ? 2 : 0
-                    border.color: Tokens.accent
-                }
-
-                Row {
-                    anchors.centerIn: parent
-                    spacing: Tokens.s2
-
-                    Icon {
-                        name: segmented._entry(segment.index, "iconName", "")
-                        visible: name.length > 0
-                        anchors.verticalCenter: parent.verticalCenter
-                        size: Tokens.iconMd
-                        tone: !segment.segmentEnabled ? Tokens.textDisabled
-                            : segment.selected ? Tokens.accent : Tokens.textSecondary
+                    Rectangle {
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.width: segment.activeFocus ? 2 : 0
+                        border.color: Tokens.ink
                     }
 
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: segmented._entry(segment.index, "text", "")
-                        visible: text.length > 0
-                        color: !segment.segmentEnabled ? Tokens.textDisabled
-                            : segment.selected ? Tokens.textPrimary : Tokens.textSecondary
-                        font.pixelSize: Tokens.bodyMd
-                        font.weight: segment.selected ? Tokens.weightDemi : Tokens.weightRegular
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: Tokens.s2
 
-                        Behavior on color { ColorAnimation { duration: Tokens.mBase; easing.type: Tokens.easeOut } }
+                        Icon {
+                            name: segmented._entry(segment.index, "iconName", "")
+                            visible: name.length > 0
+                            anchors.verticalCenter: parent.verticalCenter
+                            size: Tokens.iconMd
+                            tone: !segment.segmentEnabled ? Tokens.inkDisabled
+                                : segment.selected ? Tokens.onInk : Tokens.inkSecondary
+                        }
+
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: segmented._entry(segment.index, "text", "")
+                            visible: text.length > 0
+                            color: !segment.segmentEnabled ? Tokens.inkDisabled
+                                : segment.selected ? Tokens.onInk : Tokens.inkSecondary
+                            font.pixelSize: Tokens.bodyMd
+                            font.weight: segment.selected ? Tokens.weightDemi : Tokens.weightRegular
+                        }
                     }
-                }
 
-                MouseArea {
-                    anchors.fill: parent
-                    enabled: segment.segmentEnabled
-                    onClicked: {
-                        segment.forceActiveFocus()
-                        segmented.currentIndex = segment.index
-                        segmented.activated(segment.index)
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: segment.segmentEnabled
+                        onClicked: {
+                            segment.forceActiveFocus()
+                            segmented.currentIndex = segment.index
+                            segmented.activated(segment.index)
+                        }
                     }
-                }
 
-                Keys.onSpacePressed: if (segment.segmentEnabled) { segmented.currentIndex = segment.index; segmented.activated(segment.index) }
+                    Keys.onSpacePressed: if (segment.segmentEnabled) { segmented.currentIndex = segment.index; segmented.activated(segment.index) }
+                }
             }
         }
     }

@@ -1,9 +1,9 @@
 import QtQuick
 import OAS.HMI
 
-// Handle-free slider: the whole filled bar is the drag target, so no precise
-// aim is required while driving. The fill follows the finger with no animation;
-// only externally changed values animate.
+// Handle-free: the whole filled run is the drag target, so no precise aim is
+// required while driving. The fill follows the finger with no animation; only
+// externally changed values animate.
 Item {
     id: slider
 
@@ -37,18 +37,15 @@ Item {
     Rectangle {
         id: track
         anchors.fill: parent
-        radius: Tokens.rLg
         color: Tokens.surfaceAlt
-        border.width: slider.activeFocus ? 2 : 1
-        border.color: slider.activeFocus ? Tokens.accent : Tokens.borderStrong
+        border.width: slider.activeFocus ? 2 : Tokens.hairline
+        border.color: slider.activeFocus ? Tokens.ink : Tokens.line
         clip: true
 
         Rectangle {
             width: Math.round(track.width * slider._ratio)
             height: track.height
-            color: slider.enabled ? Tokens.accent : Tokens.textDisabled
-            // Radius only matters while the fill is narrow; the clip handles the rest.
-            radius: Tokens.rLg
+            color: slider.enabled ? Tokens.ink : Tokens.inkDisabled
 
             Behavior on width {
                 enabled: !slider._dragging
@@ -56,24 +53,28 @@ Item {
             }
         }
 
-        Icon {
-            name: slider.iconName
-            visible: slider.iconName.length > 0
+        // Label and value invert over the filled run so both stay readable.
+        Row {
             anchors.left: parent.left
             anchors.leftMargin: Tokens.s4
             anchors.verticalCenter: parent.verticalCenter
-            size: Tokens.iconMd
-            tone: Tokens.textPrimary
-        }
+            spacing: Tokens.s2
 
-        Text {
-            anchors.left: parent.left
-            anchors.leftMargin: slider.iconName.length > 0 ? Tokens.s4 * 2 + Tokens.iconMd : Tokens.s4
-            anchors.verticalCenter: parent.verticalCenter
-            text: slider.label
-            color: Tokens.textPrimary
-            font.pixelSize: Tokens.bodyMd
-            font.weight: Tokens.weightMedium
+            Icon {
+                anchors.verticalCenter: parent.verticalCenter
+                name: slider.iconName
+                visible: slider.iconName.length > 0
+                size: Tokens.iconMd
+                tone: Tokens.onInk
+            }
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: slider.label
+                color: Tokens.onInk
+                font.pixelSize: Tokens.bodyMd
+                font.weight: Tokens.weightMedium
+            }
         }
 
         Text {
@@ -82,7 +83,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: slider.displayText
             visible: slider.displayText.length > 0
-            color: Tokens.textPrimary
+            color: Tokens.ink
             font.pixelSize: Tokens.bodyMd
             font.weight: Tokens.weightDemi
         }

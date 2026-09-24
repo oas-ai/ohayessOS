@@ -12,8 +12,6 @@ Item {
     signal toggled(bool value)
 
     implicitHeight: Math.max(Tokens.touchMin, column.implicitHeight + Tokens.s2)
-    // Fixed rather than derived: the label width is anchored to this item, so
-    // deriving from it would close a layout loop.
     implicitWidth: 320
     activeFocusOnTab: enabled
     Accessible.name: toggle.text
@@ -21,11 +19,9 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        anchors.margins: -Tokens.s2
-        radius: Tokens.rMd
         color: "transparent"
         border.width: toggle.activeFocus ? 2 : 0
-        border.color: Tokens.accent
+        border.color: Tokens.ink
     }
 
     Column {
@@ -40,7 +36,7 @@ Item {
             text: toggle.text
             width: parent.width
             elide: Text.ElideRight
-            color: toggle.enabled ? Tokens.textPrimary : Tokens.textDisabled
+            color: toggle.enabled ? Tokens.ink : Tokens.inkDisabled
             font.pixelSize: Tokens.bodyMd
             font.weight: Tokens.weightMedium
         }
@@ -50,7 +46,7 @@ Item {
             visible: text.length > 0
             width: parent.width
             elide: Text.ElideRight
-            color: Tokens.textTertiary
+            color: Tokens.inkTertiary
             font.pixelSize: Tokens.label
         }
     }
@@ -59,25 +55,22 @@ Item {
         id: track
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        width: 72
-        height: 40
-        radius: Tokens.rPill
-        color: !toggle.enabled ? Tokens.surfaceAlt : toggle.checked ? Tokens.accent : Tokens.surfaceRaised
-        border.width: 1
-        border.color: toggle.checked ? Tokens.wash(Tokens.accent, 0.4) : Tokens.borderStrong
+        width: 64
+        height: 32
+        color: !toggle.enabled ? Tokens.surfaceAlt : toggle.checked ? Tokens.ink : Tokens.surfaceInk
+        border.width: Tokens.hairline
+        border.color: toggle.checked ? Tokens.ink : Tokens.lineStrong
 
         Behavior on color { ColorAnimation { duration: Tokens.mFast; easing.type: Tokens.easeOut } }
 
         Rectangle {
-            width: 32
-            height: 32
-            radius: Tokens.rPill
+            width: 24
+            height: 24
             y: 4
             x: toggle.checked ? track.width - width - 4 : 4
-            color: !toggle.enabled ? Tokens.textDisabled : toggle.checked ? Tokens.accentHi : Tokens.textSecondary
+            color: !toggle.enabled ? Tokens.inkDisabled : toggle.checked ? Tokens.onInk : Tokens.surface
 
             Behavior on x { NumberAnimation { duration: Tokens.mFast; easing.type: Tokens.easeOut } }
-            Behavior on color { ColorAnimation { duration: Tokens.mFast; easing.type: Tokens.easeOut } }
         }
     }
 

@@ -1,82 +1,66 @@
 pragma Singleton
 import QtQuick
 
-// Single source of truth for the OAS Automotive OS design system.
-// See apps/hmi/design/01-DESIGN-TOKENS.md. No other QML file declares a hex
-// literal, a duration, or a touch dimension.
+// OAS Automotive OS design system — "Grid".
+//
+// A hairline Swiss grid rather than floating cards: cells meet, separated by a
+// single rule. Zero radius, no shadows, no blur. Monochrome, where emphasis is
+// contrast and weight; colour is reserved for safety meaning alone.
+//
+// See apps/hmi/design/01-DESIGN-TOKENS.md. No other QML file declares a colour,
+// a duration or a touch dimension.
 QtObject {
     id: tokens
 
-    property bool dark: true
-    // Main assigns the live window size; every adaptive value derives from it.
+    property bool dark: false
     property int viewportWidth: 1920
     property int viewportHeight: 1080
 
-    // ── Surface ───────────────────────────────────────────────────────────
-    readonly property color bg:            dark ? "#0B0C0E" : "#F2F3F5"
-    readonly property color surface:       dark ? "#16181C" : "#FFFFFF"
-    readonly property color surfaceAlt:    dark ? "#202329" : "#E9EBEE"
-    readonly property color surfaceRaised: dark ? "#2A2E36" : "#DDE0E4"
-    readonly property color borderSubtle:  dark ? "#24272E" : "#E2E5E9"
-    readonly property color borderStrong:  dark ? "#363B44" : "#C9CDD3"
+    // ── Ground and paper ──────────────────────────────────────────────────
+    readonly property color bg:         dark ? "#0E0E0D" : "#EDEDEB"
+    readonly property color surface:    dark ? "#161615" : "#F4F4F2"
+    readonly property color surfaceAlt: dark ? "#201F1E" : "#E4E4E0"
+    readonly property color surfaceInk: dark ? "#2C2B29" : "#DCDCD7"
 
-    // ── Text ──────────────────────────────────────────────────────────────
-    readonly property color textPrimary:   dark ? "#FFFFFF" : "#101215"
-    readonly property color textSecondary: dark ? "#A5A7AB" : "#5A5E66"
-    readonly property color textTertiary:  dark ? "#6E7176" : "#7E838B"
-    readonly property color textDisabled:  dark ? "#4A4D53" : "#B0B4BA"
+    // ── Rules ─────────────────────────────────────────────────────────────
+    // The grid is built from `line`; `lineStrong` separates major regions.
+    readonly property color line:       dark ? "#2A2A28" : "#D6D6D2"
+    readonly property color lineStrong: dark ? "#43423F" : "#B9B9B3"
 
-    // ── Accent · Genesis copper ───────────────────────────────────────────
-    // Reserved for active, selected and emphasised values. Never a warning.
-    readonly property color accent:     dark ? "#C08B5C" : "#8A6039"
-    readonly property color accentHi:   dark ? "#E8C39E" : "#C08B5C"
-    readonly property color accentDeep: dark ? "#7A5433" : "#5E3F24"
+    // ── Ink ───────────────────────────────────────────────────────────────
+    readonly property color ink:          dark ? "#F2F2F0" : "#111111"
+    readonly property color inkSecondary: dark ? "#A3A29B" : "#6E6E68"
+    readonly property color inkTertiary:  dark ? "#77776F" : "#9A9A93"
+    readonly property color inkDisabled:  dark ? "#4E4E48" : "#BEBEB7"
+    // Text drawn on top of a solid ink fill.
+    readonly property color onInk:        dark ? "#0E0E0D" : "#F4F4F2"
 
-    // ── Semantic ──────────────────────────────────────────────────────────
-    readonly property color warning:  dark ? "#F2A93B" : "#B97708"
-    readonly property color critical: dark ? "#E5484D" : "#C62A2F"
-    readonly property color success:  dark ? "#4CC38A" : "#1F8F5B"
-    readonly property color info:     dark ? "#7FA8C9" : "#41688A"
-
-    // Text and icons drawn on top of an accent fill.
-    readonly property color onAccent: dark ? "#16181C" : "#FFFFFF"
-
-    // ── Illustration surfaces ─────────────────────────────────────────────
-    // Used only by VehicleVisual and MapSurface. They are rendering materials,
-    // not UI chrome, but they live here so no other QML file carries a colour.
-    readonly property color ground:    dark ? "#0E1013" : "#E8EAED"
-    readonly property color videoInk:  dark ? "#050607" : "#1A1D21"
-    readonly property color glazing:   dark ? "#0D1117" : "#AEB8C4"
-    readonly property color bodyHigh:  dark ? "#343A44" : "#FFFFFF"
-    readonly property color bodyMid:   dark ? "#232932" : "#E4E8ED"
-    readonly property color bodyLow:   dark ? "#171B22" : "#C9CFD7"
-    readonly property color doorPanel: dark ? "#2A3039" : "#DCE1E7"
-    readonly property color tyre:      dark ? "#05070A" : "#9AA0A8"
-    readonly property color mapBlock:  dark ? "#1A1E24" : "#D3D8DE"
-    readonly property color mapRoad:   dark ? "#262C34" : "#C2C9D1"
+    // ── Safety colour ─────────────────────────────────────────────────────
+    // The only colour in the system. Anything coloured means something.
+    readonly property color warning:  dark ? "#E2A244" : "#9A5B00"
+    readonly property color critical: dark ? "#F2635A" : "#B3261E"
+    readonly property color success:  dark ? "#5BC08D" : "#2E6B4F"
 
     function wash(tone, alpha) { return Qt.rgba(tone.r, tone.g, tone.b, alpha === undefined ? 0.12 : alpha) }
-    readonly property color accentWash: wash(accent)
-    readonly property color scrim: Qt.rgba(0, 0, 0, dark ? 0.62 : 0.40)
+    readonly property color scrim: Qt.rgba(0, 0, 0, dark ? 0.55 : 0.22)
 
     // ── Typography ────────────────────────────────────────────────────────
-    readonly property int speedHero:   Math.round(140 * typeScale)
-    readonly property int speedLarge:  Math.round(104 * typeScale)
-    readonly property int displayMd:   Math.round(72 * typeScale)
-    readonly property int displaySm:   Math.round(48 * typeScale)
-    readonly property int titlePage:   Math.round(32 * typeScale)
-    readonly property int titleSection: Math.round(24 * typeScale)
-    readonly property int bodyLg:      Math.round(20 * typeScale)
-    readonly property int bodyMd:      Math.round(18 * typeScale)
-    readonly property int label:       Math.round(15 * typeScale)
-    readonly property int caption:     13
+    // Data is set in DemiBold and sits under a small, sentence-case grey label.
+    readonly property int dataHero: Math.round(118 * typeScale)
+    readonly property int dataXl:   Math.round(72 * typeScale)
+    readonly property int dataLg:   Math.round(46 * typeScale)
+    readonly property int dataMd:   Math.round(32 * typeScale)
+    readonly property int titleLg:  Math.round(30 * typeScale)
+    readonly property int titleMd:  Math.round(22 * typeScale)
+    readonly property int bodyLg:   Math.round(19 * typeScale)
+    readonly property int bodyMd:   Math.round(17 * typeScale)
+    readonly property int label:    Math.round(15 * typeScale)
+    readonly property int caption:  13
 
-    // Display sizes grow on large panels; 13px stays the absolute floor.
-    readonly property real typeScale: breakpoint === "compact" ? 0.82
-                                    : breakpoint === "wide" ? 1.08
-                                    : breakpoint === "ultrawide" ? 1.12 : 1.0
+    readonly property real typeScale: breakpoint === "compact" ? 0.84
+                                    : breakpoint === "wide" ? 1.06
+                                    : breakpoint === "ultrawide" ? 1.10 : 1.0
 
-    readonly property int weightLight: Font.Light
     readonly property int weightRegular: Font.Normal
     readonly property int weightMedium: Font.Medium
     readonly property int weightDemi: Font.DemiBold
@@ -92,12 +76,11 @@ QtObject {
     readonly property int s8: 64
 
     // ── Radius ────────────────────────────────────────────────────────────
-    readonly property int rSm: 10
-    readonly property int rMd: 16
-    readonly property int rLg: 22
-    readonly property int rXl: 28
-    readonly property int rDock: 30
-    readonly property int rPill: 999
+    // Zero, everywhere. The grid does the separating; corners do not.
+    readonly property int radius: 0
+
+    // ── Rule weight ───────────────────────────────────────────────────────
+    readonly property int hairline: 1
 
     // ── Touch target ──────────────────────────────────────────────────────
     readonly property int touchMin: 48
@@ -107,17 +90,17 @@ QtObject {
 
     // ── Motion ────────────────────────────────────────────────────────────
     readonly property int mInstant: 0
-    readonly property int mFast: 150
-    readonly property int mBase: 200
-    readonly property int mSlow: 300
+    readonly property int mFast: 120
+    readonly property int mBase: 180
+    readonly property int mSlow: 260
     readonly property int easeOut: Easing.OutCubic
     readonly property int easeInOut: Easing.InOutCubic
 
     // ── Icon ──────────────────────────────────────────────────────────────
-    readonly property int iconSm: 20
-    readonly property int iconMd: 24
-    readonly property int iconLg: 32
-    readonly property int iconXl: 48
+    readonly property int iconSm: 18
+    readonly property int iconMd: 22
+    readonly property int iconLg: 28
+    readonly property int iconXl: 40
 
     // ── Breakpoint ────────────────────────────────────────────────────────
     readonly property real aspect: viewportHeight > 0 ? viewportWidth / viewportHeight : 1.78
@@ -126,16 +109,16 @@ QtObject {
         : viewportWidth >= 2300 ? "wide"
         : viewportWidth >= 1600 ? "regular" : "compact"
 
-    readonly property int screenMargin: breakpoint === "compact" ? s5
-                                      : breakpoint === "regular" ? s6 : s7
-    readonly property int gutter: s5
-    readonly property int railHeight: breakpoint === "ultrawide" ? 64 : 56
-    readonly property int dockHeight: breakpoint === "compact" ? 80
-                                    : breakpoint === "ultrawide" ? 96 : 88
-    readonly property int sideColumn: breakpoint === "wide" ? 400
-                                    : breakpoint === "ultrawide" ? 360 : 340
+    readonly property int screenMargin: breakpoint === "compact" ? 0 : 0
+    readonly property int cellPadding: breakpoint === "compact" ? s4 : s5
+    readonly property int railHeight: breakpoint === "compact" ? 64 : 72
+    readonly property int launcherHeight: breakpoint === "compact" ? 64 : 72
     readonly property bool showSideColumns: breakpoint !== "compact"
     readonly property bool showPersistentMap: breakpoint === "ultrawide"
+    // Metric cells per row.
+    readonly property int metricColumns: breakpoint === "compact" ? 2
+                                       : breakpoint === "regular" ? 4
+                                       : breakpoint === "wide" ? 4 : 6
 
     // ── Runtime policy strings ────────────────────────────────────────────
     // Presentation only. The runtime owns the decision these describe.

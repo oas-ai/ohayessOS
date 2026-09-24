@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
   parser.addOption({"scenario", "데모 프리셋: drive, park, waiting, stale.", "name", "drive"});
   parser.addOption({"demo-speed-kph", "데모 속도를 km/h 단위로 주입합니다.", "value"});
   parser.addOption({"demo-gear", "데모 기어를 주입합니다: P, R, N, D.", "gear"});
-  parser.addOption({"appearance", "시작 화면 테마: dark 또는 light.", "name", "dark"});
+  parser.addOption({"appearance", "시작 화면 테마: light 또는 dark.", "name", "light"});
   parser.addOption({"capture", "렌더링한 PNG를 저장하고 종료합니다.", "path"});
   parser.addOption({"size", "미리보기 창 크기.", "WIDTHxHEIGHT", "1440x810"});
   parser.addOption({"page", "처음 열 화면: home, navigation, climate, media, phone, camera, vehicle, settings, adas, energy, software, diagnostics.", "name", "home"});

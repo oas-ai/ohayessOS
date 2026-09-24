@@ -9,7 +9,6 @@ Button {
     property string variant: "secondary"
     property string iconName: ""
     property int size: Tokens.touchBase
-    // Shown instead of acting when the control is disabled by driving policy.
     property string lockReason: ""
 
     implicitHeight: size
@@ -18,15 +17,14 @@ Button {
     Accessible.description: enabled ? "" : lockReason
     hoverEnabled: true
 
-    readonly property color _fg: !enabled ? Tokens.textDisabled
-        : variant === "primary" ? Tokens.accentHi
+    readonly property color _fg: !enabled ? Tokens.inkDisabled
+        : variant === "primary" ? Tokens.onInk
         : variant === "danger" ? Tokens.critical
-        : Tokens.textPrimary
+        : Tokens.ink
     readonly property color _bg: !enabled ? Tokens.surfaceAlt
-        : variant === "primary" ? (down ? Tokens.accentDeep : Tokens.accent)
+        : variant === "primary" ? (down ? Tokens.inkSecondary : Tokens.ink)
         : variant === "ghost" ? "transparent"
-        : variant === "danger" ? Tokens.wash(Tokens.critical)
-        : (down ? Tokens.surfaceRaised : Tokens.surfaceAlt)
+        : down ? Tokens.surfaceInk : Tokens.surfaceAlt
 
     contentItem: Item {
         Row {
@@ -47,23 +45,20 @@ Button {
                 text: control.text
                 visible: control.text.length > 0
                 color: control._fg
-                font.pixelSize: Tokens.bodyLg
+                font.pixelSize: Tokens.bodyMd
                 font.weight: Tokens.weightMedium
             }
         }
     }
 
     background: Rectangle {
-        radius: Tokens.rMd
         color: control._bg
-        border.width: control.activeFocus ? 2 : 1
-        border.color: control.activeFocus ? Tokens.accent
-            : control.variant === "ghost" ? Tokens.borderStrong
-            : control.variant === "danger" ? Tokens.wash(Tokens.critical, 0.3)
+        border.width: control.activeFocus ? 2 : Tokens.hairline
+        border.color: control.activeFocus ? Tokens.ink
+            : control.variant === "ghost" ? Tokens.lineStrong
+            : control.variant === "danger" ? Tokens.critical
             : "transparent"
-        scale: control.down ? 0.97 : 1.0
 
         Behavior on color { ColorAnimation { duration: Tokens.mFast; easing.type: Tokens.easeOut } }
-        Behavior on scale { NumberAnimation { duration: Tokens.mFast; easing.type: Tokens.easeOut } }
     }
 }

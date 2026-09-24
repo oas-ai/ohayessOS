@@ -14,124 +14,112 @@ Item {
     property bool installing: false
     property real progress: 0
 
-    Panel {
-        anchors.fill: parent
+    EmptyState {
+        anchors.centerIn: parent
+        width: Math.min(parent.width - Tokens.s8, 480)
+        visible: !screen.update.connected
+        iconName: "download"
+        title: "업데이트 서버 연결 전"
+        detail: "네트워크가 연결되면 사용 가능한 소프트웨어 버전과 변경 사항이 여기에 표시됩니다."
+        badge: Providers.update.currentVersion
+    }
 
-        EmptyState {
-            anchors.centerIn: parent
-            width: Math.min(parent.width - Tokens.s8, 480)
-            visible: !screen.update.connected
-            iconName: "download"
-            title: "업데이트 서버 연결 전"
-            detail: "네트워크가 연결되면 사용 가능한 소프트웨어 버전과 변경 사항이 여기에 표시됩니다."
-            badge: Providers.update.currentVersion
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: Tokens.hairline
+        visible: screen.update.connected
+
+        GridBoard {
+            Layout.fillWidth: true
+            columns: 3
+
+            Metric { Layout.fillWidth: true; label: "설치됨"; value: screen.update.currentVersion; valueSize: Tokens.titleMd }
+            Metric { Layout.fillWidth: true; label: "사용 가능"; value: screen.update.availableVersion; valueSize: Tokens.titleMd }
+            Metric { Layout.fillWidth: true; label: "크기"; value: screen.update.sizeMb; unit: "MB"; valueSize: Tokens.titleMd }
         }
 
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Tokens.s6
-            spacing: Tokens.s5
-            visible: screen.update.connected
+        GridBoard {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            columns: 1
 
-            Caption { text: "소프트웨어" }
-
-            RowLayout {
+            Cell {
                 Layout.fillWidth: true
-                spacing: Tokens.s8
+                Layout.fillHeight: true
+                padding: Tokens.s6
+                spacing: Tokens.s4
 
-                Readout { label: "설치됨"; value: screen.update.currentVersion; valueSize: Tokens.titleSection }
-                Readout {
-                    label: "사용 가능"
-                    value: screen.update.availableVersion
-                    valueSize: Tokens.titleSection
-                    tone: Tokens.accent
-                }
-                Readout { label: "크기"; value: screen.update.sizeMb; unit: "MB"; valueSize: Tokens.titleSection }
-                Item { Layout.fillWidth: true }
-            }
+                Caption { text: "변경 사항" }
 
-            Divider { Layout.fillWidth: true }
+                Repeater {
+                    model: screen.update.notes
 
-            Caption { text: "변경 사항" }
+                    delegate: RowLayout {
+                        required property string modelData
+                        Layout.fillWidth: true
+                        spacing: Tokens.s3
 
-            Repeater {
-                model: screen.update.notes
+                        Rectangle {
+                            width: 6; height: 6
+                            color: Tokens.ink
+                            Layout.alignment: Qt.AlignTop
+                            Layout.topMargin: 8
+                        }
 
-                delegate: RowLayout {
-                    required property string modelData
-                    Layout.fillWidth: true
-                    spacing: Tokens.s3
-
-                    Icon {
-                        name: "check"
-                        size: Tokens.iconSm
-                        tone: Tokens.accent
-                        Layout.alignment: Qt.AlignTop
-                        Layout.topMargin: 2
+                        Text {
+                            text: modelData
+                            color: Tokens.inkSecondary
+                            font.pixelSize: Tokens.bodyMd
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                        }
                     }
+                }
+
+                Item { Layout.fillHeight: true }
+
+                ColumnLayout {
+                    visible: screen.installing
+                    Layout.fillWidth: true
+                    spacing: Tokens.s2
 
                     Text {
-                        text: modelData
-                        color: Tokens.textSecondary
-                        font.pixelSize: Tokens.bodyMd
+                        text: "설치 중 " + Math.round(screen.progress * 100) + "%"
+                        color: Tokens.ink
+                        font.pixelSize: Tokens.bodyLg
+                        font.weight: Tokens.weightDemi
+                    }
+
+                    MeterBar {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 14
+                        value: screen.progress
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Tokens.s5
+
+                    Text {
+                        text: screen.driving
+                            ? "설치는 정차 후 P 기어에서만 시작할 수 있습니다."
+                            : "설치 중에는 차량을 사용할 수 없습니다."
+                        color: screen.driving ? Tokens.warning : Tokens.inkTertiary
+                        font.pixelSize: Tokens.label
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
-                }
-            }
 
-            Item { Layout.fillHeight: true }
-
-            ColumnLayout {
-                visible: screen.installing
-                Layout.fillWidth: true
-                spacing: Tokens.s2
-
-                Text {
-                    text: "설치 중 " + Math.round(screen.progress * 100) + "%"
-                    color: Tokens.textPrimary
-                    font.pixelSize: Tokens.bodyLg
-                    font.weight: Tokens.weightMedium
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 12
-                    radius: 6
-                    color: Tokens.surfaceAlt
-
-                    Rectangle {
-                        width: parent.width * screen.progress
-                        height: parent.height
-                        radius: parent.radius
-                        color: Tokens.accent
-                        Behavior on width { NumberAnimation { duration: Tokens.mBase; easing.type: Tokens.easeOut } }
+                    OasButton {
+                        text: screen.installing ? "설치 중" : "지금 설치"
+                        iconName: "download"
+                        variant: "primary"
+                        size: Tokens.touchLarge
+                        enabled: !screen.driving && !screen.installing && screen.update.updateAvailable
+                        lockReason: "주행 중에는 설치할 수 없습니다"
+                        onClicked: confirm.open = true
                     }
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Tokens.s3
-
-                Text {
-                    text: screen.driving
-                        ? "설치는 정차 후 P 기어에서만 시작할 수 있습니다."
-                        : "설치 중에는 차량을 사용할 수 없습니다."
-                    color: screen.driving ? Tokens.warning : Tokens.textTertiary
-                    font.pixelSize: Tokens.label
-                    wrapMode: Text.WordWrap
-                    Layout.fillWidth: true
-                }
-
-                OasButton {
-                    text: screen.installing ? "설치 중" : "지금 설치"
-                    iconName: "download"
-                    variant: "primary"
-                    size: Tokens.touchLarge
-                    enabled: !screen.driving && !screen.installing && screen.update.updateAvailable
-                    lockReason: "주행 중에는 설치할 수 없습니다"
-                    onClicked: confirm.open = true
                 }
             }
         }

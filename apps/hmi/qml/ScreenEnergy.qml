@@ -12,29 +12,30 @@ Item {
     readonly property var energy: Providers.energy
     readonly property var tires: Providers.tires
 
-    RowLayout {
+    EmptyState {
+        anchors.centerIn: parent
+        width: Math.min(parent.width - Tokens.s8, 480)
+        visible: !screen.energy.connected
+        iconName: "battery"
+        title: "에너지 공급자 연결 전"
+        detail: "배터리 잔량, 주행 가능 거리, 전비와 충전 상태는 에너지 데이터가 연결되면 표시됩니다."
+        badge: "잔량 데이터 없음"
+    }
+
+    ColumnLayout {
         anchors.fill: parent
-        spacing: Tokens.gutter
+        spacing: Tokens.hairline
+        visible: screen.energy.connected
 
-        Panel {
+        GridBoard {
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.preferredHeight: Tokens.breakpoint === "compact" ? 200 : 240
+            columns: 1
 
-            EmptyState {
-                anchors.centerIn: parent
-                width: Math.min(parent.width - Tokens.s8, 480)
-                visible: !screen.energy.connected
-                iconName: "battery"
-                title: "에너지 공급자 연결 전"
-                detail: "배터리 잔량, 주행 가능 거리, 전비와 충전 상태는 에너지 데이터가 연결되면 표시됩니다."
-                badge: "잔량 데이터 없음"
-            }
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: Tokens.s5
-                spacing: Tokens.s5
-                visible: screen.energy.connected
+            Cell {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: Tokens.s4
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -42,7 +43,7 @@ Item {
                     Item { Layout.fillWidth: true }
                     StatusBadge {
                         text: screen.energy.charging ? "충전 중" : "충전 안 함"
-                        tone: screen.energy.charging ? Tokens.success : Tokens.textTertiary
+                        tone: screen.energy.charging ? Tokens.success : Tokens.inkTertiary
                     }
                 }
 
@@ -50,147 +51,120 @@ Item {
                     Layout.fillWidth: true
                     spacing: Tokens.s8
 
-                    Readout {
-                        label: "잔량"
-                        value: Math.round(screen.energy.level * 100)
-                        unit: "%"
-                        valueSize: Tokens.speedLarge
+                    Row {
+                        spacing: Tokens.s2
+
+                        Text {
+                            id: levelValue
+                            text: Math.round(screen.energy.level * 100)
+                            color: Tokens.ink
+                            font.pixelSize: Tokens.dataHero
+                            font.weight: Tokens.weightDemi
+                            font.letterSpacing: -3
+                        }
+
+                        Text {
+                            anchors.baseline: levelValue.baseline
+                            text: "%"
+                            color: Tokens.inkSecondary
+                            font.pixelSize: Tokens.titleLg
+                            font.weight: Tokens.weightMedium
+                        }
                     }
 
-                    Readout {
-                        label: "주행 가능"
-                        value: Math.round(screen.energy.rangeKm)
-                        unit: "km"
-                        valueSize: Tokens.displayMd
+                    ColumnLayout {
+                        spacing: 2
+                        Layout.alignment: Qt.AlignBottom
+                        Layout.bottomMargin: Tokens.s4
+
+                        Caption { text: "주행 가능" }
+                        Text {
+                            text: Math.round(screen.energy.rangeKm) + " km"
+                            color: Tokens.ink
+                            font.pixelSize: Tokens.titleLg
+                            font.weight: Tokens.weightDemi
+                        }
+                    }
+
+                    ColumnLayout {
+                        spacing: 2
+                        Layout.alignment: Qt.AlignBottom
+                        Layout.bottomMargin: Tokens.s4
+
+                        Caption { text: "총 용량" }
+                        Text {
+                            text: screen.energy.capacityKwh.toFixed(1) + " kWh"
+                            color: Tokens.inkSecondary
+                            font.pixelSize: Tokens.titleLg
+                            font.weight: Tokens.weightMedium
+                        }
                     }
 
                     Item { Layout.fillWidth: true }
                 }
 
-                Rectangle {
+                MeterBar {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 20
-                    radius: 10
-                    color: Tokens.surfaceAlt
-
-                    Rectangle {
-                        width: parent.width * screen.energy.level
-                        height: parent.height
-                        radius: parent.radius
-                        gradient: Gradient {
-                            orientation: Gradient.Horizontal
-                            GradientStop { position: 0; color: Tokens.accentDeep }
-                            GradientStop { position: 1; color: Tokens.accent }
-                        }
-                        Behavior on width { NumberAnimation { duration: Tokens.mBase; easing.type: Tokens.easeOut } }
-                    }
+                    Layout.preferredHeight: 18
+                    value: screen.energy.level
+                    target: 0.8
                 }
-
-                Divider { Layout.fillWidth: true }
-
-                Caption { text: "전비" }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Tokens.s5
-
-                    Repeater {
-                        model: screen.energy.recent
-
-                        delegate: Rectangle {
-                            required property var modelData
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 104
-                            radius: Tokens.rLg
-                            color: Tokens.surfaceAlt
-
-                            Readout {
-                                anchors.left: parent.left
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.leftMargin: Tokens.s4
-                                label: modelData.label
-                                value: modelData.value.toFixed(1)
-                                unit: "kWh/100km"
-                                valueSize: Tokens.titleSection
-                            }
-                        }
-                    }
-                }
-
-                Item { Layout.fillHeight: true }
             }
         }
 
-        Panel {
-            Layout.preferredWidth: Tokens.sideColumn
-            Layout.maximumWidth: Tokens.sideColumn
+        GridBoard {
+            Layout.fillWidth: true
             Layout.fillHeight: true
+            columns: Tokens.breakpoint === "compact" ? 2 : 3
 
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: Tokens.s5
-                spacing: Tokens.s4
+            Repeater {
+                model: screen.energy.recent
 
-                Caption { text: "타이어 공기압" }
+                delegate: Metric {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    label: modelData.label
+                    value: modelData.value.toFixed(1)
+                    unit: "kWh/100km"
+                    valueSize: Tokens.dataLg
+                }
+            }
+        }
+
+        GridBoard {
+            Layout.fillWidth: true
+            Layout.preferredHeight: Tokens.breakpoint === "compact" ? 140 : 160
+            columns: Tokens.breakpoint === "compact" ? 2 : 4
+
+            Repeater {
+                model: screen.tires.connected ? screen.tires.pressures : []
+
+                delegate: Metric {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    label: "타이어 " + modelData.label
+                    value: modelData.kpa
+                    unit: "kPa"
+                    valueTone: modelData.state === "warn" ? Tokens.warning : Tokens.ink
+                    delta: modelData.state === "warn" ? "점검 필요" : ""
+                    deltaTone: Tokens.warning
+                    valueSize: Tokens.dataMd
+                }
+            }
+
+            Cell {
+                visible: !screen.tires.connected
+                Layout.fillWidth: true
+                Layout.fillHeight: true
 
                 EmptyState {
                     Layout.fillWidth: true
-                    visible: !screen.tires.connected
                     iconName: "vehicle"
                     title: "TPMS 연결 전"
                     detail: "타이어 공기압 센서가 연결되면 네 바퀴 값이 표시됩니다."
                 }
-
-                GridLayout {
-                    visible: screen.tires.connected
-                    Layout.fillWidth: true
-                    columns: 2
-                    columnSpacing: Tokens.s3
-                    rowSpacing: Tokens.s3
-
-                    Repeater {
-                        model: screen.tires.pressures
-
-                        delegate: Rectangle {
-                            required property var modelData
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 96
-                            radius: Tokens.rLg
-                            color: modelData.state === "warn" ? Tokens.wash(Tokens.warning) : Tokens.surfaceAlt
-                            border.width: 1
-                            border.color: modelData.state === "warn" ? Tokens.wash(Tokens.warning, 0.3) : "transparent"
-
-                            Column {
-                                anchors.centerIn: parent
-                                spacing: Tokens.s1
-
-                                Caption {
-                                    text: modelData.label
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                }
-
-                                Text {
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    text: modelData.kpa + " kPa"
-                                    color: modelData.state === "warn" ? Tokens.warning : Tokens.textPrimary
-                                    font.pixelSize: Tokens.bodyLg
-                                    font.weight: Tokens.weightMedium
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Text {
-                    visible: screen.tires.connected && screen.tires.anyWarning
-                    text: "뒤 좌측 공기압이 권장값보다 낮습니다. 가까운 정비소에서 점검하세요."
-                    color: Tokens.warning
-                    font.pixelSize: Tokens.label
-                    wrapMode: Text.WordWrap
-                    Layout.fillWidth: true
-                }
-
-                Item { Layout.fillHeight: true }
             }
         }
     }

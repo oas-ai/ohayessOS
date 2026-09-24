@@ -14,29 +14,30 @@ Rectangle {
 
     visible: opacity > 0
     opacity: 0
-    color: Tokens.wash(overlay.tone, Tokens.dark ? 0.14 : 0.10)
-    radius: Tokens.rXl
-    border.width: 1
-    border.color: Tokens.wash(overlay.tone, 0.35)
+    color: Tokens.surface
 
     // Safety information appears instantly and fades only on the way out.
     Behavior on opacity { NumberAnimation { duration: Tokens.mBase; easing.type: Tokens.easeOut } }
 
+    // The full-height bar is the alarm; the panel behind it stays plain.
     Rectangle {
-        anchors.top: parent.top
+        id: mark
         anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 1
-        height: 4
-        radius: 2
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: Tokens.s2
         color: overlay.tone
     }
 
+    Divider { anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right }
+
     RowLayout {
         anchors.fill: parent
-        anchors.margins: Tokens.s5
-        anchors.topMargin: Tokens.s5 + Tokens.s1
-        spacing: Tokens.s4
+        anchors.leftMargin: Tokens.s6
+        anchors.rightMargin: Tokens.s6
+        anchors.topMargin: Tokens.s4
+        anchors.bottomMargin: Tokens.s4
+        spacing: Tokens.s5
 
         Icon {
             name: "warning"
@@ -46,13 +47,13 @@ Rectangle {
         }
 
         ColumnLayout {
-            spacing: Tokens.s1
+            spacing: 2
             Layout.fillWidth: true
 
             Text {
                 text: overlay.title
-                color: Tokens.textPrimary
-                font.pixelSize: Tokens.titleSection
+                color: Tokens.ink
+                font.pixelSize: Tokens.titleMd
                 font.weight: Tokens.weightDemi
                 Layout.fillWidth: true
                 elide: Text.ElideRight
@@ -61,20 +62,21 @@ Rectangle {
             Text {
                 text: overlay.detail
                 visible: text.length > 0
-                color: Tokens.textSecondary
+                color: Tokens.inkSecondary
                 font.pixelSize: Tokens.bodyMd
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
             }
+        }
 
-            Text {
-                text: overlay.recovery
-                visible: text.length > 0
-                color: Tokens.textTertiary
-                font.pixelSize: Tokens.label
-                wrapMode: Text.WordWrap
-                Layout.fillWidth: true
-            }
+        Text {
+            text: overlay.recovery
+            visible: text.length > 0
+            color: Tokens.inkTertiary
+            font.pixelSize: Tokens.label
+            horizontalAlignment: Text.AlignRight
+            wrapMode: Text.WordWrap
+            Layout.maximumWidth: 320
         }
     }
 }

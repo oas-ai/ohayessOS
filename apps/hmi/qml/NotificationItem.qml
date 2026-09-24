@@ -8,7 +8,7 @@ Item {
     property string detail: ""
     property string timestamp: ""
     property string iconName: "pulse"
-    property color tone: Tokens.textSecondary
+    property color tone: Tokens.inkSecondary
     property bool unread: false
 
     implicitHeight: Tokens.touchLarge
@@ -16,11 +16,10 @@ Item {
 
     Rectangle {
         anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         width: 3
-        height: parent.height - Tokens.s4
-        radius: 2
-        color: Tokens.accent
+        color: item.tone
         visible: item.unread
     }
 
@@ -46,9 +45,9 @@ Item {
             text: item.title
             width: parent.width
             elide: Text.ElideRight
-            color: Tokens.textPrimary
+            color: Tokens.ink
             font.pixelSize: Tokens.bodyMd
-            font.weight: item.unread ? Tokens.weightMedium : Tokens.weightRegular
+            font.weight: item.unread ? Tokens.weightDemi : Tokens.weightRegular
         }
 
         Text {
@@ -56,8 +55,8 @@ Item {
             visible: text.length > 0
             width: parent.width
             elide: Text.ElideRight
-            color: Tokens.textTertiary
-            font.pixelSize: Tokens.label
+            color: Tokens.inkTertiary
+            font.pixelSize: Tokens.caption
         }
     }
 
@@ -67,7 +66,9 @@ Item {
         anchors.rightMargin: Tokens.s4
         anchors.verticalCenter: parent.verticalCenter
         text: item.timestamp
-        color: Tokens.textTertiary
+        color: Tokens.inkTertiary
         font.pixelSize: Tokens.caption
     }
+
+    Divider { anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right }
 }

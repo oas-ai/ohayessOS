@@ -3,61 +3,66 @@ import OAS.HMI
 
 // Right slide-over for secondary detail. Replaces a modal wherever the driver
 // must still see the screen behind it.
-Item {
+Rectangle {
     id: panel
 
     property string title: ""
     property bool open: false
     default property alias content: body.data
 
-    // Position is driven by x alone; a right anchor would pin it open.
     anchors.top: parent ? parent.top : undefined
     anchors.bottom: parent ? parent.bottom : undefined
-    width: Tokens.breakpoint === "compact" ? 360 : 420
+    width: Tokens.breakpoint === "compact" ? 380 : 440
     visible: parent !== null && x < parent.width
     x: parent === null ? 0 : (open ? parent.width - width : parent.width)
+    color: Tokens.surface
 
     Behavior on x { NumberAnimation { duration: Tokens.mSlow; easing.type: Tokens.easeInOut } }
 
-    Panel {
-        anchors.fill: parent
-        border.color: Tokens.borderStrong
+    Rectangle {
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: Tokens.hairline
+        color: Tokens.lineStrong
+    }
 
-        Item {
-            id: header
-            anchors.top: parent.top
+    Item {
+        id: header
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: Tokens.railHeight
+
+        Text {
             anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.margins: Tokens.s5
-            height: Tokens.touchBase
-
-            Text {
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                text: panel.title
-                color: Tokens.textPrimary
-                font.pixelSize: Tokens.titleSection
-                font.weight: Tokens.weightMedium
-            }
-
-            OasIconButton {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                iconName: "close"
-                variant: "ghost"
-                text: "닫기"
-                onClicked: panel.open = false
-            }
+            anchors.leftMargin: Tokens.s6
+            anchors.verticalCenter: parent.verticalCenter
+            text: panel.title
+            color: Tokens.ink
+            font.pixelSize: Tokens.titleMd
+            font.weight: Tokens.weightDemi
         }
 
-        Item {
-            id: body
-            anchors.top: header.bottom
-            anchors.topMargin: Tokens.s4
-            anchors.left: parent.left
+        OasIconButton {
             anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.margins: Tokens.s5
+            anchors.rightMargin: Tokens.s4
+            anchors.verticalCenter: parent.verticalCenter
+            iconName: "close"
+            variant: "ghost"
+            text: "닫기"
+            onClicked: panel.open = false
         }
+
+        Divider { anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right }
+    }
+
+    Item {
+        id: body
+        anchors.top: header.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: Tokens.s6
     }
 }

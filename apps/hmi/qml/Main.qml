@@ -3,8 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import OAS.HMI
 
-// OAS Automotive OS shell. Twelve screens share one status rail, one dock and
-// one set of components, so no destination reads as a separate app.
+// OAS Automotive OS shell. One masthead, one grid, one launcher: twelve screens
+// share the same rules, so no destination reads as a separate app.
 ApplicationWindow {
     id: window
 
@@ -16,18 +16,19 @@ ApplicationWindow {
 
     // main.cpp drives these two.
     property int page: Nav.home
-    property bool darkMode: true
+    property bool darkMode: false
     // 0 auto · 1 light · 2 dark
-    property int appearanceMode: 2
+    property int appearanceMode: 1
+    property bool menuOpen: false
 
     readonly property bool driving: vehicleState.speedValid && vehicleState.speedKph > 3
     readonly property bool reversing: vehicleState.gearValid && vehicleState.gear === "R"
 
-    // Auto follows the vehicle's own night signal; with no signal it stays dark,
-    // which is the default theme rather than a guess about the cabin.
+    // Auto follows the vehicle's own night signal; with no signal it stays
+    // light, which is the default theme rather than a guess about the cabin.
     readonly property bool resolvedDark: appearanceMode === 1 ? false
         : appearanceMode === 2 ? true
-        : (vehicleState.nightModeValid ? vehicleState.nightMode : true)
+        : (vehicleState.nightModeValid ? vehicleState.nightMode : false)
 
     onResolvedDarkChanged: Tokens.dark = resolvedDark
     onDarkModeChanged: appearanceMode = darkMode ? 2 : 1
@@ -35,6 +36,9 @@ ApplicationWindow {
         Providers.demo = Qt.binding(function () { return vehicleState.demo })
         Tokens.dark = resolvedDark
     }
+
+    Binding { target: Tokens; property: "viewportWidth"; value: window.width }
+    Binding { target: Tokens; property: "viewportHeight"; value: window.height }
 
     // ── Automatic surfacing: reverse gear is the only one ─────────────────
     property int _pageBeforeReverse: -1
@@ -52,8 +56,18 @@ ApplicationWindow {
     // the rule runs after the host has assigned the starting page.
     Timer { interval: 0; running: true; onTriggered: window.applyReverseSurfacing() }
 
-    function go(destination) { if (page !== destination) page = destination }
+    function go(destination) { menuOpen = false; if (page !== destination) page = destination }
     function notify(message, iconName) { toast.show(message, iconName) }
+
+    // Driving locks a destination rather than hiding it, and the launcher shows
+    // why, so nothing ever appears to have vanished.
+    readonly property var lockedDestinations: {
+        if (!driving) return ({})
+        const locked = {}
+        locked[Nav.software] = "주행 중 잠김"
+        locked[Nav.diagnostics] = "주행 중 잠김"
+        return locked
+    }
 
     // ── Safety conditions ─────────────────────────────────────────────────
     readonly property bool doorOpenWhileDriving: driving && vehicleState.doorsValid && vehicleState.anyDoorOpen
@@ -61,30 +75,20 @@ ApplicationWindow {
     readonly property bool stateStale: vehicleState.freshness === "stale"
     readonly property bool anyCritical: doorOpenWhileDriving || beltOpenWhileDriving || stateStale
 
-    // Every adaptive token derives from the live window size.
-    Binding { target: Tokens; property: "viewportWidth"; value: window.width }
-    Binding { target: Tokens; property: "viewportHeight"; value: window.height }
-
-    Rectangle {
-        anchors.fill: parent
-        gradient: Gradient {
-            GradientStop { position: 0; color: Tokens.dark ? Qt.lighter(Tokens.bg, 1.25) : Tokens.bg }
-            GradientStop { position: 1; color: Tokens.bg }
-        }
-    }
+    Rectangle { anchors.fill: parent; color: Tokens.bg }
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Tokens.screenMargin
-        spacing: Tokens.gutter
+        spacing: 0
 
-        StatusRail {
+        TopBar {
             Layout.fillWidth: true
             clock: Qt.formatTime(clockSource.now, "HH:mm")
+            screenTitle: Nav.title(window.page)
             connection: vehicleState.freshness === "fresh" ? "연결됨"
                 : vehicleState.freshness === "stale" ? "업데이트 지연" : "연결 대기 중"
             connectionTone: vehicleState.freshness === "fresh" ? Tokens.success
-                : vehicleState.freshness === "stale" ? Tokens.warning : Tokens.textTertiary
+                : vehicleState.freshness === "stale" ? Tokens.warning : Tokens.inkTertiary
             synthetic: vehicleState.demo
             outsideTemp: Providers.climate.outsideTemp.toFixed(1) + " °C"
             outsideValid: Providers.climate.outsideValid
@@ -93,7 +97,7 @@ ApplicationWindow {
 
         CriticalOverlay {
             Layout.fillWidth: true
-            Layout.preferredHeight: 104
+            Layout.preferredHeight: 92
             visible: window.anyCritical
             opacity: window.anyCritical ? 1 : 0
             tone: window.stateStale ? Tokens.warning : Tokens.critical
@@ -109,7 +113,6 @@ ApplicationWindow {
 
         // ── Screens ───────────────────────────────────────────────────────
         Item {
-            id: stage
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -190,7 +193,7 @@ ApplicationWindow {
                 }
             }
 
-            // Screen change: 300ms fade and rise, the same for every destination.
+            // Screen change: the same brief fade for every destination.
             Connections {
                 target: window
                 function onPageChanged() { enter.restart() }
@@ -199,54 +202,69 @@ ApplicationWindow {
             SequentialAnimation {
                 id: enter
                 PropertyAction { target: stack; property: "opacity"; value: 0 }
-                PropertyAction { target: stack; property: "y"; value: 12 }
-                ParallelAnimation {
-                    NumberAnimation { target: stack; property: "opacity"; to: 1; duration: Tokens.mSlow; easing.type: Tokens.easeInOut }
-                    NumberAnimation { target: stack; property: "y"; to: 0; duration: Tokens.mSlow; easing.type: Tokens.easeInOut }
-                }
+                NumberAnimation { target: stack; property: "opacity"; to: 1; duration: Tokens.mSlow; easing.type: Tokens.easeOut }
             }
         }
 
-        // ── Global mini player ────────────────────────────────────────────
-        // Suppressed on the Media screen so one transport is never duplicated.
-        Panel {
-            Layout.fillWidth: true
-            Layout.preferredHeight: Tokens.touchHero + Tokens.s5
-            visible: Providers.media.connected && Providers.media.playing
-                && window.page !== Nav.media && Tokens.showSideColumns
+        Divider { Layout.fillWidth: true }
 
-            MediaMiniPlayer {
-                anchors.fill: parent
-                anchors.margins: Tokens.s3
-                anchors.leftMargin: Tokens.s5
-                anchors.rightMargin: Tokens.s5
-                available: vehicleState.mediaPlaybackAllowed
-                lockReason: Tokens.playbackReason(vehicleState.mediaPlaybackReason)
-                track: Providers.media.track
-                artist: Providers.media.artist
-                playing: Providers.media.playing
-                onToggled: {
-                    Providers.media.playing = !Providers.media.playing
-                    window.notify(Providers.media.playing ? "재생" : "일시정지", Providers.media.playing ? "play" : "pause")
+        // ── Launcher and global transport ─────────────────────────────────
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: false
+            Layout.preferredHeight: Tokens.launcherHeight
+            Layout.minimumHeight: Tokens.launcherHeight
+            Layout.maximumHeight: Tokens.launcherHeight
+            spacing: Tokens.hairline
+
+            Launcher {
+                Layout.fillHeight: true
+                current: window.page
+                open: window.menuOpen
+                onToggled: window.menuOpen = !window.menuOpen
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                color: Tokens.surface
+
+                MediaMiniPlayer {
+                    anchors.fill: parent
+                    anchors.leftMargin: Tokens.s6
+                    anchors.rightMargin: 0
+                    visible: Providers.media.connected && window.page !== Nav.media
+                    available: vehicleState.mediaPlaybackAllowed
+                    lockReason: Tokens.playbackReason(vehicleState.mediaPlaybackReason)
+                    track: Providers.media.track
+                    artist: Providers.media.artist
+                    playing: Providers.media.playing
+                    onToggled: {
+                        Providers.media.playing = !Providers.media.playing
+                        window.notify(Providers.media.playing ? "재생" : "일시정지", Providers.media.playing ? "play" : "pause")
+                    }
+                    onExpand: window.go(Nav.media)
+                    onPrevious: window.notify("이전 곡", "prev")
+                    onNext: window.notify("다음 곡", "next")
                 }
-                onExpand: window.go(Nav.media)
-                onPrevious: window.notify("이전 곡", "prev")
-                onNext: window.notify("다음 곡", "next")
             }
         }
+    }
 
-        ControlDock {
-            Layout.fillWidth: true
-            selected: window.page
-            onNavigate: function (destination) { window.go(destination) }
-        }
+    LauncherMenu {
+        open: window.menuOpen
+        current: window.page
+        anchorHeight: Tokens.launcherHeight
+        lockedReasons: window.lockedDestinations
+        onNavigate: function (d) { window.go(d) }
+        onDismissed: window.menuOpen = false
     }
 
     Toast {
         id: toast
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: Tokens.dockHeight + Tokens.screenMargin + Tokens.s5
+        anchors.bottomMargin: Tokens.launcherHeight + Tokens.s5
     }
 
     Timer {
@@ -259,7 +277,7 @@ ApplicationWindow {
         onTriggered: now = new Date()
     }
 
-    // Number keys move straight to a dock destination.
+    Shortcut { sequence: "Escape"; onActivated: window.menuOpen = false }
     Shortcut { sequence: "1"; onActivated: window.go(Nav.home) }
     Shortcut { sequence: "2"; onActivated: window.go(Nav.navigation) }
     Shortcut { sequence: "3"; onActivated: window.go(Nav.climate) }

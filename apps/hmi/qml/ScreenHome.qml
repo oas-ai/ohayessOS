@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import OAS.HMI
 
-// 01 Home / Vehicle. Left column holds driving data nearest the driver, the
-// stage holds the vehicle state surface, the right column holds next actions.
+// 01 Home / Vehicle. Identity block, then the measured values as a grid, then
+// the two things the driver acts on next.
 Item {
     id: screen
 
@@ -13,194 +13,87 @@ Item {
 
     readonly property var nav: Providers.navigation
     readonly property var climate: Providers.climate
-    readonly property var media: Providers.media
     readonly property var energy: Providers.energy
 
-    component GearStrip: Row {
-        id: strip
-        property string gear: "—"
-        property bool valid: false
-        spacing: Tokens.s4
-
-        Repeater {
-            model: ["P", "R", "N", "D"]
-            delegate: Text {
-                required property string modelData
-                readonly property bool on: strip.valid && strip.gear === modelData
-                text: modelData
-                color: on ? Tokens.accent : Tokens.textTertiary
-                font.pixelSize: Tokens.bodyLg
-                font.weight: on ? Tokens.weightDemi : Tokens.weightRegular
-                Behavior on color { ColorAnimation { duration: Tokens.mBase; easing.type: Tokens.easeOut } }
-            }
-        }
-    }
-
-    RowLayout {
+    ColumnLayout {
         anchors.fill: parent
-        spacing: Tokens.gutter
+        spacing: Tokens.hairline
 
-        // ── Driving data ──────────────────────────────────────────────────
-        ColumnLayout {
-            visible: Tokens.showSideColumns
-            Layout.preferredWidth: Tokens.sideColumn
-            Layout.maximumWidth: Tokens.sideColumn
-            Layout.fillHeight: true
-            spacing: Tokens.gutter
+        // ── Identity ──────────────────────────────────────────────────────
+        GridBoard {
+            Layout.fillWidth: true
+            Layout.preferredHeight: Tokens.breakpoint === "compact" ? 216 : 312
+            columns: 2
 
-            Panel {
+            Cell {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.preferredHeight: 360
+                Layout.preferredWidth: 3
+                spacing: Tokens.s4
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: Tokens.s5
-                    spacing: Tokens.s3
+                Caption { text: "9NXR472" }
 
-                    Caption { text: "주행" }
-
-                    Readout {
-                        value: Math.round(screen.vehicle ? screen.vehicle.speedKph : 0)
-                        unit: "km/h"
-                        valid: screen.vehicle ? screen.vehicle.speedValid : false
-                        valueSize: Tokens.speedLarge
-                    }
-
-                    GearStrip {
-                        Layout.topMargin: Tokens.s2
-                        gear: screen.vehicle ? screen.vehicle.gear : "—"
-                        valid: screen.vehicle ? screen.vehicle.gearValid : false
-                    }
-
-                    Divider { Layout.fillWidth: true; Layout.topMargin: Tokens.s2 }
-
-                    Readout {
-                        label: "가속"
-                        value: screen.vehicle && screen.vehicle.accelerationValid
-                            ? screen.vehicle.accelerationMps2.toFixed(1) : ""
-                        unit: "m/s²"
-                        valid: screen.vehicle ? screen.vehicle.accelerationValid : false
-                        valueSize: Tokens.titleSection
-                    }
-
-                    Readout {
-                        label: "조향"
-                        value: screen.vehicle && screen.vehicle.steeringValid
-                            ? Math.round(screen.vehicle.steeringAngleDeg) + "°" : ""
-                        valid: screen.vehicle ? screen.vehicle.steeringValid : false
-                        valueSize: Tokens.titleSection
-                    }
-
-                    Item { Layout.fillHeight: true }
-
-                    StatusBadge {
-                        text: screen.vehicle && screen.vehicle.cruiseValid && screen.vehicle.cruiseEnabled
-                            ? "크루즈 작동 중" : "크루즈 꺼짐"
-                        tone: screen.vehicle && screen.vehicle.cruiseValid && screen.vehicle.cruiseEnabled
-                            ? Tokens.accent : Tokens.textTertiary
-                    }
+                Text {
+                    text: "팰리세이드 2020"
+                    color: Tokens.ink
+                    font.pixelSize: Tokens.titleLg
+                    font.weight: Tokens.weightDemi
+                    font.letterSpacing: -0.5
                 }
-            }
 
-            Panel {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.preferredHeight: 220
+                Item { Layout.fillHeight: true }
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: Tokens.s5
-                    spacing: Tokens.s3
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Tokens.s8
 
-                    Caption { text: "에너지" }
-
-                    Readout {
-                        value: screen.energy.connected ? Math.round(screen.energy.level * 100) : ""
-                        unit: "%"
-                        valid: screen.energy.connected
-                        valueSize: Tokens.displaySm
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 10
-                        radius: 5
-                        color: Tokens.surfaceAlt
-
-                        Rectangle {
-                            width: parent.width * (screen.energy.connected ? screen.energy.level : 0)
-                            height: parent.height
-                            radius: parent.radius
-                            color: Tokens.accent
-                            Behavior on width { NumberAnimation { duration: Tokens.mBase; easing.type: Tokens.easeOut } }
+                    ColumnLayout {
+                        spacing: 2
+                        Caption { text: "기어" }
+                        Text {
+                            text: screen.vehicle && screen.vehicle.gearValid ? screen.vehicle.gear : "—"
+                            color: Tokens.ink
+                            font.pixelSize: Tokens.bodyLg
+                            font.weight: Tokens.weightDemi
                         }
                     }
 
-                    Text {
-                        text: screen.energy.connected
-                            ? "주행 가능 " + Math.round(screen.energy.rangeKm) + " km"
-                            : "에너지 공급자 연결 전"
-                        color: Tokens.textTertiary
-                        font.pixelSize: Tokens.label
-                        Layout.fillWidth: true
-                        elide: Text.ElideRight
+                    ColumnLayout {
+                        spacing: 2
+                        Caption { text: "상태 스트림" }
+                        Text {
+                            text: screen.vehicle ? screen.vehicle.freshness : "—"
+                            color: Tokens.inkSecondary
+                            font.pixelSize: Tokens.bodyLg
+                            font.weight: Tokens.weightMedium
+                        }
                     }
 
-                    Item { Layout.fillHeight: true }
+                    ColumnLayout {
+                        spacing: 2
+                        Caption { text: "제어 권한" }
+                        Text {
+                            text: screen.vehicle && screen.vehicle.vehicleControlsAllowed ? "허용" : "없음"
+                            color: Tokens.inkSecondary
+                            font.pixelSize: Tokens.bodyLg
+                            font.weight: Tokens.weightMedium
+                        }
+                    }
+
+                    Item { Layout.fillWidth: true }
                 }
             }
-        }
 
-        // ── Vehicle state surface ─────────────────────────────────────────
-        Panel {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.minimumWidth: 420
-            Layout.preferredWidth: 640
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: Tokens.s5
-                spacing: Tokens.s3
-
-                // Compact folds the driving readout into the stage header.
-                RowLayout {
-                    visible: !Tokens.showSideColumns
-                    Layout.fillWidth: true
-                    spacing: Tokens.s5
-
-                    Readout {
-                        value: Math.round(screen.vehicle ? screen.vehicle.speedKph : 0)
-                        unit: "km/h"
-                        valid: screen.vehicle ? screen.vehicle.speedValid : false
-                        valueSize: Tokens.displayMd
-                    }
-
-                    Item { Layout.fillWidth: true }
-
-                    GearStrip {
-                        gear: screen.vehicle ? screen.vehicle.gear : "—"
-                        valid: screen.vehicle ? screen.vehicle.gearValid : false
-                    }
-                }
-
-                RowLayout {
-                    visible: Tokens.showSideColumns
-                    Layout.fillWidth: true
-
-                    Caption { text: "차량 상태" }
-                    Item { Layout.fillWidth: true }
-                    StatusBadge {
-                        text: screen.vehicle && screen.vehicle.doorsValid ? "도어 신호 수신" : "도어 신호 없음"
-                        tone: screen.vehicle && screen.vehicle.doorsValid ? Tokens.success : Tokens.textTertiary
-                    }
-                }
+            Cell {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: 1
+                Layout.maximumWidth: Tokens.breakpoint === "compact" ? 260 : 420
+                padding: 0
 
                 VehicleVisual {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    Layout.minimumHeight: 200
 
                     gear: screen.vehicle ? screen.vehicle.gear : "—"
                     gearValid: screen.vehicle ? screen.vehicle.gearValid : false
@@ -216,168 +109,207 @@ Item {
                     turnSignal: Providers.lights.turnSignal
                     charging: screen.energy.connected && screen.energy.charging
                 }
-
-                Divider { Layout.fillWidth: true }
-
-                VehicleStatusIndicator {
-                    Layout.fillWidth: true
-                    items: {
-                        const list = []
-                        const doors = screen.vehicle ? screen.vehicle.doors : []
-                        for (let i = 0; i < doors.length; i++) {
-                            list.push({ label: doors[i].label, valid: doors[i].valid,
-                                        state: doors[i].open ? "open" : "ok" })
-                        }
-                        return list
-                    }
-                }
             }
         }
 
-        // ── Persistent map on ultra-wide displays ─────────────────────────
-        MapSurface {
-            visible: Tokens.showPersistentMap
+        // ── Measured values ───────────────────────────────────────────────
+        GridBoard {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredWidth: 960
-            available: screen.nav.connected
-            routeActive: screen.nav.routeActive
-            traffic: screen.nav.traffic
+            columns: Tokens.metricColumns
+
+            Metric {
+                Layout.fillWidth: true; Layout.fillHeight: true
+                label: "속도"
+                value: Math.round(screen.vehicle ? screen.vehicle.speedKph : 0)
+                unit: "km/h"
+                valid: screen.vehicle ? screen.vehicle.speedValid : false
+                valueSize: Tokens.dataLg
+
+                BarSeries {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 44
+                    values: [32, 54, 68, 80, 74, 80]
+                    highlight: 3
+                    visible: screen.vehicle && screen.vehicle.speedValid
+                }
+            }
+
+            Metric {
+                Layout.fillWidth: true; Layout.fillHeight: true
+                label: "에너지"
+                value: screen.energy.connected ? Math.round(screen.energy.level * 100) : ""
+                unit: "%"
+                valid: screen.energy.connected
+                valueSize: Tokens.dataLg
+
+                MeterBar {
+                    Layout.fillWidth: true
+                    value: screen.energy.connected ? screen.energy.level : 0
+                    visible: screen.energy.connected
+                }
+            }
+
+            Metric {
+                Layout.fillWidth: true; Layout.fillHeight: true
+                label: "주행 가능 거리"
+                value: screen.energy.connected ? Math.round(screen.energy.rangeKm) : ""
+                unit: "km"
+                valid: screen.energy.connected
+                valueSize: Tokens.dataLg
+            }
+
+            Metric {
+                Layout.fillWidth: true; Layout.fillHeight: true
+                label: "실내 온도"
+                value: screen.climate.connected ? screen.climate.driverTemp.toFixed(1) : ""
+                unit: "°C"
+                delta: screen.climate.connected ? "동승석 " + screen.climate.passengerTemp.toFixed(1) : ""
+                valid: screen.climate.connected
+                valueSize: Tokens.dataLg
+            }
+
+            Metric {
+                Layout.fillWidth: true; Layout.fillHeight: true
+                label: "조향각"
+                value: screen.vehicle && screen.vehicle.steeringValid
+                    ? Math.round(screen.vehicle.steeringAngleDeg) + "°" : ""
+                valid: screen.vehicle ? screen.vehicle.steeringValid : false
+            }
+
+            Metric {
+                Layout.fillWidth: true; Layout.fillHeight: true
+                label: "가속도"
+                value: screen.vehicle && screen.vehicle.accelerationValid
+                    ? screen.vehicle.accelerationMps2.toFixed(1) : ""
+                unit: "m/s²"
+                valid: screen.vehicle ? screen.vehicle.accelerationValid : false
+            }
+
+            Metric {
+                Layout.fillWidth: true; Layout.fillHeight: true
+                label: "크루즈"
+                value: screen.vehicle && screen.vehicle.cruiseValid
+                    ? (screen.vehicle.cruiseEnabled ? "작동" : "꺼짐") : ""
+                valid: screen.vehicle ? screen.vehicle.cruiseValid : false
+            }
+
+            Metric {
+                Layout.fillWidth: true; Layout.fillHeight: true
+                label: "브레이크"
+                value: screen.vehicle && screen.vehicle.brakeValid
+                    ? (screen.vehicle.brakePressed ? "밟음" : "해제") : ""
+                valid: screen.vehicle ? screen.vehicle.brakeValid : false
+            }
         }
 
         // ── Next actions ──────────────────────────────────────────────────
-        ColumnLayout {
-            Layout.preferredWidth: Tokens.sideColumn
-            Layout.maximumWidth: Tokens.sideColumn
-            Layout.fillHeight: true
-            spacing: Tokens.gutter
+        GridBoard {
+            Layout.fillWidth: true
+            Layout.preferredHeight: Tokens.breakpoint === "compact" ? 150 : 172
+            columns: 2
 
-            Panel {
+            Cell {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.minimumHeight: 260
+                spacing: Tokens.s3
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: Tokens.s5
-                    spacing: Tokens.s3
+                RowLayout {
+                    Layout.fillWidth: true
+                    Caption { text: "도어 · 안전벨트" }
+                    Item { Layout.fillWidth: true }
+                    StatusBadge {
+                        text: screen.vehicle && screen.vehicle.doorsValid ? "신호 수신" : "신호 없음"
+                        tone: screen.vehicle && screen.vehicle.doorsValid ? Tokens.success : Tokens.inkTertiary
+                    }
+                }
 
-                    RowLayout {
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Tokens.s4
+
+                    Text {
+                        text: "도어"
+                        Layout.preferredWidth: 72
+                        color: Tokens.inkTertiary
+                        font.pixelSize: Tokens.label
+                    }
+
+                    VehicleStatusIndicator {
                         Layout.fillWidth: true
-                        Caption { text: "다음 안내" }
-                        Item { Layout.fillWidth: true }
-                        StatusBadge {
-                            visible: screen.nav.connected
-                            text: screen.nav.traffic === "heavy" ? "정체" : screen.nav.traffic === "moderate" ? "서행" : "원활"
-                            tone: screen.nav.traffic === "heavy" ? Tokens.critical
-                                : screen.nav.traffic === "moderate" ? Tokens.warning : Tokens.success
+                        items: {
+                            const list = []
+                            const doors = screen.vehicle ? screen.vehicle.doors : []
+                            for (let i = 0; i < doors.length; i++) {
+                                list.push({ label: doors[i].label, valid: doors[i].valid,
+                                            state: doors[i].open ? "open" : "ok" })
+                            }
+                            return list
                         }
                     }
+                }
 
-                    NavInstruction {
-                        Layout.fillWidth: true
-                        available: screen.nav.connected
-                        turnIcon: screen.nav.nextTurnIcon
-                        distanceM: screen.nav.nextTurnDistanceM
-                        road: screen.nav.nextTurnRoad
-                        detail: screen.nav.nextTurnDetail
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Tokens.s4
+
+                    Text {
+                        text: "안전벨트"
+                        Layout.preferredWidth: 72
+                        color: Tokens.inkTertiary
+                        font.pixelSize: Tokens.label
                     }
 
-                    Item { Layout.fillHeight: true }
+                    VehicleStatusIndicator {
+                        Layout.fillWidth: true
+                        items: {
+                            const list = []
+                            const belts = screen.vehicle ? screen.vehicle.seatbelts : []
+                            for (let i = 0; i < belts.length; i++) {
+                                list.push({ label: belts[i].label, valid: belts[i].valid,
+                                            state: belts[i].latched ? "ok" : "critical" })
+                            }
+                            return list
+                        }
+                    }
+                }
 
-                    RowLayout {
+                Item { Layout.fillHeight: true }
+            }
+
+            Cell {
+                id: nextTurn
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: Tokens.s2
+                Accessible.name: "내비게이션 열기"
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Caption { text: "다음 안내" }
+                    Icon { name: "chevronRight"; size: Tokens.iconSm; tone: Tokens.inkTertiary }
+                    Item { Layout.fillWidth: true }
+                    StatusBadge {
                         visible: screen.nav.connected
-                        Layout.fillWidth: true
-                        spacing: Tokens.s4
-
-                        Readout { label: "도착"; value: screen.nav.eta; valueSize: Tokens.titleSection }
-                        Readout { label: "남은 거리"; value: screen.nav.remainingKm.toFixed(1); unit: "km"; valueSize: Tokens.titleSection }
-                        Item { Layout.fillWidth: true }
-                    }
-
-                    OasButton {
-                        Layout.fillWidth: true
-                        text: "내비게이션 열기"
-                        iconName: "navigation"
-                        onClicked: screen.navigate(Nav.navigation)
+                        text: screen.nav.traffic === "heavy" ? "정체" : screen.nav.traffic === "moderate" ? "서행" : "원활"
+                        tone: screen.nav.traffic === "heavy" ? Tokens.critical
+                            : screen.nav.traffic === "moderate" ? Tokens.warning : Tokens.success
                     }
                 }
-            }
 
-            Panel {
-                visible: Tokens.showSideColumns
-                Layout.fillWidth: true
-                Layout.preferredHeight: 156
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: Tokens.s5
-                    spacing: Tokens.s2
-
-                    Caption { text: "미디어" }
-
-                    MediaMiniPlayer {
-                        Layout.fillWidth: true
-                        available: screen.media.connected && (screen.vehicle ? screen.vehicle.mediaPlaybackAllowed : false)
-                        lockReason: screen.vehicle ? Tokens.playbackReason(screen.vehicle.mediaPlaybackReason) : ""
-                        track: screen.media.track
-                        artist: screen.media.artist
-                        playing: screen.media.playing
-                        onToggled: {
-                            screen.media.playing = !screen.media.playing
-                            screen.notify(screen.media.playing ? "재생" : "일시정지", screen.media.playing ? "play" : "pause")
-                        }
-                        onExpand: screen.navigate(Nav.media)
-                        onPrevious: screen.notify("이전 곡", "prev")
-                        onNext: screen.notify("다음 곡", "next")
-                    }
+                NavInstruction {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    available: screen.nav.connected
+                    turnIcon: screen.nav.nextTurnIcon
+                    distanceM: screen.nav.nextTurnDistanceM
+                    road: screen.nav.nextTurnRoad
+                    detail: screen.nav.connected
+                        ? "도착 " + screen.nav.eta + " · " + screen.nav.remainingKm.toFixed(1) + " km"
+                        : ""
                 }
-            }
 
-            Panel {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 176
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: Tokens.s5
-                    spacing: Tokens.s3
-
-                    Caption { text: "공조" }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: Tokens.s4
-
-                        Readout {
-                            label: "운전석"
-                            value: screen.climate.driverTemp.toFixed(1)
-                            unit: "°C"
-                            valid: screen.climate.connected
-                            valueSize: Tokens.titleSection
-                        }
-
-                        Item { Layout.fillWidth: true }
-
-                        Readout {
-                            label: "동승석"
-                            value: screen.climate.passengerTemp.toFixed(1)
-                            unit: "°C"
-                            valid: screen.climate.connected
-                            valueSize: Tokens.titleSection
-                        }
-                    }
-
-                    Item { Layout.fillHeight: true }
-
-                    OasButton {
-                        Layout.fillWidth: true
-                        text: "공조 열기"
-                        iconName: "climate"
-                        variant: "ghost"
-                        onClicked: screen.navigate(Nav.climate)
-                    }
-                }
+                overlay: MouseArea { anchors.fill: parent; onClicked: screen.navigate(Nav.navigation) }
             }
         }
     }

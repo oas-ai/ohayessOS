@@ -28,27 +28,26 @@ Item {
         MouseArea { anchors.fill: parent; onClicked: { modal.open = false; modal.rejected() } }
     }
 
-    Panel {
+    Rectangle {
         anchors.centerIn: parent
-        width: Math.min(560, parent.width - Tokens.s8)
-        height: layout.implicitHeight + Tokens.s6 * 2
-        border.color: Tokens.borderStrong
-        scale: modal.open ? 1 : 0.96
-
-        Behavior on scale { NumberAnimation { duration: Tokens.mBase; easing.type: Tokens.easeOut } }
+        width: Math.min(620, parent.width - Tokens.s8 * 2)
+        height: layout.implicitHeight + Tokens.s7 * 2
+        color: Tokens.surface
+        border.width: Tokens.hairline
+        border.color: Tokens.lineStrong
 
         MouseArea { anchors.fill: parent }
 
         ColumnLayout {
             id: layout
             anchors.fill: parent
-            anchors.margins: Tokens.s6
+            anchors.margins: Tokens.s7
             spacing: Tokens.s4
 
             Text {
                 text: modal.title
-                color: Tokens.textPrimary
-                font.pixelSize: Tokens.titleSection
+                color: Tokens.ink
+                font.pixelSize: Tokens.titleMd
                 font.weight: Tokens.weightDemi
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
@@ -57,7 +56,7 @@ Item {
             Text {
                 text: modal.detail
                 visible: text.length > 0
-                color: Tokens.textSecondary
+                color: Tokens.inkSecondary
                 font.pixelSize: Tokens.bodyMd
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true

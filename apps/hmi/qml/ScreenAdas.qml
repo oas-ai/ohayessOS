@@ -12,34 +12,22 @@ Item {
 
     readonly property var adas: Providers.adas
 
-    RowLayout {
+    GridBoard {
         anchors.fill: parent
-        spacing: Tokens.gutter
+        columns: Tokens.showSideColumns ? 2 : 1
 
-        Panel {
+        Cell {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.preferredWidth: 3
+            padding: 0
 
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: Tokens.s5
-                spacing: Tokens.s3
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    Caption { text: "주행 환경" }
-                    Item { Layout.fillWidth: true }
-                    StatusBadge {
-                        text: screen.adas.connected ? "차로 인식됨" : "센서 연결 전"
-                        tone: screen.adas.connected ? Tokens.success : Tokens.textTertiary
-                    }
-                }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
 
                 VehicleVisual {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.minimumHeight: 240
-
+                    anchors.fill: parent
                     speedKph: screen.vehicle ? screen.vehicle.speedKph : 0
                     speedValid: screen.vehicle ? screen.vehicle.speedValid : false
                     gear: screen.vehicle ? screen.vehicle.gear : "—"
@@ -56,97 +44,114 @@ Item {
                     lightsOn: Providers.lights.lit
                 }
 
+                StatusBadge {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.margins: Tokens.cellPadding
+                    text: screen.adas.connected ? "차로 인식됨" : "센서 연결 전"
+                    tone: screen.adas.connected ? Tokens.success : Tokens.inkTertiary
+                }
+
                 EmptyState {
-                    Layout.fillWidth: true
+                    anchors.centerIn: parent
+                    width: Math.min(parent.width - Tokens.s8, 460)
                     visible: !screen.adas.connected
                     iconName: "adas"
                     title: "주행 보조 공급자 연결 전"
-                    detail: "차로, 주변 차량, 앞차와의 거리는 ADAS 데이터가 연결되면 위 표면에 표시됩니다."
+                    detail: "차로, 주변 차량, 앞차와의 거리는 ADAS 데이터가 연결되면 이 표면에 표시됩니다."
                 }
             }
         }
 
-        Panel {
-            Layout.preferredWidth: Tokens.sideColumn
-            Layout.maximumWidth: Tokens.sideColumn
+        Cell {
+            Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.preferredWidth: 2
+            spacing: Tokens.s5
 
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: Tokens.s5
-                spacing: Tokens.s4
+            Caption { text: "스마트 크루즈" }
 
-                Caption { text: "스마트 크루즈" }
-
-                Readout {
-                    label: "설정 속도"
-                    value: screen.adas.connected ? screen.adas.cruiseSetKph : ""
-                    unit: "km/h"
-                    valid: screen.adas.connected
-                    valueSize: Tokens.displaySm
-                }
-
-                OasSlider {
-                    Layout.fillWidth: true
-                    label: "차간 거리"
-                    from: 1
-                    to: screen.adas.maxFollowDistance
-                    stepSize: 1
-                    value: screen.adas.followDistance
-                    displayText: screen.adas.followDistance + " 단계"
-                    enabled: screen.adas.connected
-                    onMoved: function (v) { screen.adas.followDistance = v }
-                }
-
-                Divider { Layout.fillWidth: true }
-
-                Caption { text: "보조 시스템" }
-
-                OasToggle {
-                    Layout.fillWidth: true
-                    text: "차로 이탈 방지"
-                    checked: screen.adas.laneKeep
-                    enabled: screen.adas.connected
-                    lockReason: "ADAS 공급자 연결 전"
-                    onToggled: function (v) { screen.adas.laneKeep = v; screen.notify(v ? "차로 이탈 방지 켜짐" : "차로 이탈 방지 꺼짐", "adas") }
-                }
-
-                OasToggle {
-                    Layout.fillWidth: true
-                    text: "차로 중앙 유지"
-                    checked: screen.adas.laneCentering
-                    enabled: screen.adas.connected
-                    lockReason: "ADAS 공급자 연결 전"
-                    onToggled: function (v) { screen.adas.laneCentering = v }
-                }
-
-                OasToggle {
-                    Layout.fillWidth: true
-                    text: "후측방 충돌 경고"
-                    checked: screen.adas.blindSpot
-                    enabled: screen.adas.connected
-                    lockReason: "ADAS 공급자 연결 전"
-                    onToggled: function (v) { screen.adas.blindSpot = v }
-                }
-
-                OasToggle {
-                    Layout.fillWidth: true
-                    text: "전방 충돌 방지 보조"
-                    checked: screen.adas.forwardCollision
-                    enabled: screen.adas.connected
-                    lockReason: "ADAS 공급자 연결 전"
-                    onToggled: function (v) { screen.adas.forwardCollision = v }
-                }
-
-                Item { Layout.fillHeight: true }
+            Row {
+                spacing: Tokens.s2
 
                 Text {
-                    text: "이 HMI는 ADAS 판단을 수행하지 않습니다. 표시되는 상태는 공급자가 보고한 값입니다."
-                    color: Tokens.textTertiary
-                    font.pixelSize: Tokens.label
-                    wrapMode: Text.WordWrap
-                    Layout.fillWidth: true
+                    id: cruiseValue
+                    text: screen.adas.connected ? screen.adas.cruiseSetKph : "—"
+                    color: screen.adas.connected ? Tokens.ink : Tokens.inkTertiary
+                    font.pixelSize: Tokens.dataXl
+                    font.weight: Tokens.weightDemi
+                    font.letterSpacing: -1.2
                 }
+
+                Text {
+                    anchors.baseline: cruiseValue.baseline
+                    text: "km/h"
+                    color: Tokens.inkSecondary
+                    font.pixelSize: Tokens.titleMd
+                    font.weight: Tokens.weightMedium
+                }
+            }
+
+            OasSlider {
+                Layout.fillWidth: true
+                label: "차간 거리"
+                from: 1
+                to: screen.adas.maxFollowDistance
+                stepSize: 1
+                value: screen.adas.followDistance
+                displayText: screen.adas.followDistance + " 단계"
+                enabled: screen.adas.connected
+                onMoved: function (v) { screen.adas.followDistance = v }
+            }
+
+            Divider { Layout.fillWidth: true; Layout.topMargin: Tokens.s2 }
+
+            Caption { text: "보조 시스템" }
+
+            OasToggle {
+                Layout.fillWidth: true
+                text: "차로 이탈 방지"
+                checked: screen.adas.laneKeep
+                enabled: screen.adas.connected
+                lockReason: "ADAS 공급자 연결 전"
+                onToggled: function (v) { screen.adas.laneKeep = v; screen.notify(v ? "차로 이탈 방지 켜짐" : "차로 이탈 방지 꺼짐", "adas") }
+            }
+
+            OasToggle {
+                Layout.fillWidth: true
+                text: "차로 중앙 유지"
+                checked: screen.adas.laneCentering
+                enabled: screen.adas.connected
+                lockReason: "ADAS 공급자 연결 전"
+                onToggled: function (v) { screen.adas.laneCentering = v }
+            }
+
+            OasToggle {
+                Layout.fillWidth: true
+                text: "후측방 충돌 경고"
+                checked: screen.adas.blindSpot
+                enabled: screen.adas.connected
+                lockReason: "ADAS 공급자 연결 전"
+                onToggled: function (v) { screen.adas.blindSpot = v }
+            }
+
+            OasToggle {
+                Layout.fillWidth: true
+                text: "전방 충돌 방지 보조"
+                checked: screen.adas.forwardCollision
+                enabled: screen.adas.connected
+                lockReason: "ADAS 공급자 연결 전"
+                onToggled: function (v) { screen.adas.forwardCollision = v }
+            }
+
+            Item { Layout.fillHeight: true }
+
+            Text {
+                text: "이 HMI는 ADAS 판단을 수행하지 않습니다. 표시되는 상태는 공급자가 보고한 값입니다."
+                color: Tokens.inkTertiary
+                font.pixelSize: Tokens.label
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
             }
         }
     }

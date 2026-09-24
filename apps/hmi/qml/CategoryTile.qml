@@ -1,9 +1,10 @@
 import QtQuick
+import QtQuick.Layouts
 import OAS.HMI
 
 // Vehicle hub entry. A locked tile is dimmed with its reason, never hidden —
 // a driver who cannot find a feature searches longer than one who sees it locked.
-Item {
+Cell {
     id: tile
 
     property string title: ""
@@ -13,68 +14,68 @@ Item {
     property bool active: false
     signal activated()
 
-    implicitHeight: 148
-    implicitWidth: 240
+    implicitHeight: 150
+    color: tile.active ? Tokens.surfaceAlt : Tokens.surface
     activeFocusOnTab: enabled
     Accessible.name: title
     Accessible.description: enabled ? summary : lockReason
     Accessible.role: Accessible.Button
+    spacing: Tokens.s3
 
-    Panel {
-        anchors.fill: parent
-        color: tile.active ? Tokens.accentWash : Tokens.surface
-        border.width: tile.activeFocus ? 2 : 1
-        border.color: tile.activeFocus ? Tokens.accent
-            : tile.active ? Tokens.wash(Tokens.accent, 0.3)
-            : hover.hovered && tile.enabled ? Tokens.borderStrong : Tokens.borderSubtle
+    Behavior on color { ColorAnimation { duration: Tokens.mFast; easing.type: Tokens.easeOut } }
 
-        Behavior on color { ColorAnimation { duration: Tokens.mBase; easing.type: Tokens.easeOut } }
-    }
+    RowLayout {
+        Layout.fillWidth: true
 
-    Icon {
-        id: glyph
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.margins: Tokens.s5
-        name: tile.iconName
-        size: Tokens.iconXl
-        tone: tile.enabled ? Tokens.textSecondary : Tokens.textDisabled
-        active: tile.active
-    }
-
-    Column {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.margins: Tokens.s5
-        spacing: Tokens.s1
-
-        Text {
-            text: tile.title
-            width: parent.width
-            elide: Text.ElideRight
-            color: tile.enabled ? Tokens.textPrimary : Tokens.textDisabled
-            font.pixelSize: Tokens.bodyLg
-            font.weight: Tokens.weightMedium
+        Icon {
+            name: tile.iconName
+            size: Tokens.iconLg
+            tone: tile.enabled ? Tokens.ink : Tokens.inkDisabled
         }
 
-        Text {
-            text: tile.enabled ? tile.summary : tile.lockReason
-            visible: text.length > 0
-            width: parent.width
-            elide: Text.ElideRight
-            color: Tokens.textTertiary
-            font.pixelSize: Tokens.label
+        Item { Layout.fillWidth: true }
+
+        Icon {
+            name: "chevronRight"
+            size: Tokens.iconSm
+            tone: Tokens.inkTertiary
+            visible: tile.enabled
         }
     }
 
-    HoverHandler { id: hover }
-
-    MouseArea {
-        anchors.fill: parent
-        enabled: tile.enabled
-        onClicked: { tile.forceActiveFocus(); tile.activated() }
+    Text {
+        text: tile.title
+        Layout.fillWidth: true
+        elide: Text.ElideRight
+        color: tile.enabled ? Tokens.ink : Tokens.inkDisabled
+        font.pixelSize: Tokens.bodyLg
+        font.weight: Tokens.weightDemi
     }
+
+    Text {
+        text: tile.enabled ? tile.summary : tile.lockReason
+        visible: text.length > 0
+        Layout.fillWidth: true
+        elide: Text.ElideRight
+        color: Tokens.inkTertiary
+        font.pixelSize: Tokens.label
+    }
+
+    Item { Layout.fillHeight: true }
+
+    overlay: [
+        Rectangle {
+            anchors.fill: parent
+            color: "transparent"
+            border.width: tile.activeFocus ? 2 : 0
+            border.color: Tokens.ink
+        },
+        MouseArea {
+            anchors.fill: parent
+            enabled: tile.enabled
+            onClicked: { tile.forceActiveFocus(); tile.activated() }
+        }
+    ]
 
     Keys.onSpacePressed: if (enabled) tile.activated()
     Keys.onReturnPressed: if (enabled) tile.activated()

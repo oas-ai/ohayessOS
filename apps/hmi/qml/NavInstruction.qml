@@ -13,7 +13,7 @@ Item {
     property bool available: false
     property bool overlay: false
 
-    implicitHeight: 112
+    implicitHeight: 104
     implicitWidth: 360
 
     readonly property string _distance: distanceM >= 1000
@@ -22,10 +22,9 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: Tokens.rXl
-        color: instruction.overlay ? Tokens.wash(Tokens.surface, 0.92) : "transparent"
-        border.width: instruction.overlay ? 1 : 0
-        border.color: Tokens.borderStrong
+        color: instruction.overlay ? Tokens.surface : "transparent"
+        border.width: instruction.overlay ? Tokens.hairline : 0
+        border.color: Tokens.lineStrong
     }
 
     Icon {
@@ -35,7 +34,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         name: instruction.available ? instruction.turnIcon : "navigation"
         size: Tokens.iconXl
-        tone: instruction.available ? Tokens.accent : Tokens.textTertiary
+        tone: instruction.available ? Tokens.ink : Tokens.inkTertiary
     }
 
     Column {
@@ -44,21 +43,21 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: instruction.overlay ? Tokens.s5 : 0
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 2
+        spacing: 1
 
         Text {
             text: instruction.available ? instruction._distance : "경로 없음"
-            color: Tokens.textPrimary
-            font.pixelSize: Tokens.displaySm
-            font.weight: Tokens.weightLight
-            font.letterSpacing: -1
+            color: Tokens.ink
+            font.pixelSize: Tokens.dataLg
+            font.weight: Tokens.weightDemi
+            font.letterSpacing: -1.2
         }
 
         Text {
             text: instruction.available ? instruction.road : "목적지를 설정하면 안내가 표시됩니다"
             width: parent.width
             elide: Text.ElideRight
-            color: instruction.available ? Tokens.textSecondary : Tokens.textTertiary
+            color: instruction.available ? Tokens.inkSecondary : Tokens.inkTertiary
             font.pixelSize: Tokens.bodyLg
             font.weight: Tokens.weightMedium
         }
@@ -68,7 +67,7 @@ Item {
             visible: instruction.available && text.length > 0
             width: parent.width
             elide: Text.ElideRight
-            color: Tokens.textTertiary
+            color: Tokens.inkTertiary
             font.pixelSize: Tokens.label
         }
     }
