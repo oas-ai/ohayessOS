@@ -1,185 +1,146 @@
 # OAS Automotive OS — Design Tokens
 
-구현: `apps/hmi/qml/Tokens.qml` (singleton). **QML에 hex 리터럴·매직 넘버를 직접 쓰지 않는다.** 모든 값은 이 토큰을 경유한다.
+시스템 이름은 **Grid**다. 떠 있는 카드가 아니라 **맞닿는 셀과 1px 규칙선**으로 화면을 구성한다. 반경 0, 그림자 없음, blur 없음. 강조는 대비와 굵기로 만들고, **색은 안전 상태에만 남긴다.**
+
+구현: `apps/hmi/qml/Tokens.qml` (singleton). **다른 QML 파일은 색·duration·터치 치수를 직접 쓰지 않는다.**
 
 ## 1. Color
 
-### 1.1 Palette — Dark (기본 테마)
+### 1.1 Light — 기본 테마
 
 | Token | Value | 용도 |
 | --- | --- | --- |
-| `bg` | `#0B0C0E` | 화면 바탕. 유일한 최하위 레이어. |
-| `surface` | `#16181C` | Panel, Dock, Card |
-| `surfaceAlt` | `#202329` | Panel 내부 구획, 입력 트랙, 비활성 세그먼트 |
-| `surfaceRaised` | `#2A2E36` | hover, 선택된 세그먼트, 슬라이더 핸들 |
-| `borderSubtle` | `#24272E` | Panel 외곽 1px |
-| `borderStrong` | `#363B44` | 구획선, 비활성 컨트롤 외곽 |
-| `textPrimary` | `#FFFFFF` | 값, 제목 |
-| `textSecondary` | `#A5A7AB` | 레이블, 보조 설명 |
-| `textTertiary` | `#6E7176` | 캡션, 단위 |
-| `textDisabled` | `#4A4D53` | 잠긴 컨트롤 |
+| `bg` | `#EDEDEB` | 화면 바탕. 셀 사이로 비치지 않는 최하위 레이어 |
+| `surface` | `#F4F4F2` | 셀 |
+| `surfaceAlt` | `#E4E4E0` | 눌린 셀, 입력 트랙, 지도·차량 지면 |
+| `surfaceInk` | `#DCDCD7` | 차트 빈 막대, 미터 트랙 |
+| `line` | `#D6D6D2` | **그리드의 모든 구분선** |
+| `lineStrong` | `#B9B9B3` | 주요 영역 경계, 고스트 컨트롤 외곽 |
+| `ink` | `#111111` | 값, 제목, 활성 채움 |
+| `inkSecondary` | `#6E6E68` | 라벨, 보조 설명 |
+| `inkTertiary` | `#9A9A93` | 캡션, 불명 상태 |
+| `inkDisabled` | `#BEBEB7` | 잠긴 컨트롤 |
+| `onInk` | `#F4F4F2` | **잉크 채움 위의 텍스트·아이콘** |
 
-### 1.2 Palette — Light (정차 중 선호)
+### 1.2 Dark — 야간
 
 | Token | Value |
 | --- | --- |
-| `bg` | `#F2F3F5` |
-| `surface` | `#FFFFFF` |
-| `surfaceAlt` | `#E9EBEE` |
-| `surfaceRaised` | `#DDE0E4` |
-| `borderSubtle` | `#E2E5E9` |
-| `borderStrong` | `#C9CDD3` |
-| `textPrimary` | `#101215` |
-| `textSecondary` | `#5A5E66` |
-| `textTertiary` | `#7E838B` |
-| `textDisabled` | `#B0B4BA` |
+| `bg` | `#0E0E0D` |
+| `surface` | `#161615` |
+| `surfaceAlt` | `#201F1E` |
+| `surfaceInk` | `#2C2B29` |
+| `line` | `#2A2A28` |
+| `lineStrong` | `#43423F` |
+| `ink` | `#F2F2F0` |
+| `inkSecondary` | `#A3A29B` |
+| `inkTertiary` | `#77776F` |
+| `inkDisabled` | `#4E4E48` |
+| `onInk` | `#0E0E0D` |
 
-### 1.3 Accent — Genesis Copper
+**Light가 기본이다.** Dark는 같은 그리드 언어의 반전이며 명암 역할만 뒤집는다. 자동 모드는 차량의 `nightMode` 신호를 우선하고, 신호가 없으면 Light를 유지한다.
 
-| Token | Dark | Light | 용도 |
+### 1.3 Safety — 시스템에 남은 유일한 색
+
+| Token | Light | Dark | 의미 |
 | --- | --- | --- | --- |
-| `accent` | `#C08B5C` | `#8A6039` | 활성 상태, 선택, 강조 값, 진행률 |
-| `accentHi` | `#E8C39E` | `#C08B5C` | 활성 위의 텍스트·아이콘, 최상위 강조 |
-| `accentDeep` | `#7A5433` | `#5E3F24` | 진행률 트랙의 채워진 하단, 그라디언트 끝 |
-| `accentWash` | `rgba(192,139,92,0.12)` | `rgba(138,96,57,0.10)` | 선택 배경, 활성 타일 |
+| `warning` | `#9A5B00` | `#E2A244` | 주의. 주행 계속 가능 |
+| `critical` | `#B3261E` | `#F2635A` | 즉시 대응. 주행 위험 |
+| `success` | `#2E6B4F` | `#5BC08D` | 정상·허용·활성 완료 |
 
-Copper는 **활성·선택·강조**에만 쓴다. 경고 의미를 갖지 않는다. 화면 한 곳에서 Copper가 차지하는 면적은 stage 면적의 10%를 넘지 않는다.
+**색이 보이면 그것은 안전 정보다.** 브랜드 강조, 선택 상태, 장식에 색을 쓰지 않는다. 선택은 `ink` 채움으로 표현한다.
 
-### 1.4 Semantic
+### 1.4 Illustration
 
-| Token | Dark | Light | 의미 |
-| --- | --- | --- | --- |
-| `warning` | `#F2A93B` | `#B97708` | 주의 필요. 주행 계속 가능. |
-| `critical` | `#E5484D` | `#C62A2F` | 즉시 대응. 주행 위험. |
-| `success` | `#4CC38A` | `#1F8F5B` | 정상·허용·활성 완료 |
-| `info` | `#7FA8C9` | `#41688A` | 중립 안내 |
-| `warningWash` / `criticalWash` / `successWash` | 각 색 12% alpha | 동일 | 배지·배너 배경 |
-
-`warning`(amber)과 `accent`(copper)는 색상환에서 인접하다. **두 색을 같은 시각적 그룹 안에 동시에 배치하지 않는다.** 경고 배지가 있는 타일은 accent 강조를 해제한다.
+차량·지도 표면의 재질색은 `Tokens`의 illustration 섹션을 경유한다: `ground` `videoInk` `glazing` `bodyHigh/Mid/Low` `doorPanel` `tyre` `mapBlock` `mapRoad`. UI chrome이 아니라 렌더링 재료이므로 분리해 둔다.
 
 ### 1.5 색 사용 규칙
 
-- 색만으로 정보를 전달하지 않는다. 상태 색에는 항상 텍스트 또는 아이콘 형태 차이를 동반한다.
-- `textPrimary` 대비는 dark에서 18.1:1, light에서 17.4:1. `textSecondary`는 각각 7.2:1, 6.1:1 — 모두 WCAG AA 이상.
-- `textTertiary`는 13px 캡션 전용이며 조작 대상 텍스트에 쓰지 않는다.
-- Blur/Glass는 Dock과 Critical Overlay **두 곳에만** 쓴다. 임베디드 GPU와 software renderer에서 동일하게 보이도록 blur 대신 `surface` + 1px border + 미세 그라디언트로 구현한다.
+- 색만으로 정보를 전달하지 않는다. 상태 색에는 항상 텍스트 또는 형태 차이를 동반한다.
+- 지도 정체 구간은 색 + **끊긴 선 텍스처**로 이중 표현한다.
+- 유효하지 않은 신호는 채우지 않고 **외곽선**으로 그린다. "불명"이 "정상"으로 보이면 안 된다.
+- `MeterBar`의 투영 구간은 **사선 해칭**이다. 측정값과 예측값이 같은 채움으로 보이면 안 된다.
 
 ## 2. Typography
 
-시스템 sans-serif. 숫자는 항상 tabular (`font.features: { "tnum": 1 }`).
+시스템 sans-serif. 데이터는 **DemiBold**, 라벨은 **문장형 소문자 회색**이다. 대문자 변환과 자간 확대를 쓰지 않는다.
 
-| Token | Size | Weight | Letter | 용도 |
-| --- | --- | --- | --- | --- |
-| `speedHero` | 140 | Light (300) | -3 | Home 중앙 속도 |
-| `speedLarge` | 104 | Light | -2 | compact 속도, Energy 잔량 |
-| `displayMd` | 72 | Light | -1.5 | Climate 온도, 화면 대표 수치 |
-| `displaySm` | 48 | Light | -1 | 타일 대표 수치 |
-| `titlePage` | 32 | Medium (500) | -0.2 | 화면 제목 |
-| `titleSection` | 24 | Medium | 0 | 패널 제목 |
-| `bodyLg` | 20 | Medium | 0 | 주 조작 레이블, 버튼 |
-| `bodyMd` | 18 | Regular (400) | 0 | 본문, 목록 항목 |
-| `label` | 15 | Medium | 0.2 | 보조 정보, 컨트롤 레이블 |
-| `caption` | 13 | Medium | 1.6 | 섹션 캡션 (UPPERCASE), 단위 |
+| Token | Size | Weight | 용도 |
+| --- | --- | --- | --- |
+| `dataHero` | 118 | DemiBold | 에너지 잔량 등 화면 대표 수치 |
+| `dataXl` | 72 | DemiBold | 공조 온도, 크루즈 설정 속도 |
+| `dataLg` | 46 | DemiBold | 주 메트릭 값, 다음 안내 거리 |
+| `dataMd` | 32 | DemiBold | 보조 메트릭 값 |
+| `titleLg` | 30 | DemiBold | 차량명, 트랙명 |
+| `titleMd` | 22 | DemiBold | 섹션 제목, 모달 제목 |
+| `bodyLg` | 19 | Medium | 주 조작 레이블 |
+| `bodyMd` | 17 | Regular | 본문, 목록 항목, 버튼 |
+| `label` | 15 | Regular | 보조 정보 |
+| `caption` | 13 | Regular | 셀 라벨, 변화량, 단위 |
 
-**13px 미만을 쓰지 않는다.** 주행 중 읽어야 하는 값은 `bodyLg` 이상이다.
+수치 옆 단위는 baseline을 맞추고 값의 약 52% 크기로 둔다. **13px 미만을 쓰지 않는다.**
 
-수치와 단위는 baseline을 맞추고 단위는 한 단계 아래 토큰 + `textTertiary`를 쓴다 (`87` `km/h`).
+`typeScale`은 breakpoint에 따라 0.84 / 1.0 / 1.06 / 1.10이며, `caption`만 13px로 고정한다.
 
 ## 3. Space
 
-4px base grid.
+4px base grid. `s1` 4 · `s2` 8 · `s3` 12 · `s4` 16 · `s5` 24 · `s6` 32 · `s7` 40 · `s8` 64.
 
-| Token | px | 용도 |
-| --- | --- | --- |
-| `s1` | 4 | 아이콘-텍스트 간격 |
-| `s2` | 8 | 밀접 요소 |
-| `s3` | 12 | 컨트롤 내부 패딩 |
-| `s4` | 16 | 기본 간격 |
-| `s5` | 24 | Panel 내부 패딩, 컴포넌트 간격 |
-| `s6` | 32 | 화면 외곽 여백 (regular) |
-| `s7` | 40 | 화면 외곽 여백 (wide/ultrawide) |
-| `s8` | 64 | 대형 구획 |
-
-Grid: 12 column. gutter `s5`(24). margin은 breakpoint별 `s6`/`s7`. compact은 `s5`(24).
+`cellPadding`은 compact 16, 그 외 24다. **화면 외곽 여백은 0이다** — 그리드가 가장자리까지 간다.
 
 ## 4. Radius
 
-| Token | px | 용도 |
-| --- | --- | --- |
-| `rSm` | 10 | 배지, 소형 칩 |
-| `rMd` | 16 | 버튼, 세그먼트 |
-| `rLg` | 22 | Tile, 입력 트랙 |
-| `rXl` | 28 | Panel |
-| `rDock` | 30 | Control Dock |
-| `rPill` | 999 | Toggle, StatusBadge |
+`radius` = **0**. 예외 없다. 구분은 선이 하고 모서리는 하지 않는다.
 
-## 5. Touch Target
+## 5. Rule
 
-| Token | px | 규칙 |
-| --- | --- | --- |
-| `touchMin` | 48 | **절대 하한.** 모든 조작 가능 요소. |
-| `touchBase` | 56 | 기본 버튼, 목록 행 |
-| `touchLarge` | 72 | 주행 중 빈번 조작 (온도, 팬, 재생) |
-| `touchHero` | 96 | Dock 항목, Camera 뷰 전환 |
+`hairline` = 1px. 그리드는 `GridBoard`가 만든다 — 보드를 `line` 색으로 칠하고 셀을 1px 간격으로 올린다. 따라서 **모든 구분선이 정확히 1px이고, 셀은 자기 위치를 알 필요가 없다.**
 
-시각적 크기가 `touchMin` 미만인 아이콘 버튼은 투명 hit area를 확장해 48px를 확보한다.
+## 6. Touch Target
 
-인접한 서로 다른 동작 사이의 최소 간격은 `s2`(8px)다. 온도 −/+ 처럼 반대 동작이 인접하면 `s4`(16px)를 쓴다.
+`touchMin` 48 · `touchBase` 56 · `touchLarge` 72 · `touchHero` 96.
 
-## 6. Motion
+시각 크기가 48px 미만인 아이콘 버튼은 투명 hit area를 확장한다. 인접한 반대 동작 사이 최소 간격은 `s4`(16px)다.
+
+## 7. Motion
 
 | Token | ms | Easing | 용도 |
 | --- | --- | --- | --- |
-| `mInstant` | 0 | — | 안전 경고 출현. 지연 없음. |
-| `mFast` | 150 | OutCubic | 버튼 press, 토글 knob, hover |
-| `mBase` | 200 | OutCubic | 선택 이동, 값 변경, 색 전환 |
-| `mSlow` | 300 | InOutCubic | 화면 전환, 패널 slide, 모달 |
+| `mInstant` | 0 | — | 안전 경고 출현 |
+| `mFast` | 120 | OutCubic | press, 토글 knob, 세그먼트 |
+| `mBase` | 180 | OutCubic | 값 변경, 색 전환, 런처 메뉴 |
+| `mSlow` | 260 | InOutCubic | 화면 전환, 사이드 패널, 도어 |
 
-**300ms를 넘는 애니메이션을 만들지 않는다.** 반복(loop) 애니메이션은 충전 진행 표시 **하나만** 허용한다. 장식 목적의 pulse·shimmer·parallax는 금지한다.
+**260ms를 넘는 전환을 만들지 않는다.** 반복 애니메이션은 **충전 채움(1400ms)** 과 **방향지시등(500ms)** 두 곳뿐이다. 둘 다 의미를 가진 움직임이다.
 
-차량 시각화의 상태 변화(도어 열림, 방향지시등)는 `mBase` fade 또는 위치 이동으로만 표현한다.
+## 8. Elevation
 
-## 7. Elevation
+**없다.** 그림자도 blur도 쓰지 않는다. 레이어는 `line`과 `surface`/`bg` 대비로만 표현한다. 런처 메뉴와 모달은 `scrim`(light 22%, dark 55%)으로 뒤를 눌러 분리한다.
 
-다크 배경에서 그림자는 보이지 않는다. **레이어는 surface 단계와 border로 표현한다.**
+## 9. Icon
 
-| Level | 구성 |
-| --- | --- |
-| 0 | `bg` |
-| 1 | `surface` + `borderSubtle` 1px |
-| 2 | `surfaceAlt` + `borderStrong` 1px |
-| 3 (Dock / Modal) | `surface` + `borderStrong` 1px + 상단 3% 화이트 그라디언트 |
+`iconSm` 18 · `iconMd` 22 · `iconLg` 28 · `iconXl` 40.
 
-Light 테마에서만 level 3에 `0 2px 12px rgba(16,18,21,0.08)` 그림자를 허용한다.
+24×24 그리드, **1.6px stroke, round cap/join, fill 없음.** 활성은 `ink`로 바꾸고 굵기를 2.1px로 올린다. 채우기로 활성을 표현하지 않는다.
 
-## 8. Icon
+## 10. Breakpoint
 
-| Token | px | 용도 |
+| Token | 조건 | 메트릭 열 |
 | --- | --- | --- |
-| `iconSm` | 20 | 인라인, 배지 |
-| `iconMd` | 24 | 버튼, 목록 |
-| `iconLg` | 32 | Dock, 타일 |
-| `iconXl` | 48 | 카테고리 타일, Turn arrow |
-
-스타일: **1.75px stroke, round cap/join, fill 없음.** 24×24 그리드에서 설계하고 배율로 확대한다. 활성 상태는 stroke를 `accent`로 바꾸고 굵기를 2.25px로 올린다. 채우기로 활성을 표현하지 않는다.
-
-## 9. Breakpoint
-
-| Token | 조건 |
-| --- | --- |
-| `compact` | `width < 1600` |
-| `regular` | `1600 ≤ width < 2300` 그리고 `aspect < 2.2` |
-| `wide` | `2300 ≤ width < 3200` 그리고 `aspect < 2.6` |
-| `ultrawide` | `width ≥ 3200` 또는 `aspect ≥ 2.6` |
+| `compact` | `width < 1600` | 2 |
+| `regular` | `1600–2299`, aspect < 2.2 | 4 |
+| `wide` | `2300–3199`, aspect < 2.6 | 4 |
+| `ultrawide` | `width ≥ 3200` 또는 aspect ≥ 2.6 | 6 |
 
 검증 해상도: 1280×720 · 1920×1080 · 2560×1440 · 3840×1200.
 
-## 10. 토큰 적용 검사
+## 11. 토큰 적용 검사
 
-구현이 다음을 만족해야 한다.
-
-- [ ] QML 어디에도 `#RRGGBB` 리터럴이 없다 (`Tokens.qml` 제외). 차량·지도 일러스트의 재질색도 `Tokens`의 illustration 섹션을 경유한다.
-- [ ] 조작 가능한 모든 항목의 `implicitHeight ≥ 48`.
-- [ ] 모든 전환 `Behavior`/`Animation`의 `duration ≤ 300`. 예외는 Interaction Spec이 허용한 충전 채움(1400ms)과 방향지시등(500ms) 두 곳뿐이다.
+- [ ] QML 어디에도 `#RRGGBB` 리터럴이 없다 (`Tokens.qml` 제외).
+- [ ] 반경을 쓰는 곳이 없다.
+- [ ] `accent`라는 개념이 없다. 선택은 `ink` 채움이다.
+- [ ] 색이 쓰인 곳은 전부 안전 의미를 가진다.
+- [ ] 조작 가능한 모든 항목의 높이 ≥ 48.
+- [ ] 모든 전환 `duration ≤ 260`. 예외는 충전(1400ms)과 방향지시등(500ms)뿐이다.
 - [ ] 모든 텍스트의 `font.pixelSize ≥ 13`.
-- [ ] 1280×720과 3840×1200 양쪽에서 Dock과 주요 조작이 스크롤 없이 보인다.
+- [ ] 레이아웃 안의 자식에 `anchors`를 걸지 않는다 (`Cell.overlay` 슬롯 사용).

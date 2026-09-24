@@ -56,6 +56,9 @@ ApplicationWindow {
     // the rule runs after the host has assigned the starting page.
     Timer { interval: 0; running: true; onTriggered: window.applyReverseSurfacing() }
 
+    readonly property bool transportVisible: Providers.media.connected
+        && Providers.media.playing && page !== Nav.media
+
     function go(destination) { menuOpen = false; if (page !== destination) page = destination }
     function notify(message, iconName) { toast.show(message, iconName) }
 
@@ -224,16 +227,19 @@ ApplicationWindow {
                 onToggled: window.menuOpen = !window.menuOpen
             }
 
+            // The transport strip is only present while something is playing;
+            // the launcher keeps its place in the row, so collapsing the strip
+            // never covers screen content.
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: Tokens.surface
+                color: window.transportVisible ? Tokens.surface : Tokens.bg
 
                 MediaMiniPlayer {
                     anchors.fill: parent
                     anchors.leftMargin: Tokens.s6
                     anchors.rightMargin: 0
-                    visible: Providers.media.connected && window.page !== Nav.media
+                    visible: window.transportVisible
                     available: vehicleState.mediaPlaybackAllowed
                     lockReason: Tokens.playbackReason(vehicleState.mediaPlaybackReason)
                     track: Providers.media.track
