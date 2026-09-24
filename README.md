@@ -12,7 +12,7 @@ E2E 테스트는 정상 stream 종료, stale 상태, 손상·절단·초과 크�
 
 ## HMI와 개발용 Viewer
 
-실차 HMI는 [apps/hmi](apps/hmi)의 Qt/QML 애플리케이션입니다. 임베디드 Linux와 Qt 6.2 이상을 대상으로 하며, platform이 제공하는 `VehicleStateBridge`만 통해 canonical protobuf stream을 받습니다. 신뢰된 상태가 없으면 주행 값을 표시하거나 조작 기능을 활성화하지 않습니다.
+실차 HMI는 [apps/hmi](apps/hmi)의 Qt/QML 애플리케이션입니다. UX 구조·디자인 토큰·컴포넌트 시스템·상호작용 규격은 [apps/hmi/design](apps/hmi/design)에 있으며, 12개 화면은 이 문서들을 구현합니다. 임베디드 Linux와 Qt 6.2 이상을 대상으로 하며, platform이 제공하는 `VehicleStateBridge`만 통해 canonical protobuf stream을 받습니다. 신뢰된 상태가 없으면 주행 값을 표시하거나 조작 기능을 활성화하지 않습니다.
 
 `ohayess-viewer`는 별도의 loopback 전용 웹 Viewer입니다. 하드웨어 없이 `vcan` Gateway의 stdout을 연결하거나 fixture를 pipe해 개발·데모·browser CI에 사용합니다. Viewer는 제품 HMI가 아닙니다.
 

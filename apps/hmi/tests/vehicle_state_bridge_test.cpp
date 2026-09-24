@@ -3,6 +3,8 @@
 #include <QElapsedTimer>
 #include <QTemporaryDir>
 #include <QThread>
+#include <QVariantList>
+#include <QVariantMap>
 
 #include <cerrno>
 #include <cmath>
@@ -33,6 +35,15 @@ bool waitFor(const std::function<bool()> &condition, int timeoutMs = 500) {
   return condition();
 }
 
+QVariantMap corner(const QVariantList &list, const QString &id) {
+  for (const auto &value : list) {
+    const auto entry = value.toMap();
+    if (entry["id"].toString() == id) return entry;
+  }
+  fail("corner id was missing from the published list");
+  return {};
+}
+
 int writerFor(const QString &path) {
   int fd = -1;
   if (!waitFor([&] {
@@ -47,7 +58,26 @@ void writeState(int fd, float speedMps, bool includeSpeed = true, bool stale = f
   state.set_timestamp_ns(static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()) * 1'000'000);
   if (includeSpeed) state.set_vehicle_speed_mps(speedMps);
   state.mutable_gear()->set_position(oas::vehicle::v1::GEAR_POSITION_DRIVE);
+  state.set_acceleration_mps2(0.5F);
+  state.mutable_steering()->set_angle_rad(0.1745329F);  // 10 degrees
+  state.mutable_brake()->set_pressed(true);
+  state.mutable_accelerator()->set_position(0.25F);
+  state.mutable_cruise()->set_enabled(true);
+  state.set_night_mode(true);
+  auto *driverDoor = state.add_doors();
+  driverDoor->set_position(oas::vehicle::v1::DOOR_POSITION_FRONT_LEFT);
+  driverDoor->set_open(true);
+  auto *rearDoor = state.add_doors();
+  rearDoor->set_position(oas::vehicle::v1::DOOR_POSITION_REAR_RIGHT);
+  rearDoor->set_open(false);
+  auto *driverBelt = state.add_seatbelts();
+  driverBelt->set_position(oas::vehicle::v1::SEAT_POSITION_DRIVER);
+  driverBelt->set_latched(false);
+  auto *frontWheel = state.add_wheels();
+  frontWheel->set_position(oas::vehicle::v1::WHEEL_POSITION_FRONT_LEFT);
+  frontWheel->set_speed_mps(speedMps);
   (*state.mutable_raw_signals())["CGW1.CF_Gway_DrvDrSw"] = 1.0;
+  (*state.mutable_raw_signals())["AAA.First"] = 2.0;
   oas::vehicle::v1::HmiState hmi;
   *hmi.mutable_vehicle_state() = state;
   hmi.set_freshness(stale ? oas::vehicle::v1::HMI_FRESHNESS_STALE : oas::vehicle::v1::HMI_FRESHNESS_FRESH);
@@ -81,9 +111,36 @@ int main(int argc, char *argv[]) {
   if (std::abs(bridge.speedKph() - 80.0) > 0.1 || bridge.gear() != "D") fail("published VehicleState values are incorrect");
   if (!bridge.mediaPlaybackAllowed() || !bridge.diagnosticsAvailable()) fail("runtime capabilities were not published");
   if (!bridge.diagnosticsSummary().contains("Door switch 1.0")) fail("raw diagnostics were not published");
+  if (!bridge.speedValid() || !bridge.gearValid()) fail("speed and gear validity were not published");
+  if (!bridge.accelerationValid() || std::abs(bridge.accelerationMps2() - 0.5) > 0.01) fail("acceleration was not published");
+  if (!bridge.steeringValid() || std::abs(bridge.steeringAngleDeg() - 10.0) > 0.1) fail("steering angle was not converted to degrees");
+  if (!bridge.brakeValid() || !bridge.brakePressed()) fail("brake state was not published");
+  if (!bridge.acceleratorValid() || std::abs(bridge.acceleratorPosition() - 0.25) > 0.01) fail("accelerator position was not published");
+  if (!bridge.cruiseValid() || !bridge.cruiseEnabled()) fail("cruise state was not published");
+  if (!bridge.nightModeValid() || !bridge.nightMode()) fail("night mode was not published");
+
+  if (!bridge.doorsValid() || !bridge.anyDoorOpen()) fail("door states were not published");
+  if (bridge.doors().size() != 4) fail("door list lost its stable four-corner layout");
+  if (!corner(bridge.doors(), "frontLeft")["open"].toBool()) fail("open driver door was not published");
+  const auto closedDoor = corner(bridge.doors(), "rearRight");
+  if (!closedDoor["valid"].toBool() || closedDoor["open"].toBool()) fail("closed door was not published");
+  // A corner the vehicle never reported must stay invalid, never render as closed.
+  if (corner(bridge.doors(), "frontRight")["valid"].toBool()) fail("unreported door was marked valid");
+
+  if (!bridge.seatbeltsValid() || !bridge.anyBeltUnlatched()) fail("seatbelt states were not published");
+  if (corner(bridge.seatbelts(), "driver")["latched"].toBool()) fail("unlatched driver belt was not published");
+  if (corner(bridge.seatbelts(), "passenger")["valid"].toBool()) fail("unreported belt was marked valid");
+
+  const auto frontLeftWheel = corner(bridge.wheels(), "frontLeft");
+  if (!frontLeftWheel["valid"].toBool() || std::abs(frontLeftWheel["speedKph"].toDouble() - 80.0) > 0.1) fail("wheel speed was not published");
+
+  if (bridge.rawSignals().size() != 2) fail("raw signal list was not published");
+  if (bridge.rawSignals().first().toMap()["key"].toString() != "AAA.First") fail("raw signals were not sorted by key");
 
   if (!waitFor([&] { return !bridge.available(); }, 750)) fail("stale VehicleState stayed available");
   if (bridge.mediaPlaybackAllowed() || bridge.diagnosticsAvailable()) fail("stale state left capabilities enabled");
+  if (bridge.speedValid() || bridge.gearValid() || bridge.doorsValid() || bridge.steeringValid()) fail("stale state left driving signals valid");
+  if (!bridge.rawSignals().isEmpty()) fail("stale state left raw signals on screen");
   if (bridge.freshness() != "stale") fail("expired stream was not distinguished from waiting");
   writeState(writer, 0.0F);
   if (!waitFor([&] { return bridge.available(); })) fail("fresh VehicleState did not recover");
@@ -103,6 +160,10 @@ int main(int argc, char *argv[]) {
   if (std::abs(demo.speedKph() - 12.5) > 0.1 || demo.gear() != "R") fail("demo values were not injected");
   demo.showDemo("park");
   if (!demo.isDemo() || !demo.mediaPlaybackAllowed() || demo.gear() != "P") fail("park preview is invalid");
+  if (!demo.doorsValid() || !demo.anyDoorOpen()) fail("park preview did not populate door state");
+  if (!demo.seatbeltsValid() || !demo.steeringValid() || !demo.brakeValid()) fail("park preview did not populate vehicle signals");
+  if (demo.rawSignals().isEmpty()) fail("park preview did not populate raw signals");
   demo.showDemo("stale");
   if (demo.available() || demo.freshness() != "stale") fail("stale preview is invalid");
+  if (demo.speedValid() || demo.doorsValid() || !demo.rawSignals().isEmpty()) fail("stale preview exposed driving values");
 }

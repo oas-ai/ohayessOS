@@ -28,7 +28,8 @@ int main(int argc, char *argv[]) {
   parser.addOption({"appearance", "시작 화면 테마: dark 또는 light.", "name", "dark"});
   parser.addOption({"capture", "렌더링한 PNG를 저장하고 종료합니다.", "path"});
   parser.addOption({"size", "미리보기 창 크기.", "WIDTHxHEIGHT", "1440x810"});
-  parser.addOption({"page", "처음 열 화면: home, map, climate, media, vehicle.", "name", "home"});
+  parser.addOption({"page", "처음 열 화면: home, navigation, climate, media, phone, camera, vehicle, settings, adas, energy, software, diagnostics.", "name", "home"});
+  parser.addOption({"expect-page", "해당 화면으로 전환된 뒤 PNG를 저장합니다. 10초 뒤 실패합니다.", "name"});
   parser.addOption({"expect-speed", "실시간 속도가 도착한 뒤 PNG를 저장합니다(km/h). 10초 뒤 실패합니다.", "value"});
   parser.process(app);
   bool validAge = false;
@@ -38,8 +39,16 @@ int main(int argc, char *argv[]) {
   if (!QStringList{"drive", "park", "waiting", "stale"}.contains(scenario)) return 2;
   const auto dimensions = parser.value("size").split('x');
   if (dimensions.size() != 2 || dimensions[0].toInt() < 1280 || dimensions[1].toInt() < 720) return 2;
-  const auto page = QStringList{"home", "map", "climate", "media", "vehicle"}.indexOf(parser.value("page"));
+  // Index order matches Nav.qml, so one StackLayout holds every destination.
+  const QStringList pages{"home", "navigation", "climate", "media", "phone", "camera",
+                          "vehicle", "settings", "adas", "energy", "software", "diagnostics"};
+  const auto page = pages.indexOf(parser.value("page"));
   if (page < 0) return 2;
+  int expectedPage = -1;
+  if (parser.isSet("expect-page")) {
+    expectedPage = pages.indexOf(parser.value("expect-page"));
+    if (expectedPage < 0 || !parser.isSet("capture")) return 2;
+  }
   const auto appearance = parser.value("appearance");
   if (!QStringList{"dark", "light"}.contains(appearance)) return 2;
   std::optional<double> demoSpeed;
@@ -69,7 +78,16 @@ int main(int argc, char *argv[]) {
   window->setProperty("darkMode", appearance == "dark");
   window->setProperty("page", page);
   if (parser.isSet("capture")) {
-    if (parser.isSet("expect-speed")) {
+    if (expectedPage >= 0) {
+      // Verifies an automatic surfacing rule actually moved the screen.
+      auto *poll = new QTimer(&app);
+      QObject::connect(poll, &QTimer::timeout, &app, [&, expectedPage] {
+        if (window->property("page").toInt() != expectedPage) return;
+        app.exit(window->grabWindow().save(parser.value("capture")) ? 0 : 1);
+      });
+      poll->start(100);
+      QTimer::singleShot(10000, &app, [&] { app.exit(1); });
+    } else if (parser.isSet("expect-speed")) {
       bool ok = false;
       const auto expected = parser.value("expect-speed").toDouble(&ok);
       if (!ok || !std::isfinite(expected) || parser.isSet(demoOption)) return 2;

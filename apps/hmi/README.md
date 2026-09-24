@@ -34,7 +34,7 @@ cmake --build build/hmi
 ./build/hmi/ohayess-hmi --demo
 ```
 
-상단의 `밝은 화면` / `어두운 화면` 버튼으로 화면 테마를 즉시 바꿉니다. 밝은 화면은 흰색 기반, 어두운 화면은 검정색 기반이며, 이 선택은 HMI 렌더링에만 적용됩니다. 재현 가능한 캡처는 `--appearance light` 또는 `--appearance dark`를 사용합니다.
+상단 Status Rail의 테마 버튼으로 화면 테마를 즉시 바꿉니다. Settings → 화면에서 자동·밝은 화면·어두운 화면을 선택하며, 자동은 차량의 `nightMode` 신호를 우선합니다. 밝은 화면은 흰색 기반, 어두운 화면은 검정색 기반이며, 이 선택은 HMI 렌더링에만 적용됩니다. 재현 가능한 캡처는 `--appearance light` 또는 `--appearance dark`를 사용합니다.
 
 Additional synthetic states and reproducible PNG capture use the same QML views:
 
@@ -43,6 +43,8 @@ Additional synthetic states and reproducible PNG capture use the same QML views:
 ./build/hmi/ohayess-hmi --demo --scenario stale --size 1280x720 --capture /tmp/oas-stale.png
 ./build/hmi/ohayess-hmi --demo --scenario waiting
 ./build/hmi/ohayess-hmi --demo --page vehicle --size 1920x1080 --capture /tmp/oas-vehicle.png
+# 초광폭 디스플레이 레이아웃
+./build/hmi/ohayess-hmi --demo --page home --size 3840x1200 --capture /tmp/oas-ultrawide.png
 # 주행 프리셋에서 정차 P 상태를 직접 주입
 ./build/hmi/ohayess-hmi --demo --demo-speed-kph 0 --demo-gear P
 # R 기어의 12.5 km/h 상태를 주입
@@ -50,9 +52,9 @@ Additional synthetic states and reproducible PNG capture use the same QML views:
 ctest --test-dir build/hmi --output-on-failure
 ```
 
-제품 UX 구조와 실제 데이터 계약의 경계는 [UX_ARCHITECTURE.ko.md](UX_ARCHITECTURE.ko.md)를 참고하세요.
+제품 UX 구조, 디자인 토큰, 컴포넌트 시스템, 상호작용 규격은 [design/](design/)에 있습니다. 진입점은 [DESIGN.md](DESIGN.md)입니다.
 
-`--scenario`은 drive, park, stale, waiting 프리셋을 지원합니다. `--demo-speed-kph`는 0~400 km/h, `--demo-gear`는 P/R/N/D를 받으며 프리셋 값을 덮어씁니다. 데모는 실제 프레임을 읽지 않고 화면에 합성 상태임을 표시합니다. `--page`는 home, map, climate, media, vehicle을 지원합니다. 헤드리스 캡처에는 `QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software`를 설정합니다. 자세한 기준은 [디자인과 상태 규칙](DESIGN.md)을 참고하세요. CI는 `hmi-previews`에 캡처를 보관합니다.
+`--scenario`은 drive, park, stale, waiting 프리셋을 지원합니다. `--demo-speed-kph`는 0~400 km/h, `--demo-gear`는 P/R/N/D를 받으며 프리셋 값을 덮어씁니다. 데모는 실제 프레임을 읽지 않고 화면에 합성 상태임을 표시합니다. `--page`는 home, navigation, climate, media, phone, camera, vehicle, settings, adas, energy, software, diagnostics를 지원합니다. `--expect-page`는 자동 전면화가 실제로 화면을 바꾼 뒤에 캡처합니다. 헤드리스 캡처에는 `QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software`를 설정합니다. 자세한 기준은 [디자인과 상태 규칙](DESIGN.md)을 참고하세요. CI는 `hmi-previews`에 캡처를 보관합니다.
 
 If preserving an existing build directory, configure with a new `-B` directory and use the same path for build, CTest and executable commands.
 
