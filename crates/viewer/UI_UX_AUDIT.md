@@ -15,6 +15,9 @@ This audit covers the current virtual HMI: no hardware, media engine, account, c
 | Diagnostics lacked CAN and Logs destinations. | Overview, CAN, and Logs now expose safe pre-hardware states. |
 | Future integrations could appear as broken blank pages. | Every hardware-dependent destination has a concise waiting state and explains what will appear later. |
 | Static CSS could override a hidden in-menu view. | The global `[hidden]` rule has priority, and browser verification checks each menu state. |
+| The viewer and the production HMI had drifted into two different visual languages. | Both now use the same Grid system: meeting cells on a hairline rule, zero radius, monochrome with colour reserved for safety, light by default. |
+| A missing value rendered as an em dash at display size, which reads as a solid black bar rather than "no value". | Unknown values carry `.is-empty`, which drops them to a readable size in tertiary ink. |
+| `.setting-row > div` also matched the sibling `.choice-row`, stacking the theme buttons into a column. | The rule is scoped with `:not(.choice-row)`. |
 
 ## Screen inventory
 

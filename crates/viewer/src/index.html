@@ -4,10 +4,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OAS VehicleState Viewer</title>
 <link rel="stylesheet" href="/design.css">
-<body data-safety="unknown" data-theme="dark">
+<body data-safety="unknown" data-theme="light">
 <main class="app-shell">
   <header class="top-bar">
-    <div class="brand"><span class="brand-mark">O</span> OAS</div>
+    <div class="brand"><span class="brand-mark"><i></i><i></i><i></i><i></i></span> OAS Viewer</div>
     <nav class="primary-nav" aria-label="주 메뉴">
       <button class="nav-button is-active" type="button" data-route="home">Home</button>
       <button class="nav-button" type="button" data-route="media">Media</button>
@@ -21,61 +21,167 @@
   <div id="global-safety-banner" class="safety-banner global-safety" aria-live="polite">안전 상태 확인 중</div>
 
   <section class="screen" data-screen="home">
-    <header class="page-heading home-heading"><div><p class="eyebrow">Drive brief</p><h1>오늘의 주행</h1></div><p class="muted">주행 중에는 필요한 상태만 조용히 표시합니다.</p></header>
-    <div class="home-dashboard">
-      <article class="card home-drive-card"><div><p class="eyebrow">Vehicle state</p><output id="home-speed" class="home-speed">—</output><p class="muted">현재 속도</p></div><div class="home-gear"><span class="metric-label">Gear</span><strong id="home-gear">—</strong></div></article>
-      <article class="card home-action-card card--emphasis"><p class="eyebrow">Media</p><h2 id="home-media-title">미디어 잠김</h2><p id="home-media-copy" class="muted">차량 상태를 확인하고 있습니다.</p><button class="button" type="button" data-route="media">미디어</button></article>
-      <article class="card home-action-card"><p class="eyebrow">Vehicle</p><h2>차량 상태</h2><p class="muted">공조, 오디오와 차량 정보를 확인합니다.</p><button class="button button--secondary" type="button" data-route="vehicle">Vehicle</button></article>
-      <article class="card home-action-card"><p class="eyebrow">System</p><h2>상태 확인</h2><p class="muted">CAN, Gateway, freshness 상태를 확인합니다.</p><button class="button button--secondary" type="button" data-route="diagnostics">진단</button></article>
+    <div class="board">
+      <div class="cell">
+        <header class="page-heading home-heading">
+          <div><p class="eyebrow">Drive brief</p><h1>오늘의 주행</h1></div>
+          <p class="muted">주행 중에는 필요한 상태만 조용히 표시합니다.</p>
+        </header>
+      </div>
+    </div>
+    <div class="board board--4">
+      <article class="cell cell--tall span-2">
+        <p class="eyebrow">현재 속도</p>
+        <output id="home-speed" class="home-speed is-empty">—</output>
+      </article>
+      <article class="cell cell--tall">
+        <p class="eyebrow">기어</p>
+        <div class="home-gear"><strong id="home-gear" class="is-empty">—</strong></div>
+      </article>
+      <article class="cell cell--tall">
+        <p class="eyebrow">Media</p>
+        <h2 id="home-media-title">미디어 잠김</h2>
+        <p id="home-media-copy" class="muted">차량 상태를 확인하고 있습니다.</p>
+        <div class="button-row"><button class="button" type="button" data-route="media">미디어</button></div>
+      </article>
+    </div>
+    <div class="board board--2">
+      <article class="cell">
+        <p class="eyebrow">Vehicle</p>
+        <h2>차량 상태</h2>
+        <p class="muted">공조, 오디오와 차량 정보를 확인합니다.</p>
+        <div class="button-row"><button class="button button--secondary" type="button" data-route="vehicle">Vehicle</button></div>
+      </article>
+      <article class="cell">
+        <p class="eyebrow">System</p>
+        <h2>상태 확인</h2>
+        <p class="muted">CAN, Gateway, freshness 상태를 확인합니다.</p>
+        <div class="button-row"><button class="button button--secondary" type="button" data-route="diagnostics">진단</button></div>
+      </article>
     </div>
   </section>
 
   <section class="screen" data-screen="workspace" hidden>
-    <header class="page-heading"><p class="eyebrow">AVN workspace</p><h1>Split</h1></header>
-    <div class="split-workspace">
-      <article class="card split-pane"><p class="eyebrow">Media</p><h2 id="split-media-title">미디어 잠김</h2><p id="split-media-copy" class="muted">차량 상태를 확인하고 있습니다.</p><button class="button" type="button" data-route="media">미디어 열기</button></article>
-      <article class="card split-pane"><p class="eyebrow">Climate</p><h2>실내 환경</h2><p class="muted">온도·풍량·A/C 제어는 Vehicle에서 엽니다.</p><button class="button button--secondary" type="button" data-route="vehicle">차량 제어 열기</button></article>
+    <div class="board"><div class="cell"><header class="page-heading"><p class="eyebrow">AVN workspace</p><h1>Split</h1></header></div></div>
+    <div class="board board--2">
+      <article class="cell cell--tall">
+        <p class="eyebrow">Media</p>
+        <h2 id="split-media-title">미디어 잠김</h2>
+        <p id="split-media-copy" class="muted">차량 상태를 확인하고 있습니다.</p>
+        <div class="button-row"><button class="button" type="button" data-route="media">미디어 열기</button></div>
+      </article>
+      <article class="cell cell--tall">
+        <p class="eyebrow">Climate</p>
+        <h2>실내 환경</h2>
+        <p class="muted">온도·풍량·A/C 제어는 Vehicle에서 엽니다.</p>
+        <div class="button-row"><button class="button button--secondary" type="button" data-route="vehicle">차량 제어 열기</button></div>
+      </article>
     </div>
   </section>
 
   <section class="screen" data-screen="media" hidden>
-    <header class="page-heading"><p class="eyebrow">Entertainment</p><h1>Media</h1></header>
+    <div class="board"><div class="cell"><header class="page-heading"><p class="eyebrow">Entertainment</p><h1>Media</h1></header></div></div>
     <nav class="sub-nav" aria-label="미디어 메뉴"><button class="sub-nav-button is-active" type="button" data-tab-group="media" data-tab="player">Player</button><button class="sub-nav-button" type="button" data-tab-group="media" data-tab="library">Library</button></nav>
-    <div data-tab-panel-group="media" data-tab-panel="player" class="dashboard-grid">
-      <article class="card card--media"><div class="media-state"><p class="eyebrow">Playback</p><h2 id="media-title">미디어 잠김</h2><p id="media-copy">차량 상태를 확인하고 있습니다.</p><div id="media-safety-banner" class="safety-banner">안전 상태 확인 중</div></div></article>
-      <aside class="card"><p class="eyebrow">Playback policy</p><div class="metric-list"><div class="metric"><span class="metric-label">Speed</span><span id="media-speed" class="metric-value">—</span></div><div class="metric"><span class="metric-label">Gear</span><span id="media-gear" class="metric-value">—</span></div><div class="metric"><span class="metric-label">D while stopped</span><span id="media-drive-setting" class="metric-value">—</span></div></div></aside>
+    <div data-tab-panel-group="media" data-tab-panel="player">
+      <div class="board board--split">
+        <article class="cell cell--tall cell--quiet">
+          <p class="eyebrow">Playback</p>
+          <h2 id="media-title">미디어 잠김</h2>
+          <p id="media-copy" class="muted">차량 상태를 확인하고 있습니다.</p>
+          <div id="media-safety-banner" class="safety-banner">안전 상태 확인 중</div>
+        </article>
+        <aside class="cell">
+          <p class="eyebrow">Playback policy</p>
+          <div class="metric-list">
+            <div class="metric"><span class="metric-label">Speed</span><span id="media-speed" class="metric-value is-empty">—</span></div>
+            <div class="metric"><span class="metric-label">Gear</span><span id="media-gear" class="metric-value is-empty">—</span></div>
+            <div class="metric"><span class="metric-label">D while stopped</span><span id="media-drive-setting" class="metric-value">—</span></div>
+          </div>
+        </aside>
+      </div>
     </div>
-    <div data-tab-panel-group="media" data-tab-panel="library" class="content-grid" hidden><article class="card"><p class="eyebrow">Web media</p><h2>YouTube</h2><p class="muted">WebView 연결 후 계정과 콘텐츠 목록을 표시합니다.</p></article><article class="card"><p class="eyebrow">Local media</p><h2>오프라인 콘텐츠</h2><p class="muted">저장 장치가 연결되면 안전하게 검색합니다.</p></article><article class="card"><p class="eyebrow">Queue</p><h2>재생 목록 없음</h2><p class="muted">재생 가능한 미디어를 선택하면 여기에 표시됩니다.</p></article></div>
+    <div data-tab-panel-group="media" data-tab-panel="library" class="board board--3" hidden>
+      <article class="cell"><p class="eyebrow">Web media</p><h2>YouTube</h2><p class="muted">WebView 연결 후 계정과 콘텐츠 목록을 표시합니다.</p></article>
+      <article class="cell"><p class="eyebrow">Local media</p><h2>오프라인 콘텐츠</h2><p class="muted">저장 장치가 연결되면 안전하게 검색합니다.</p></article>
+      <article class="cell"><p class="eyebrow">Queue</p><h2>재생 목록 없음</h2><p class="muted">재생 가능한 미디어를 선택하면 여기에 표시됩니다.</p></article>
+    </div>
   </section>
 
   <section class="screen" data-screen="vehicle" hidden>
-    <header class="page-heading"><p class="eyebrow">Comfort control · UI preview</p><h1>Vehicle</h1></header>
+    <div class="board"><div class="cell"><header class="page-heading"><p class="eyebrow">Comfort control · UI preview</p><h1>Vehicle</h1></header></div></div>
     <nav class="sub-nav" aria-label="차량 메뉴"><button class="sub-nav-button is-active" type="button" data-tab-group="vehicle" data-tab="controls">Controls</button><button class="sub-nav-button" type="button" data-tab-group="vehicle" data-tab="vision">Vision</button></nav>
-    <div data-tab-panel-group="vehicle" data-tab-panel="controls" class="vehicle-layout">
-      <article class="card"><p class="eyebrow">Driving state</p><div class="metric-list"><div class="metric"><span class="metric-label">Speed</span><span id="vehicle-speed" class="metric-value">—</span></div><div class="metric"><span class="metric-label">Gear</span><span id="vehicle-gear" class="metric-value">—</span></div></div></article>
-      <article class="card comfort-card"><p class="eyebrow">Climate</p><h2>실내 환경</h2><div class="control-row"><span class="control-label">목표 온도</span><div class="stepper"><button class="button button--secondary" type="button" data-temperature="-0.5" aria-label="온도 낮추기">−</button><output id="target-temperature" class="control-value">22.0°C</output><button class="button button--secondary" type="button" data-temperature="0.5" aria-label="온도 높이기">+</button></div></div><div class="control-row"><span class="control-label">풍량</span><div class="fan-levels"><button class="fan-button" type="button" data-fan="1">1</button><button class="fan-button is-active" type="button" data-fan="2">2</button><button class="fan-button" type="button" data-fan="3">3</button><button class="fan-button" type="button" data-fan="4">4</button><button class="fan-button" type="button" data-fan="5">5</button></div></div><button id="ac-toggle" class="button button--secondary" type="button" aria-pressed="true">A/C 켜짐</button></article>
-      <article class="card comfort-card"><p class="eyebrow">Audio</p><h2>차량 오디오</h2><label class="control-label" for="audio-volume">음량 <output id="volume-value">45%</output></label><input id="audio-volume" class="range" type="range" min="0" max="100" value="45"><p class="muted">OAS HMI의 로컬 UI 값입니다.</p></article>
-      <article class="card"><p class="eyebrow">Vision</p><h2>준비 중</h2><p class="muted">카메라와 영상 pipeline이 준비되면 이 위치에 표시됩니다.</p></article>
+    <div data-tab-panel-group="vehicle" data-tab-panel="controls">
+      <div class="board board--2">
+        <article class="cell"><p class="eyebrow">Speed</p><span id="vehicle-speed" class="metric-value is-empty">—</span></article>
+        <article class="cell"><p class="eyebrow">Gear</p><span id="vehicle-gear" class="metric-value is-empty">—</span></article>
+      </div>
+      <div class="board board--2">
+        <article class="cell">
+          <p class="eyebrow">Climate</p>
+          <h2>실내 환경</h2>
+          <div class="control-row">
+            <span class="control-label">목표 온도</span>
+            <div class="stepper">
+              <button class="button button--secondary" type="button" data-temperature="-0.5" aria-label="온도 낮추기">−</button>
+              <output id="target-temperature" class="control-value">22.0°C</output>
+              <button class="button button--secondary" type="button" data-temperature="0.5" aria-label="온도 높이기">+</button>
+            </div>
+          </div>
+          <div class="control-row">
+            <span class="control-label">풍량</span>
+            <div class="fan-levels"><button class="fan-button" type="button" data-fan="1">1</button><button class="fan-button is-active" type="button" data-fan="2">2</button><button class="fan-button" type="button" data-fan="3">3</button><button class="fan-button" type="button" data-fan="4">4</button><button class="fan-button" type="button" data-fan="5">5</button></div>
+          </div>
+          <div class="button-row"><button id="ac-toggle" class="button button--secondary" type="button" aria-pressed="true">A/C 켜짐</button></div>
+        </article>
+        <article class="cell">
+          <p class="eyebrow">Audio</p>
+          <h2>차량 오디오</h2>
+          <label class="control-label" for="audio-volume">음량 <output id="volume-value">45%</output></label>
+          <input id="audio-volume" class="range" type="range" min="0" max="100" value="45">
+          <p class="muted">OAS HMI의 로컬 UI 값입니다.</p>
+        </article>
+      </div>
+      <div class="board"><article class="cell"><p class="eyebrow">Vision</p><h2>준비 중</h2><p class="muted">카메라와 영상 pipeline이 준비되면 이 위치에 표시됩니다.</p></article></div>
     </div>
-    <div data-tab-panel-group="vehicle" data-tab-panel="vision" class="dashboard-grid" hidden><article class="card card--media"><div class="media-state"><p class="eyebrow">Camera</p><h2>카메라 입력 대기 중</h2><p>카메라와 video pipeline이 연결되면 전·후방 화면을 표시합니다.</p></div></article><aside class="card"><p class="eyebrow">Privacy</p><h2>로컬 처리</h2><p class="muted">영상 저장과 외부 전송은 명시적인 설정 전까지 비활성화됩니다.</p></aside></div>
+    <div data-tab-panel-group="vehicle" data-tab-panel="vision" class="board board--split" hidden>
+      <article class="cell cell--tall cell--quiet"><p class="eyebrow">Camera</p><h2>카메라 입력 대기 중</h2><p class="muted">카메라와 video pipeline이 연결되면 전·후방 화면을 표시합니다.</p></article>
+      <aside class="cell"><p class="eyebrow">Privacy</p><h2>로컬 처리</h2><p class="muted">영상 저장과 외부 전송은 명시적인 설정 전까지 비활성화됩니다.</p></aside>
+    </div>
     <div class="simulation-note">UI 시뮬레이션 모드 · 현재 조작은 CAN, 네트워크, 차량에 어떤 명령도 보내지 않습니다.</div>
   </section>
 
   <section class="screen" data-screen="settings" hidden>
-    <header class="page-heading"><p class="eyebrow">Preferences</p><h1>Settings</h1></header>
+    <div class="board"><div class="cell"><header class="page-heading"><p class="eyebrow">Preferences</p><h1>Settings</h1></header></div></div>
     <nav class="sub-nav" aria-label="설정 메뉴"><button class="sub-nav-button is-active" type="button" data-tab-group="settings" data-tab="display">Display</button><button class="sub-nav-button" type="button" data-tab-group="settings" data-tab="audio">Audio</button><button class="sub-nav-button" type="button" data-tab-group="settings" data-tab="safety">Media safety</button><button class="sub-nav-button" type="button" data-tab-group="settings" data-tab="system">System</button></nav>
-    <div data-tab-panel-group="settings" data-tab-panel="display" class="settings-list"><article class="card setting-row"><div><p class="eyebrow">Appearance</p><h2>테마</h2><p id="theme-source" class="muted">차량 낮/밤 신호를 기다리는 동안 시스템 설정을 따릅니다.</p></div><div class="choice-row" aria-label="테마 선택"><button class="button button--secondary" type="button" data-theme-choice="auto">자동</button><button class="button button--secondary" type="button" data-theme-choice="light">라이트</button><button class="button button--secondary" type="button" data-theme-choice="dark">다크</button></div></article><article class="card setting-row"><div><p class="eyebrow">Workspace</p><h2>화면 분할</h2><p class="muted">미디어와 공조를 나란히 표시하는 AVN 작업 공간입니다.</p></div><button class="button button--secondary" type="button" data-route="workspace">분할 화면 열기</button></article></div>
-    <div data-tab-panel-group="settings" data-tab-panel="audio" class="settings-list" hidden><article class="card setting-row"><div><p class="eyebrow">Audio</p><h2>출력 장치</h2><p class="muted">OAS 장치의 음량·출력 장치를 hardware integration 후 선택합니다.</p></div><span class="setting-value">준비 중</span></article></div>
-    <div data-tab-panel-group="settings" data-tab-panel="safety" class="settings-list" hidden><article class="card setting-row"><div><p class="eyebrow">Media safety</p><h2>D 기어 정차 시 미디어</h2><p class="muted">움직임·상태 불명·stale에서는 항상 차단됩니다.</p></div><span id="settings-drive-setting" class="setting-value">—</span></article></div>
-    <div data-tab-panel-group="settings" data-tab-panel="system" class="settings-list" hidden><article class="card setting-row"><div><p class="eyebrow">System</p><h2>업데이트와 재시작</h2><p class="muted">대상 Linux의 systemd 배포가 준비되면 상태와 업데이트를 표시합니다.</p></div><span class="setting-value">준비 중</span></article></div>
+    <div data-tab-panel-group="settings" data-tab-panel="display" class="board">
+      <article class="cell setting-row">
+        <div><p class="eyebrow">Appearance</p><h2>테마</h2><p id="theme-source" class="muted">차량 낮/밤 신호를 기다리는 동안 시스템 설정을 따릅니다.</p></div>
+        <div class="choice-row" aria-label="테마 선택"><button class="button button--secondary" type="button" data-theme-choice="auto">자동</button><button class="button button--secondary" type="button" data-theme-choice="light">라이트</button><button class="button button--secondary" type="button" data-theme-choice="dark">다크</button></div>
+      </article>
+      <article class="cell setting-row">
+        <div><p class="eyebrow">Workspace</p><h2>화면 분할</h2><p class="muted">미디어와 공조를 나란히 표시하는 AVN 작업 공간입니다.</p></div>
+        <button class="button button--secondary" type="button" data-route="workspace">분할 화면 열기</button>
+      </article>
+    </div>
+    <div data-tab-panel-group="settings" data-tab-panel="audio" class="board" hidden><article class="cell setting-row"><div><p class="eyebrow">Audio</p><h2>출력 장치</h2><p class="muted">OAS 장치의 음량·출력 장치를 hardware integration 후 선택합니다.</p></div><span class="setting-value">준비 중</span></article></div>
+    <div data-tab-panel-group="settings" data-tab-panel="safety" class="board" hidden><article class="cell setting-row"><div><p class="eyebrow">Media safety</p><h2>D 기어 정차 시 미디어</h2><p class="muted">움직임·상태 불명·stale에서는 항상 차단됩니다.</p></div><span id="settings-drive-setting" class="setting-value">—</span></article></div>
+    <div data-tab-panel-group="settings" data-tab-panel="system" class="board" hidden><article class="cell setting-row"><div><p class="eyebrow">System</p><h2>업데이트와 재시작</h2><p class="muted">대상 Linux의 systemd 배포가 준비되면 상태와 업데이트를 표시합니다.</p></div><span class="setting-value">준비 중</span></article></div>
   </section>
 
   <section class="screen" data-screen="diagnostics" hidden>
-    <header class="page-heading"><p class="eyebrow">Read only</p><h1>Diagnostics</h1></header>
+    <div class="board"><div class="cell"><header class="page-heading"><p class="eyebrow">Read only</p><h1>Diagnostics</h1></header></div></div>
     <nav class="sub-nav" aria-label="진단 메뉴"><button class="sub-nav-button is-active" type="button" data-tab-group="diagnostics" data-tab="overview">Overview</button><button class="sub-nav-button" type="button" data-tab-group="diagnostics" data-tab="can">CAN</button><button class="sub-nav-button" type="button" data-tab-group="diagnostics" data-tab="logs">Logs</button></nav>
-    <div data-tab-panel-group="diagnostics" data-tab-panel="overview" class="overview-grid"><article class="card"><p class="eyebrow">State stream</p><h2 id="diagnostics-stream">확인 중</h2><p id="diagnostics-copy" class="muted">Gateway stream의 최신 상태를 기다립니다.</p></article><article class="card"><p class="eyebrow">Safety policy</p><h2 id="diagnostics-policy">확인 중</h2><p class="muted">모든 정책 판정은 runtime이 제공합니다.</p></article><article class="card"><p class="eyebrow">Gateway</p><h2>연결 준비 중</h2><p class="muted">대상 Linux에서 service 상태를 표시합니다.</p></article></div>
-    <div data-tab-panel-group="diagnostics" data-tab-panel="can" class="content-grid" hidden><article class="card"><p class="eyebrow">CAN interface</p><h2>대상 장비 대기 중</h2><p class="muted">SocketCAN interface, bitrate, listen-only 상태를 표시합니다.</p></article><article class="card"><p class="eyebrow">Gateway decoder</p><h2>상태 stream 기준</h2><p class="muted">수신된 canonical VehicleState만 표시하며 CAN 송신은 제공하지 않습니다.</p></article><article class="card"><p class="eyebrow">DBC raw catalog</p><h2>Body · comfort</h2><p class="muted">CGW1 · GW_DDM_PE · DATC12 · 제어·안전 판단에는 사용하지 않습니다.</p><p id="diagnostics-raw-signals" class="muted">DBC raw 신호를 기다립니다.</p></article></div>
-    <div data-tab-panel-group="diagnostics" data-tab-panel="logs" class="settings-list" hidden><article class="card"><p class="eyebrow">Event log</p><h2>로그 없음</h2><p class="muted">Gateway와 systemd가 연결되면 최근 오류·복구 이벤트를 표시합니다.</p></article></div>
+    <div data-tab-panel-group="diagnostics" data-tab-panel="overview" class="board board--3">
+      <article class="cell"><p class="eyebrow">State stream</p><h2 id="diagnostics-stream">확인 중</h2><p id="diagnostics-copy" class="muted">Gateway stream의 최신 상태를 기다립니다.</p></article>
+      <article class="cell"><p class="eyebrow">Safety policy</p><h2 id="diagnostics-policy">확인 중</h2><p class="muted">모든 정책 판정은 runtime이 제공합니다.</p></article>
+      <article class="cell"><p class="eyebrow">Gateway</p><h2>연결 준비 중</h2><p class="muted">대상 Linux에서 service 상태를 표시합니다.</p></article>
+    </div>
+    <div data-tab-panel-group="diagnostics" data-tab-panel="can" class="board board--3" hidden>
+      <article class="cell"><p class="eyebrow">CAN interface</p><h2>대상 장비 대기 중</h2><p class="muted">SocketCAN interface, bitrate, listen-only 상태를 표시합니다.</p></article>
+      <article class="cell"><p class="eyebrow">Gateway decoder</p><h2>상태 stream 기준</h2><p class="muted">수신된 canonical VehicleState만 표시하며 CAN 송신은 제공하지 않습니다.</p></article>
+      <article class="cell"><p class="eyebrow">DBC raw catalog</p><h2>Body · comfort</h2><p class="muted">CGW1 · GW_DDM_PE · DATC12 · 제어·안전 판단에는 사용하지 않습니다.</p><p id="diagnostics-raw-signals" class="muted">DBC raw 신호를 기다립니다.</p></article>
+    </div>
+    <div data-tab-panel-group="diagnostics" data-tab-panel="logs" class="board" hidden><article class="cell"><p class="eyebrow">Event log</p><h2>로그 없음</h2><p class="muted">Gateway와 systemd가 연결되면 최근 오류·복구 이벤트를 표시합니다.</p></article></div>
   </section>
 </main>
 <script>
@@ -103,10 +209,11 @@
   document.querySelectorAll('[data-tab-group]').forEach(button => button.addEventListener('click', () => { location.hash = `${activeRoute()}/${button.dataset.tab}`; }));
   function applyTheme(state) {
     const vehicleTheme = state?.nightMode === true ? 'dark' : state?.nightMode === false ? 'light' : null;
-    const systemTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    const theme = themeChoice === 'auto' ? vehicleTheme || systemTheme : themeChoice;
+    // Auto follows the vehicle's own night signal; with no signal it stays
+    // light, which is the default theme rather than a guess about the cabin.
+    const theme = themeChoice === 'auto' ? vehicleTheme || 'light' : themeChoice;
     document.body.dataset.theme = theme;
-    byId('theme-source').textContent = themeChoice === 'auto' ? vehicleTheme ? `차량 ${vehicleTheme === 'dark' ? '야간' : '주간'} 신호를 적용합니다.` : '차량 낮/밤 신호를 기다리는 동안 시스템 설정을 따릅니다.' : `${theme === 'dark' ? '다크' : '라이트'} 모드를 고정합니다.`;
+    byId('theme-source').textContent = themeChoice === 'auto' ? vehicleTheme ? `차량 ${vehicleTheme === 'dark' ? '야간' : '주간'} 신호를 적용합니다.` : '차량 낮/밤 신호를 기다리는 동안 밝은 화면을 유지합니다.' : `${theme === 'dark' ? '어두운 화면' : '밝은 화면'}을 고정합니다.`;
     themeChoices.forEach(button => button.classList.toggle('is-active', button.dataset.themeChoice === themeChoice));
   }
   themeChoices.forEach(button => button.addEventListener('click', () => { themeChoice = button.dataset.themeChoice; localStorage.setItem('oas-theme-choice', themeChoice); applyTheme(); }));
@@ -117,6 +224,7 @@
     byId('target-temperature').textContent = `${targetTemperature.toFixed(1)}°C`;
     document.querySelectorAll('[data-fan]').forEach(button => button.classList.toggle('is-active', Number(button.dataset.fan) === fanLevel));
     byId('ac-toggle').textContent = acEnabled ? 'A/C 켜짐' : 'A/C 꺼짐';
+    byId('ac-toggle').classList.toggle('is-active', acEnabled);
     byId('ac-toggle').setAttribute('aria-pressed', String(acEnabled));
   }
   document.querySelectorAll('[data-temperature]').forEach(button => button.addEventListener('click', () => { targetTemperature = Math.min(30, Math.max(16, targetTemperature + Number(button.dataset.temperature))); renderComfortControls(); }));
@@ -139,8 +247,9 @@
     const safetyText = allowed ? '정차 상태가 확인되었습니다' : '차량이 움직이거나 상태가 불명확하면 재생하지 않습니다';
     byId('global-safety-banner').textContent = safetyText;
     byId('media-safety-banner').textContent = safetyText;
-    ['home-speed', 'media-speed', 'vehicle-speed'].forEach(id => { byId(id).textContent = speed; });
-    ['home-gear', 'media-gear', 'vehicle-gear'].forEach(id => { byId(id).textContent = state.gear; });
+    const setValue = (id, text) => { const node = byId(id); node.textContent = text; node.classList.toggle('is-empty', text === '—'); };
+    ['home-speed', 'media-speed', 'vehicle-speed'].forEach(id => setValue(id, speed));
+    ['home-gear', 'media-gear', 'vehicle-gear'].forEach(id => setValue(id, state.gear));
     ['media-drive-setting', 'settings-drive-setting'].forEach(id => { byId(id).textContent = state.allowDriveWhenStopped ? '허용' : '차단'; });
     byId('diagnostics-stream').textContent = state.videoPlayback === 'no_vehicle_state' ? '상태 대기 중' : '상태 수신 중';
     byId('diagnostics-copy').textContent = `speed ${speed} · gear ${state.gear}`;

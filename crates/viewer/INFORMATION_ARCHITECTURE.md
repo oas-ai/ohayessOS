@@ -1,6 +1,6 @@
 # OAS VehicleState Viewer information architecture
 
-초기 HMI는 read-only 상태와 미디어를 중심으로 하며, Vehicle에는 hardware integration 전까지 로컬 UI 시뮬레이션 Comfort Control을 둔다. 깊은 메뉴보다 하단의 다섯 최상위 목적지를 고정하고, 안전 상태는 어느 화면에서도 우선한다.
+초기 HMI는 read-only 상태와 미디어를 중심으로 하며, Vehicle에는 hardware integration 전까지 로컬 UI 시뮬레이션 Comfort Control을 둔다. 깊은 메뉴보다 상단의 여섯 최상위 목적지를 고정하고, 안전 상태는 어느 화면에서도 우선한다. 시각 언어는 제품 HMI와 같은 Grid 시스템이며, 정의는 [design system](DESIGN_SYSTEM.md)에 있다.
 
 ```mermaid
 flowchart TD
@@ -45,7 +45,7 @@ flowchart TD
 
 - Home은 부팅 후 첫 화면이며, 최상위 화면 간 이동은 한 번의 탭으로 끝난다.
 - Media의 Player와 Library는 해당 화면 안의 tab으로 둔다. 독립 top-level 화면을 늘리지 않는다.
-- Settings → Display에서 자동·라이트·다크 테마를 선택한다. 자동은 차량의 `nightMode` 신호를 우선한다.
+- Settings → Display에서 자동·라이트·다크 테마를 선택한다. 자동은 차량의 `nightMode` 신호를 우선하며, 신호가 없으면 밝은 화면을 유지한다.
 - Comfort Control은 목표 온도, 풍량, A/C, 오디오 음량의 UI 상태만 변경한다. 현재는 CAN 송신이나 네트워크 요청을 만들지 않는다.
 - Diagnostics의 쓰기 동작은 로그 export만 허용한다. CAN 송신이나 차량 제어는 제공하지 않는다.
 - Vision은 실제 카메라 하드웨어·영상 pipeline이 준비될 때까지 숨긴다. 빈 메뉴를 노출하지 않는다.
