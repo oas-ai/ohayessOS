@@ -58,4 +58,6 @@ Cell {
             font.weight: Tokens.weightMedium
         }
     }
+
+    Item { Layout.fillHeight: true }
 }

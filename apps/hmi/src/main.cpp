@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
   parser.addOption({"size", "미리보기 창 크기.", "WIDTHxHEIGHT", "1440x810"});
   parser.addOption({"page", "처음 열 화면: home, navigation, climate, media, phone, camera, vehicle, settings, adas, energy, software, diagnostics.", "name", "home"});
   parser.addOption({"expect-page", "해당 화면으로 전환된 뒤 PNG를 저장합니다. 10초 뒤 실패합니다.", "name"});
+  parser.addOption({"menu", "런처 메뉴를 펼친 상태로 시작합니다."});
   parser.addOption({"expect-speed", "실시간 속도가 도착한 뒤 PNG를 저장합니다(km/h). 10초 뒤 실패합니다.", "value"});
   parser.process(app);
   bool validAge = false;
@@ -77,6 +78,7 @@ int main(int argc, char *argv[]) {
   window->resize(dimensions[0].toInt(), dimensions[1].toInt());
   window->setProperty("darkMode", appearance == "dark");
   window->setProperty("page", page);
+  if (parser.isSet("menu")) window->setProperty("menuOpen", true);
   if (parser.isSet("capture")) {
     if (expectedPage >= 0) {
       // Verifies an automatic surfacing rule actually moved the screen.

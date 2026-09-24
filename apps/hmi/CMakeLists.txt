@@ -99,6 +99,10 @@ if(BUILD_TESTING)
   add_test(NAME hmi-wide-1440p COMMAND ohayess-hmi --demo --scenario drive --page home --size 2560x1440 --capture ${CMAKE_CURRENT_BINARY_DIR}/wide-1440p.png)
   add_test(NAME hmi-ultrawide COMMAND ohayess-hmi --demo --scenario drive --page home --size 3840x1200 --capture ${CMAKE_CURRENT_BINARY_DIR}/ultrawide.png)
 
+  # The launcher menu is the only route to a destination, so it has to render.
+  add_test(NAME hmi-launcher-menu COMMAND ohayess-hmi --demo --scenario park --menu --size 1920x1080 --capture ${CMAKE_CURRENT_BINARY_DIR}/launcher-menu.png)
+  add_test(NAME hmi-launcher-menu-driving COMMAND ohayess-hmi --demo --scenario drive --menu --size 1920x1080 --capture ${CMAKE_CURRENT_BINARY_DIR}/launcher-menu-driving.png)
+
   # Reverse gear is the only automatic screen change in the system.
   add_test(NAME hmi-reverse-surfaces-camera COMMAND ohayess-hmi --demo --scenario park --demo-gear R --demo-speed-kph 2 --page home --expect-page camera --size 1920x1080 --capture ${CMAKE_CURRENT_BINARY_DIR}/reverse-camera.png)
 
